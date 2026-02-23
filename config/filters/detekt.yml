@@ -1,0 +1,48 @@
+comments:
+  excludes: [ '**/test/**', '**/androidTest/**', '**/android-test/**', '**/*.Test.kt', '**/*.Spec.kt', '**/*.Spek.kt' ]
+  CommentOverPrivateFunction:
+    active: false
+  CommentOverPrivateProperty:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+  AbsentOrWrongFileLicense:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicClass:
+    active: false
+
+style:
+  MagicNumber:
+    active: false
+  UnusedPrivateFunction:
+    ignoreAnnotated: [ 'Composable' ]
+
+complexity:
+  LongMethod:
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**' , '**/commonTest/**', '**/generated/**' ]
+
+potential-bugs:
+  UnsafeCallOnNullableType:
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**' , '**/commonTest/**', '**/generated/**' ]
+  UnsafeCast:
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**' , '**/commonTest/**', '**/generated/**' ]
+  NullableToStringCall:
+    active: false
+  ImplicitUnitReturnType:
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**' , '**/commonTest/**', '**/generated/**' ]
+
+naming:
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9]*'
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**' , '**/commonTest/**', '**/generated/**' ]
+  FunctionNameMaxLength:
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**' , '**/commonTest/**', '**/generated/**' ]
+  FunctionNaming:
+    ignoreAnnotated: [ 'Composable' ]
+    excludes: [ '**/test/**','**/androidTest/**','**/android-test/**', '**/androidUnitTest/**', '**/commonTest/**', '**/generated/**' ]
+
+exceptions:
+  NotImplementedDeclaration:
+    excludes: [ '**/*Fake.kt' ]

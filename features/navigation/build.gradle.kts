@@ -1,0 +1,38 @@
+import extension.configureTargets
+
+plugins {
+    alias(libs.plugins.escodro.multiplatform)
+    alias(libs.plugins.escodro.kotlin.parcelable)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+kotlin {
+    configureTargets("navigation")
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.features.navigationApi)
+            implementation(projects.libraries.parcelable)
+            implementation(projects.libraries.coroutines)
+            implementation(projects.libraries.appstate)
+            implementation(projects.resources)
+
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.material)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.materialIconsExtended)
+
+            implementation(libs.koin.compose)
+
+            api(libs.compose.navigation.ui)
+
+            implementation(libs.kotlinx.serialization)
+        }
+    }
+
+    androidLibrary {
+        namespace = "com.zavgar.system.navigation"
+    }
+}

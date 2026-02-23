@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+
+    <string name="logo_title">ZavGar</string>
+    <string name="logo_subtitle">магазин-сервис</string>
+
+    <!--    Label Placeholder-->
+    <string name="phone_label">Номер телефона</string>
+    <string name="phone_placeholder">+7 (999) 999 99-99</string>
+    <string name="password_label">Создайте пароль</string>
+    <string name="password_placeholder">Введите пароль</string>
+    <string name="repeat_password_label">Повторите пароль</string>
+    <string name="birth_date_label">День рождения</string>
+    <string name="birth_date_placeholder">DD.MM.YYYY</string>
+
+    <!--    Date dialog-->
+    <string name="dialog_picker_confirm">Подвердить</string>
+    <string name="dialog_picker_cancel">Отмена</string>
+
+    <!--    History-->
+    <string name="home_title_history">История</string>
+    <string name="history_period_start">С</string>
+    <string name="history_period_end">По</string>
+    <string name="history_empty_title">История операций пуста</string>
+    <string name="history_empty_description">За выбранный период операций нет</string>
+    <string name="error_invalid_date_range">Начальная дата не может быть позже конечной</string>
+
+    <!--    Login-->
+    <string name="login_top_title">Авторизация</string>
+    <string name="login_password_label">Пароль</string>
+    <string name="login_password_placeholder">Введите пароль</string>
+    <string name="login_forgot_password">Забыли пароль?</string>
+    <string name="login_button_text">Войти</string>
+    <string name="login_button_text_not_account">Нет аккаунта?</string>
+    <string name="login_button_text_register">Зарегистрироваться</string>
+
+    <!--    Register-->
+    <string name="register_top_title">Регистрация</string>
+    <string name="register_name_label">Имя</string>
+    <string name="register_name_placeholder">Введите ваше имя</string>
+    <string name="register_button_text">Зарегистрироваться</string>
+    <string name="register_button_text_has_account">Уже есть аккаунт?</string>
+    <string name="register_button_text_login">Войти</string>
+
+    <string name="confirmation_top_title">Введите код подтверждения</string>
+    <string name="confirmation_text">Мы отправили SMS с кодом подверждения на ваш телефон</string>
+    <string name="confirmation_resend_code">Отправить код повторно</string>
+    <string name="confirmation_button_text">Подтвердить</string>
+
+    <!--    Reset-->
+    <string name="reset_top_title">Востановление пароля</string>
+    <string name="reset_password_button_text">Подтвердить</string>
+    <string name="reset_password_button_text_return">Вернуться ко</string>
+    <string name="reset_password_button_text_login">входу</string>
+
+    <!--    Wallet-->
+    <string name="home_top_title_wallet">Бонусная система</string>
+    <string name="home_bottom_title_wallet">Главная</string>
+    <string name="points">бонусов</string>
+    <string name="refresh_points">Обновить баллы</string>
+
+
+    <!--    Settings-->
+    <string name="home_title_setting">Настройки</string>
+    <string name="settings_profil_details_button">Учетная запись</string>
+    <string name="settings_about_app_button">О приложении</string>
+    <string name="settings_logout_button">Выйти</string>
+
+    <!--    Preferences-->
+    <string name="preferences_top_title">О приложении</string>
+
+    <!--    Account-->
+    <string name="account_top_title">Аккаунт</string>
+    <string name="profile_update_success">Данные успешно сохранены</string>
+    <string name="password_update_success">Пароль успешно обновлен</string>
+    <string name="password_update_error">Неверный пароль</string>
+    <string name="profile_delete_success">Профиль успешно удален</string>
+    <string name="account_confirm">Сохранить изменения</string>
+    <string name="account_password_pattern">***********</string>
+    <string name="account_password_label">Пароль</string>
+    <string name="account_delete_title">Удалить аккаунт</string>
+    <string name="account_delete_description">Вы уверены, что хотите удалить аккаунт востановление будет не возможно?</string>
+    <string name="account_delete_confirm">Удалить</string>
+    <string name="account_delete_cancel">Отмена</string>
+    <string name="account_change_password">Изменение пароля</string>
+    <string name="account_change_confirm">Изменить</string>
+    <string name="account_change_cancel">Отмена</string>
+    <string name="account_old_password_label">Старый пароль</string>
+    <string name="account_new_password_label">Новый пароль</string>
+
+
+    <!--    Error validation-->
+    <string name="error_blank_phone">Номер телефона не может быть пустым</string>
+    <string name="error_invalid_format_phone">Неверный формат номера телефона, формат: +7 (999) 999-99-99</string>
+    <string name="error_invalid_length_phone">Неверная длина номера телефона, формат: +7 (999) 999-99-99</string>
+
+    <string name="error_blank_password">Пароль не может быть пустым</string>
+    <string name="error_short_password">Пароль не может быть короче 8 символов</string>
+    <string name="error_passwords_not_match">Пароли не совпадают</string>
+
+    <string name="error_blank_code">Код не может быть пустым</string>
+    <string name="error_short_code">Код не может быть короче 6 символов</string>
+
+    <string name="error_blank_name">Имя не может быть пустым</string>
+
+    <string name="error_blank_birth_date">Дата рождения не может быть пустой</string>
+
+    <string name="error_invalid_phone">Неверный номер телефона, попробуйте еще ра</string>
+
+
+    <!--    Error authorization-->
+    <string name="error_user_not_found">Пользователь с указанными данными не найден, проверьте правильность введенных данных</string>
+    <string name="error_user_already_exists">Пользователь с таким номером телефона уже существует</string>
+    <string name="error_invalid_format">Неверный формат входных данных попробуйте еще раз</string>
+    <string name="error_invalid_code">Неверный или истекший код, попробуйте еще раз</string>
+
+    <!--    Snackbar-->
+    <string name="confirmation_resend_success">Код подверждения успешно отправлен на ваш номер телефона</string>
+
+    <!--    Error internal-->
+    <string name="error_server_error">Ошибка сервера</string>
+    <string name="error_network_error">Ошибка сети</string>
+    <string name="error_unknown_error">Неизвестная ошибка</string>
+
+</resources>
