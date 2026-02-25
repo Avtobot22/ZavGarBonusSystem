@@ -15,6 +15,7 @@ import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
+import com.zavgar.system.designsystem.components.snackbar.SnackBarType
 import com.zavgar.system.domain.usecase.ChangePasswordUseCase
 import com.zavgar.system.domain.usecase.DeleteProfileUseCase
 import com.zavgar.system.domain.usecase.DeleteSessionUseCase
@@ -84,7 +85,7 @@ class AccountViewModel(
                         )
                     }
 
-                is ProfileGetResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
+                is ProfileGetResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message, SnackBarType.ERROR) }
                 is ProfileGetResult.TokenExpired -> handleLogout()
             }
 
@@ -169,11 +170,22 @@ class AccountViewModel(
 
             when (result) {
                 is ChangePasswordResult.Success -> {
-                    setEvent { AccountEvent.ShowSnackbar(UiText.Resource(Res.string.password_update_success)) }
+                    setEvent {
+                        AccountEvent.ShowSnackbar(
+                            UiText.Resource(Res.string.password_update_success),
+                            SnackBarType.SUCCESS
+                        )
+                    }
                     setState { copy(isPasswordDialogOpen = false) }
                 }
 
-                is ChangePasswordResult.Error -> setEvent { AccountEvent.ShowSnackbar(UiText.Resource(Res.string.password_update_error)) }
+                is ChangePasswordResult.Error -> setEvent {
+                    AccountEvent.ShowSnackbar(
+                        UiText.Resource(Res.string.password_update_error),
+                        SnackBarType.WARNING
+                    )
+                }
+
                 is ChangePasswordResult.TokenExpired -> handleLogout()
             }
         }
@@ -195,11 +207,16 @@ class AccountViewModel(
 
             when (val result = deleteProfileUseCase().toDeleteResult()) {
                 is DeleteResult.Success -> {
-                    setEvent { AccountEvent.ShowSnackbar(UiText.Resource(Res.string.profile_delete_success)) }
+                    setEvent {
+                        AccountEvent.ShowSnackbar(
+                            UiText.Resource(Res.string.profile_delete_success),
+                            SnackBarType.SUCCESS
+                        )
+                    }
                     setEvent { AccountEvent.NavigateToLogin }
                 }
 
-                is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
+                is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message, SnackBarType.ERROR) }
                 is DeleteResult.TokenExpired -> handleLogout()
             }
 
@@ -247,8 +264,20 @@ class AccountViewModel(
             setState { copy(isLoading = false) }
 
             when (result) {
-                is ProfileUpdateResult.Success -> setEvent { AccountEvent.ShowSnackbar(UiText.Resource(Res.string.profile_update_success)) }
-                is ProfileUpdateResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
+                is ProfileUpdateResult.Success -> setEvent {
+                    AccountEvent.ShowSnackbar(
+                        UiText.Resource(Res.string.profile_update_success),
+                        SnackBarType.SUCCESS
+                    )
+                }
+
+                is ProfileUpdateResult.Error -> setEvent {
+                    AccountEvent.ShowSnackbar(
+                        result.message,
+                        type = SnackBarType.ERROR
+                    )
+                }
+
                 is ProfileUpdateResult.TokenExpired -> setEvent { AccountEvent.NavigateToLogin }
             }
         }
@@ -261,7 +290,7 @@ class AccountViewModel(
                 setEvent {
                     AccountEvent.ShowSnackbar(exception.message?.let {
                         UiText.DynamicString(it)
-                    } ?: UiText.Resource(Res.string.error_unknown_error))
+                    } ?: UiText.Resource(Res.string.error_unknown_error), type = SnackBarType.ERROR)
                 }
             }
         }

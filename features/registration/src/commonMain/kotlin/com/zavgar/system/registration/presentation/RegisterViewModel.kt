@@ -33,12 +33,11 @@ class RegisterViewModel(
     override fun handleIntent(intent: RegisterIntent) {
         when (intent) {
             is RegisterIntent.EnterName -> handleNameInput(intent.name)
-            is RegisterIntent.EnterBirthDate -> handleBirthDateInput(intent.birthDate)
+            is RegisterIntent.CloseDatePicker -> handleCloseDatePicker(intent.birthDate)
             is RegisterIntent.EnterPhone -> handlePhoneInput(intent.phone)
             is RegisterIntent.EnterPassword -> handlePasswordInput(intent.password)
             is RegisterIntent.EnterRepeatPassword -> handleRepeatPasswordInput(intent.repeatPassword)
             is RegisterIntent.OpenDatePicker -> handleOpenDatePicker()
-            is RegisterIntent.CloseDatePicker -> handleCloseDatePicker()
             is RegisterIntent.DismissDatePicker -> handleDismissDatePicker()
             is RegisterIntent.ClickLogin -> handleClickLogin()
             is RegisterIntent.Submit -> handleSubmit()
@@ -57,7 +56,7 @@ class RegisterViewModel(
             )
         }
 
-    private fun handleBirthDateInput(birthDate: LocalDate) =
+    private fun handleCloseDatePicker(birthDate: LocalDate) =
         setState {
             copy(
                 birthDate = birthDate,
@@ -95,8 +94,6 @@ class RegisterViewModel(
     }
 
     private fun handleOpenDatePicker() = setState { copy(isDatePickerOpen = true) }
-
-    private fun handleCloseDatePicker() = setState { copy(isDatePickerOpen = false) }
 
     private fun handleDismissDatePicker() = setState { copy(isDatePickerOpen = false) }
 

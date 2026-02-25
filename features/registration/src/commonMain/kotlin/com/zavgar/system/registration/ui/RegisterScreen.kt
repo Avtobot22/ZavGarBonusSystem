@@ -1,26 +1,18 @@
 package com.zavgar.system.registration.ui
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,6 +28,7 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.button.AppTextButton
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
+import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
 import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
@@ -115,7 +108,7 @@ internal fun RegisterScaffold(
 ) {
     Scaffold(
         modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { paddingValues ->
         RegisterContent(
@@ -138,16 +131,7 @@ internal fun RegisterContent(
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
     val phoneMask = remember { MaskVisualTransformation("+7 (###) ### ##-##") }
-    val interactionSource = remember { MutableInteractionSource() }
 
-    LaunchedEffect(interactionSource) {
-        interactionSource.interactions.collect { interaction ->
-            if (interaction is PressInteraction.Release) {
-                focusManager.clearFocus()
-                onIntent(RegisterIntent.OpenDatePicker)
-            }
-        }
-    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -178,27 +162,22 @@ internal fun RegisterContent(
                 enabled = !state.isLoading
             )
 
-            AppTextField(
+            AppDatePickerField(
                 value = state.birthDateText,
-                onValueChange = {},
+                onClick = { onIntent(RegisterIntent.OpenDatePicker) },
                 label = stringResource(Res.string.birth_date_label),
                 placeholder = stringResource(Res.string.birth_date_placeholder),
                 modifier = Modifier.padding(vertical = 11.dp),
                 isError = state.birthDateError != null,
                 errorMessage = state.birthDateError?.asString(),
                 enabled = !state.isLoading,
-                trailingIcon = {
-                    Icon(Icons.Default.DateRange, contentDescription = null)
-                },
-                readOnly = true,
-                interactionSource = interactionSource
             )
 
             AppDatePicker(
                 initialDate = state.birthDate,
                 isOpen = state.isDatePickerOpen,
                 onDismiss = { onIntent(RegisterIntent.DismissDatePicker) },
-                onConfirm = { onIntent(RegisterIntent.EnterBirthDate(it)) }
+                onConfirm = { onIntent(RegisterIntent.CloseDatePicker(it)) }
             )
 
             AppValidatedTextField(

@@ -6,7 +6,7 @@ sealed interface RegisterIntent {
 
     data class EnterName(val name: String) : RegisterIntent
 
-    data class EnterBirthDate(val birthDate: LocalDate) : RegisterIntent
+    data class CloseDatePicker(val birthDate: LocalDate) : RegisterIntent
 
     data class EnterPhone(val phone: String) : RegisterIntent
 
@@ -19,8 +19,6 @@ sealed interface RegisterIntent {
     data object ClickLogin : RegisterIntent
 
     data object OpenDatePicker : RegisterIntent
-
-    data object CloseDatePicker : RegisterIntent
 
     data object DismissDatePicker : RegisterIntent
 }

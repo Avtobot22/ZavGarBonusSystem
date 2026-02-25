@@ -32,7 +32,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-private const val BASE_URL = "http://10.0.2.2:80/"
+expect val BASE_URL: String
 
 val networkModule = module {
 

@@ -5,8 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -123,7 +120,7 @@ internal fun HistoryScaffold(
     Scaffold(
         containerColor = Color.Transparent,
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
@@ -163,9 +160,6 @@ internal fun HistoryContent(
     listState: LazyListState,
     modifier: Modifier = Modifier
 ) {
-    val periodStartInteractionSource = remember { MutableInteractionSource() }
-    val periodEndInteractionSource = remember { MutableInteractionSource() }
-
     val shouldLoadMore by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
@@ -179,22 +173,6 @@ internal fun HistoryContent(
     LaunchedEffect(shouldLoadMore) {
         if (shouldLoadMore) {
             onIntent(HistoryIntent.LoadNextPage)
-        }
-    }
-
-    LaunchedEffect(periodStartInteractionSource) {
-        periodStartInteractionSource.interactions.collect { interaction ->
-            if (interaction is PressInteraction.Release) {
-                onIntent(HistoryIntent.OpenDatePicker(DatePickerType.START))
-            }
-        }
-    }
-
-    LaunchedEffect(periodEndInteractionSource) {
-        periodEndInteractionSource.interactions.collect { interaction ->
-            if (interaction is PressInteraction.Release) {
-                onIntent(HistoryIntent.OpenDatePicker(DatePickerType.END))
-            }
         }
     }
 
@@ -222,14 +200,12 @@ internal fun HistoryContent(
                 AppDateChip(
                     value = state.periodStartText,
                     label = stringResource(Res.string.history_period_start),
-                    onClick = {},
-                    interactionSource = periodStartInteractionSource
+                    onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.START)) },
                 )
                 AppDateChip(
                     value = state.periodEndText,
                     label = stringResource(Res.string.history_period_end),
-                    onClick = {},
-                    interactionSource = periodEndInteractionSource
+                    onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.END)) },
                 )
 
                 AppDatePicker(

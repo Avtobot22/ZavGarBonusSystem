@@ -1,4 +1,4 @@
-TEAM_ID=
+TEAM_ID=1
 
 PRODUCT_NAME=ZavGarBonusSystem
 PRODUCT_BUNDLE_IDENTIFIER=com.zavgar.system.ZavGarBonusSystem$(TEAM_ID)

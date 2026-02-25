@@ -2,10 +2,8 @@ package com.zavgar.system.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Scaffold
@@ -77,10 +75,11 @@ private fun HomeScaffold(
     navBackStack: NavBackStack<Destination>,
     modifier: Modifier = Modifier
 ) {
+
     val windowInsets = if (isEdgeToEdge) {
         WindowInsets(0, 0, 0, 0)
     } else {
-        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+        WindowInsets.safeDrawing
     }
 
     Scaffold(
@@ -107,11 +106,8 @@ private fun HomeScaffold(
                 navBackStack = navBackStack,
                 modifier = Modifier
                     .fillMaxSize()
-                    .apply {
-                        if (!isEdgeToEdge) {
-                            padding(paddingValues).consumeWindowInsets(paddingValues)
-                        }
-                    }
+                    .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues)
             )
         }
     }

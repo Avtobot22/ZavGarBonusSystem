@@ -1,24 +1,15 @@
 package com.zavgar.system.account.ui
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,7 +27,10 @@ import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppOutlinedButton
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
-import com.zavgar.system.designsystem.components.textfield.AppPasswordField
+import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
+import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
+import com.zavgar.system.designsystem.components.textfield.AppClickablePasswordField
+import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.topbar.AppProfilTopBar
 import com.zavgar.system.designsystem.screen.Screen
@@ -82,9 +76,10 @@ internal fun AccountLoader(
             is AccountEvent.NavigateToLogin -> onNavigateToLogin()
             is AccountEvent.NavigateBack -> onNavigateBack()
             is AccountEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
+                snackbarHostState.showCustomSnackbar(
+                    type = event.type,
                     message = event.message.suspendAsString(),
-                    duration = SnackbarDuration.Short
+                    withDismissAction = true,
                 )
             }
         }
@@ -108,8 +103,8 @@ internal fun AccountScaffold(
     Scaffold(
         containerColor = Color.Transparent,
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.safeDrawing,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
     ) { paddingValues ->
         AccountContent(
             state = state,
@@ -124,27 +119,6 @@ internal fun AccountScaffold(
 internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Unit, modifier: Modifier) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
-    val dateInteractionSource = remember { MutableInteractionSource() }
-    val passwordInteractionSource = remember { MutableInteractionSource() }
-
-
-    LaunchedEffect(dateInteractionSource) {
-        dateInteractionSource.interactions.collect { interaction ->
-            if (interaction is PressInteraction.Release) {
-                focusManager.clearFocus()
-                onIntent(AccountIntent.OpenDatePicker)
-            }
-        }
-    }
-
-    LaunchedEffect(passwordInteractionSource) {
-        passwordInteractionSource.interactions.collect { interaction ->
-            if (interaction is PressInteraction.Release) {
-                focusManager.clearFocus()
-                onIntent(AccountIntent.OperPasswordDialog)
-            }
-        }
-    }
 
     ChangePasswordDialog(state = state, onIntent = onIntent)
     DeleteAccountDialog(state = state, onIntent = onIntent)
@@ -180,20 +154,15 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
                 enabled = !state.isLoading
             )
 
-            AppTextField(
+            AppDatePickerField(
                 value = state.birthDateText,
-                onValueChange = {},
+                onClick = { onIntent(AccountIntent.OpenDatePicker) },
                 label = stringResource(Res.string.birth_date_label),
                 placeholder = stringResource(Res.string.birth_date_placeholder),
                 modifier = Modifier.padding(vertical = 11.dp),
                 isError = state.birthDateError != null,
                 errorMessage = state.birthDateError?.asString(),
                 enabled = !state.isLoading,
-                trailingIcon = {
-                    Icon(Icons.Default.DateRange, contentDescription = null)
-                },
-                readOnly = true,
-                interactionSource = dateInteractionSource
             )
 
             AppDatePicker(
@@ -203,14 +172,12 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
                 onConfirm = { onIntent(AccountIntent.EnterBirthDate(it)) }
             )
 
-            AppPasswordField(
+            AppClickablePasswordField(
                 value = stringResource(Res.string.account_password_pattern),
-                onValueChange = {},
+                onClick = { onIntent(AccountIntent.OperPasswordDialog) },
                 label = stringResource(Res.string.account_password_label),
-                readOnly = true,
                 enabled = !state.isLoading,
                 modifier = Modifier.padding(vertical = 11.dp),
-                interactionSource = passwordInteractionSource
             )
 
             AppOutlinedButton(

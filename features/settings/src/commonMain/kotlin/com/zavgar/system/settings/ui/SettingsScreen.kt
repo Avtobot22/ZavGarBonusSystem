@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -102,7 +101,7 @@ internal fun SettingsScaffold(
     Scaffold(
         containerColor = Color.Transparent,
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { paddingValues ->
 
@@ -137,7 +136,7 @@ internal fun SettingsContent(
     ) {
         AppTopBar(
             title = stringResource(Res.string.home_title_setting),
-            modifier = Modifier.padding(top = 60.dp, bottom = 100.dp)
+            modifier = Modifier.padding(top = 60.dp, bottom = 120.dp)
         )
 
         Column(
