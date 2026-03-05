@@ -171,6 +171,7 @@ internal fun LoginContent(
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
         ) {
             AppValidatedTextField(
                 value = state.phone,
@@ -178,7 +179,6 @@ internal fun LoginContent(
                 isValid = state.isPhoneValid,
                 label = stringResource(Res.string.phone_label),
                 placeholder = stringResource(Res.string.phone_placeholder),
-                modifier = Modifier.padding(vertical = 11.dp),
                 isError = state.phoneError != null,
                 errorMessage = state.phoneError?.asString(),
                 visualTransformation = phoneMask,
@@ -189,7 +189,6 @@ internal fun LoginContent(
             AppPasswordField(
                 value = state.password,
                 onValueChange = { onIntent(LoginIntent.EnterPassword(it)) },
-                modifier = Modifier.padding(vertical = 11.dp),
                 isError = state.passwordError != null,
                 errorMessage = state.passwordError?.asString(),
                 enabled = !state.isLoading,
@@ -219,9 +218,9 @@ internal fun LoginContent(
                     focusManager.clearFocus()
                     onIntent(LoginIntent.Submit)
                 },
-                enabled = !state.isLoading,
+                enabled = state.isLoginButtonEnabled,
                 isLoading = state.isLoading,
-                modifier = Modifier.padding(vertical = 24.dp),
+                modifier = Modifier.padding(top = 12.dp),
                 shakingState = errorShakingState
             )
 

@@ -204,7 +204,7 @@ internal fun ConfirmationContent(
             text = stringResource(Res.string.confirmation_button_text),
             onClick = { onIntent(ConfirmationIntent.Submit) },
             modifier = Modifier.padding(top = 35.dp),
-            enabled = !state.isLoading,
+            enabled = state.isConfirmButtonEnabled,
             isLoading = state.isLoading,
             shakingState = errorShakingState
         )

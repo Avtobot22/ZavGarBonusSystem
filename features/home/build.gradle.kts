@@ -34,7 +34,7 @@ kotlin {
         }
     }
 
-    androidLibrary {
+    android {
         namespace = "com.zavgar.system.home"
     }
 }

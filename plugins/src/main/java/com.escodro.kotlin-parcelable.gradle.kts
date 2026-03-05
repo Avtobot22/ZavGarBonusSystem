@@ -5,7 +5,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         compilerOptions {
             freeCompilerArgs.addAll(
                 "-P",

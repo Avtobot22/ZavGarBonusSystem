@@ -16,4 +16,10 @@ data class LoginState(
     val isLoading: Boolean = false,
 
     val generalError: UiText? = null
-)
+) {
+    val isFormFilled: Boolean
+        get() = phone.isNotBlank() && password.isNotBlank()
+
+    val isLoginButtonEnabled: Boolean
+        get() = isFormFilled && !isLoading
+}

@@ -37,11 +37,18 @@ class RegisterViewModel(
             is RegisterIntent.EnterPhone -> handlePhoneInput(intent.phone)
             is RegisterIntent.EnterPassword -> handlePasswordInput(intent.password)
             is RegisterIntent.EnterRepeatPassword -> handleRepeatPasswordInput(intent.repeatPassword)
+            is RegisterIntent.AcceptTerms -> handleAcceptTerms(intent.isTermsAccepted)
             is RegisterIntent.OpenDatePicker -> handleOpenDatePicker()
             is RegisterIntent.DismissDatePicker -> handleDismissDatePicker()
             is RegisterIntent.ClickLogin -> handleClickLogin()
             is RegisterIntent.Submit -> handleSubmit()
         }
+    }
+
+    private fun handleAcceptTerms(termsAccepted: Boolean) = setState {
+        copy(
+            isTermsAccepted = termsAccepted
+        )
     }
 
     companion object {

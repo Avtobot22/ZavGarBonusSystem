@@ -13,4 +13,12 @@ data class ResetPasswordState(
     val repeatPasswordError: UiText? = null,
 
     val isLoading: Boolean = false,
-)
+) {
+    val isFormFilled: Boolean
+        get() = phone.isNotBlank() &&
+                password.isNotBlank() &&
+                repeatPassword.isNotBlank()
+
+    val isResetPasswordButtonEnabled: Boolean
+        get() = isFormFilled && !isLoading
+}

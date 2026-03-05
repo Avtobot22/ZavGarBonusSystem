@@ -3,9 +3,9 @@
 #noinspection UnusedVersionCatalogEntry
 version_code = "30402"
 #noinspection UnusedVersionCatalogEntry
-version_name = "3.4.2"
-android_gradle_plugin = "9.0.1"
-kotlin = "2.3.0"
+version_name = "1.0.0"
+android_gradle_plugin = "9.1.0"
+kotlin = "2.3.10"
 #noinspection UnusedVersionCatalogEntry
 android_sdk_compile = "36"
 #noinspection UnusedVersionCatalogEntry
@@ -16,76 +16,39 @@ android_sdk_min = "24"
 # General dependencies
 logging = "3.0.5"
 logcat = "0.4"
-stately = "2.1.0"
 
 # KotlinX
 kotlinx_coroutines = "1.10.2"
-kotlinx_serialization = "1.9.0"
+kotlinx_serialization = "1.10.0"
 kotlinx_collections_immutable = "0.4.0"
 kotlinx_datetime = "0.7.1"
 
 # AndroidX
-activity = "1.12.2"
-core = "1.17.0"
+activity = "1.12.4"
 appcompat = "1.7.1"
-corektx = "1.17.0"
 datastore = "1.2.0"
-glance = "1.1.1"
-workmanager = "2.11.0"
 lifecycle_viewmodel = "2.9.6"
 lifecycle_runtime = "2.10.0"
 
 # Compose
-compose_compiler = "1.10.0"
-compose_runtime = "1.10.0"
-compose_material = "1.10.0"
+compose_compiler = "1.10.1"
+compose_runtime = "1.10.1"
+compose_material = "1.10.1"
 compose_material3 = "1.10.0-alpha05"
-compose_components_resources = "1.10.0"
+compose_components_resources = "1.10.1"
 compose_materialIconsExtended = "1.7.3"
-compose_uiTooling = "1.10.0"
-compose_uiToolingPreview = "1.10.0"
-compose_uiTest = "1.10.0"
-compose_material3AdaptiveNavigationSuite = "1.10.0-alpha05"
+compose_uiTooling = "1.10.1"
+compose_uiToolingPreview = "1.10.1"
 compose_navigation = "1.0.0-alpha06"
 compose_adaptive = "1.3.0-alpha03"
 
 # Koin
 koin = "4.1.1"
 
-# SQLDelight
-sqldelight = "2.2.1"
-
-# Moko
-moko_permissions = "0.20.1"
-
-# Multiplatform Utils
-multiplatform_paths = "0.2.2"
-
-# Test
-test_junit = "4.13.2"
-test_uiautomator = "2.3.0"
-test_junit4_android = "1.10.1"
-test_manifest = "1.10.1"
-test_work = "2.11.1"
-test_robolectric = "4.16.1"
-
-# Quality
-ktlint = "1.8.0"
-detekt = "2.0.0-alpha.2"
-composerules = "0.5.3"
-
-# License
-aboutlibraries = "13.2.1"
-kotlinStdlib = "2.3.0"
-kotlinTest = "2.3.0"
-runner = "1.7.0"
-coreVersion = "1.7.0"
-junit = "1.3.0"
-espressoCore = "3.7.0"
 material = "1.13.0"
 
 # Ktor
-ktor = "3.4.0"
+ktor = "3.4.1"
 
 #Qr-kit
 qrKit = "3.1.3"
@@ -98,12 +61,9 @@ kotlin_gradle_plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 # General dependencies
 logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
 logcat = { module = "com.squareup.logcat:logcat", version.ref = "logcat" }
-stately = { module = "co.touchlab:stately-common", version.ref = "stately" }
 
 # KotlinX
 kotlinx_coroutines_core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
-kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
-kotlinx_coroutines_swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx_coroutines" }
 kotlinx_serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx_serialization" }
 kotlinx_collections_immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_collections_immutable" }
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_datetime" }
@@ -111,13 +71,8 @@ kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # AndroidX
 androidx_activity = { module = "androidx.activity:activity", version.ref = "activity" }
 androidx_activity_compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
-androidx_core = { module = "androidx.core:core", version.ref = "core" }
 androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-androidx_corektx = { module = "androidx.core:core-ktx", version.ref = "corektx" }
 androidx_datastore = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
-androidx_glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
-androidx_glance_material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
-androidx_workmanager = { module = "androidx.work:work-runtime-ktx", version.ref = "workmanager" }
 androidx_lifecycle_viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle_viewmodel" }
 androidx_lifecycle_runtime = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_runtime" }
 
@@ -129,82 +84,35 @@ compose_components_resources = { module = "org.jetbrains.compose.components:comp
 compose_materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose_materialIconsExtended" }
 compose_uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose_uiTooling" }
 compose_uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose_uiToolingPreview" }
-compose_uiTest = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose_uiTest" }
-compose_material3AdaptiveNavigationSuite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose_material3AdaptiveNavigationSuite" }
 compose_navigation_ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "compose_navigation" }
 compose_navigation_adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose_adaptive" }
 
 #Koin
 koin_core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-koin_test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin_compose = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
-
-# SQLDelight
-sqldelight_driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
-sqldelight_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
-sqldelight_jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
-sqldelight_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
-
-# Moko
-moko_permissions_compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko_permissions" }
-moko_permissions_notifications = { module = "dev.icerock.moko:permissions-notifications", version.ref = "moko_permissions" }
-
-## Multiplatform Utils
-multiplatform_path = { module = "me.sujanpoudel.multiplatform.utils:multiplatform-paths", version.ref = "multiplatform_paths" }
-
-# Test
-test_junit = { module = "junit:junit", version.ref = "test_junit" }
-test_uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "test_uiautomator" }
-
-test-junit4-android = { module = "androidx.compose.ui:ui-test-junit4-android", version.ref = "test_junit4_android" }
-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "test_manifest" }
-test-work = { module = "androidx.work:work-testing", version.ref = "test_work" }
-
-test-robolectric = { module = "org.robolectric:robolectric", version.ref = "test_robolectric" }
-
-# Quality
-#noinspection UnusedVersionCatalogEntry
-ktlint = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
-detekt = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
-#noinspection UnusedVersionCatalogEntry
-composerules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "composerules" }
 
 # --- Ktor Core & Logic ---
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
-ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" } # Важно для токенов
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 # --- Ktor Engines (Движки для платформ) ---
-ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" } # Лучший выбор для Android
-ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" } # Для iOS
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 
 # Qr-kit
 qrKit = { module = "network.chaintech:qr-kit", version.ref = "qrKit" }
 
-# License
-aboutlibraries_plugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlibraries" }
-aboutlibraries_ui = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlibraries" }
-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }
-kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlinTest" }
-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
-core = { group = "androidx.test", name = "core", version.ref = "coreVersion" }
-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android_kmp_plugin = { id = "com.android.kotlin.multiplatform.library", version.ref = "android_gradle_plugin" }
 kotlin_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose_compiler" }
 compose_compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 escodro_multiplatform = { id = "com.escodro.multiplatform" }
 escodro_kotlin_parcelable = { id = "com.escodro.kotlin-parcelable" }
-escodro_kotlin_quality = { id = "com.escodro.kotlin-quality" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-android-lint = { id = "com.android.lint", version.ref = "android_gradle_plugin" }
-android-application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
-android-library = { id = "com.android.library", version.ref = "android_gradle_plugin" }

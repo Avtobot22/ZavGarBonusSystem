@@ -14,6 +14,8 @@ sealed interface RegisterIntent {
 
     data class EnterRepeatPassword(val repeatPassword: String) : RegisterIntent
 
+    data class AcceptTerms(val isTermsAccepted: Boolean) : RegisterIntent
+
     data object Submit : RegisterIntent
 
     data object ClickLogin : RegisterIntent

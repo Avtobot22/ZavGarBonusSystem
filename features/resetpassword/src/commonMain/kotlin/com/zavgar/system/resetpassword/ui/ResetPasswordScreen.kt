@@ -155,41 +155,44 @@ internal fun ResetPasswordContent(
         verticalArrangement = Arrangement.Center
     ) {
 
-        AppValidatedTextField(
-            value = state.phone,
-            onValueChange = { onIntent(ResetPasswordIntent.EnterPhone(it)) },
-            isValid = state.isPhoneValid,
-            label = stringResource(Res.string.phone_label),
-            placeholder = stringResource(Res.string.phone_placeholder),
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.phoneError != null,
-            errorMessage = state.phoneError?.asString(),
-            visualTransformation = phoneMask,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            enabled = !state.isLoading
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
+        ) {
 
-        AppPasswordField(
-            value = state.password,
-            onValueChange = { onIntent(ResetPasswordIntent.EnterPassword(it)) },
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.passwordError != null,
-            errorMessage = state.passwordError?.asString(),
-            enabled = !state.isLoading,
-            label = stringResource(Res.string.password_label),
-            placeholder = stringResource(Res.string.password_placeholder)
-        )
+            AppValidatedTextField(
+                value = state.phone,
+                onValueChange = { onIntent(ResetPasswordIntent.EnterPhone(it)) },
+                isValid = state.isPhoneValid,
+                label = stringResource(Res.string.phone_label),
+                placeholder = stringResource(Res.string.phone_placeholder),
+                isError = state.phoneError != null,
+                errorMessage = state.phoneError?.asString(),
+                visualTransformation = phoneMask,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                enabled = !state.isLoading
+            )
 
-        AppPasswordField(
-            value = state.repeatPassword,
-            onValueChange = { onIntent(ResetPasswordIntent.EnterRepeatPassword(it)) },
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.repeatPasswordError != null,
-            errorMessage = state.repeatPasswordError?.asString(),
-            enabled = !state.isLoading,
-            label = stringResource(Res.string.repeat_password_label),
-            placeholder = stringResource(Res.string.password_placeholder)
-        )
+            AppPasswordField(
+                value = state.password,
+                onValueChange = { onIntent(ResetPasswordIntent.EnterPassword(it)) },
+                isError = state.passwordError != null,
+                errorMessage = state.passwordError?.asString(),
+                enabled = !state.isLoading,
+                label = stringResource(Res.string.password_label),
+                placeholder = stringResource(Res.string.password_placeholder)
+            )
+
+            AppPasswordField(
+                value = state.repeatPassword,
+                onValueChange = { onIntent(ResetPasswordIntent.EnterRepeatPassword(it)) },
+                isError = state.repeatPasswordError != null,
+                errorMessage = state.repeatPasswordError?.asString(),
+                enabled = !state.isLoading,
+                label = stringResource(Res.string.repeat_password_label),
+                placeholder = stringResource(Res.string.password_placeholder)
+            )
+        }
 
         AppPrimaryButton(
             text = stringResource(Res.string.reset_password_button_text),
@@ -197,9 +200,9 @@ internal fun ResetPasswordContent(
                 focusManager.clearFocus()
                 onIntent(ResetPasswordIntent.Submit)
             },
-            enabled = !state.isLoading,
+            enabled = state.isResetPasswordButtonEnabled,
             isLoading = state.isLoading,
-            modifier = Modifier.padding(top = 48.dp, bottom = 24.dp),
+            modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
             shakingState = errorShakingState
         )
 

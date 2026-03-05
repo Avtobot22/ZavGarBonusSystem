@@ -14,4 +14,10 @@ data class ConfirmationState(
     val isLoading: Boolean = false,
 
     val timerSeconds: Int = 0
-)
+) {
+    val isCodeValid: Boolean
+        get() = code.length == 6
+
+    val isConfirmButtonEnabled: Boolean
+        get() = isCodeValid && !isLoading
+}

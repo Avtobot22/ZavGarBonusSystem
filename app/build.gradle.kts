@@ -2,13 +2,12 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
-    alias(libs.plugins.escodro.kotlin.quality)
     alias(libs.plugins.compose.compiler)
 }
 
 android {
     defaultConfig {
-        applicationId = "com.zavgar.system.app"
+        applicationId = "com.zavgar.system.bonusapp"
         versionCode = Integer.parseInt(libs.versions.version.code.get())
         versionName = libs.versions.version.name.get()
         compileSdk = Integer.parseInt(libs.versions.android.sdk.compile.get())
@@ -22,10 +21,10 @@ android {
     val properties = readProperties(file("../config/signing/signing.properties"))
     signingConfigs {
         create("release") {
-            keyAlias = getSigningKey(properties, "ALKAA_KEY_ALIAS", "keyAlias")
-            keyPassword = getSigningKey(properties, "ALKAA_KEY_PASSWORD", "keyPassword")
-            storeFile = file(getSigningKey(properties, "ALKAA_STORE_PATH", "storePath"))
-            storePassword = getSigningKey(properties, "ALKAA_KEY_STORE_PASSWORD", "storePassword")
+            keyAlias = getSigningKey(properties, "ZAVGAR_KEY_ALIAS", "keyAlias")
+            keyPassword = getSigningKey(properties, "ZAVGAR_KEY_PASSWORD", "keyPassword")
+            storeFile = file(getSigningKey(properties, "ZAVGAR_STORE_PATH", "storePath"))
+            storePassword = getSigningKey(properties, "ZAVGAR_KEY_STORE_PASSWORD", "storePassword")
         }
     }
 

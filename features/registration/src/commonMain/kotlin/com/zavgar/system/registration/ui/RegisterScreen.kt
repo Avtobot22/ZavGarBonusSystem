@@ -152,6 +152,13 @@ internal fun RegisterContent(
     val scrollState = rememberScrollState()
     val phoneMask = remember { MaskVisualTransformation("+7 (###) ### ##-##") }
 
+    AppDatePicker(
+        initialDate = state.birthDate,
+        isOpen = state.isDatePickerOpen,
+        onDismiss = { onIntent(RegisterIntent.DismissDatePicker) },
+        onConfirm = { onIntent(RegisterIntent.CloseDatePicker(it)) }
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -160,70 +167,68 @@ internal fun RegisterContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AppTextField(
-            value = state.name,
-            onValueChange = { onIntent(RegisterIntent.EnterName(it)) },
-            label = stringResource(Res.string.register_name_label),
-            placeholder = stringResource(Res.string.register_name_placeholder),
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.nameError != null,
-            errorMessage = state.nameError?.asString(),
-            enabled = !state.isLoading
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AppTextField(
+                value = state.name,
+                onValueChange = { onIntent(RegisterIntent.EnterName(it)) },
+                label = stringResource(Res.string.register_name_label),
+                placeholder = stringResource(Res.string.register_name_placeholder),
+                isError = state.nameError != null,
+                errorMessage = state.nameError?.asString(),
+                enabled = !state.isLoading
+            )
 
-        AppDatePickerField(
-            value = state.birthDateText,
-            onClick = { onIntent(RegisterIntent.OpenDatePicker) },
-            label = stringResource(Res.string.birth_date_label),
-            placeholder = stringResource(Res.string.birth_date_placeholder),
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.birthDateError != null,
-            errorMessage = state.birthDateError?.asString(),
-            enabled = !state.isLoading,
-        )
+            AppDatePickerField(
+                value = state.birthDateText,
+                onClick = { onIntent(RegisterIntent.OpenDatePicker) },
+                label = stringResource(Res.string.birth_date_label),
+                placeholder = stringResource(Res.string.birth_date_placeholder),
+                isError = state.birthDateError != null,
+                errorMessage = state.birthDateError?.asString(),
+                enabled = !state.isLoading,
+            )
 
-        AppDatePicker(
-            initialDate = state.birthDate,
-            isOpen = state.isDatePickerOpen,
-            onDismiss = { onIntent(RegisterIntent.DismissDatePicker) },
-            onConfirm = { onIntent(RegisterIntent.CloseDatePicker(it)) }
-        )
+            AppValidatedTextField(
+                value = state.phone,
+                onValueChange = { onIntent(RegisterIntent.EnterPhone(it)) },
+                isValid = state.isPhoneValid,
+                label = stringResource(Res.string.phone_label),
+                placeholder = stringResource(Res.string.phone_placeholder),
+                isError = state.phoneError != null,
+                errorMessage = state.phoneError?.asString(),
+                visualTransformation = phoneMask,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                enabled = !state.isLoading
+            )
 
-        AppValidatedTextField(
-            value = state.phone,
-            onValueChange = { onIntent(RegisterIntent.EnterPhone(it)) },
-            isValid = state.isPhoneValid,
-            label = stringResource(Res.string.phone_label),
-            placeholder = stringResource(Res.string.phone_placeholder),
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.phoneError != null,
-            errorMessage = state.phoneError?.asString(),
-            visualTransformation = phoneMask,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            enabled = !state.isLoading
-        )
+            AppPasswordField(
+                value = state.password,
+                onValueChange = { onIntent(RegisterIntent.EnterPassword(it)) },
+                isError = state.passwordError != null,
+                errorMessage = state.passwordError?.asString(),
+                enabled = !state.isLoading,
+                label = stringResource(Res.string.password_label),
+                placeholder = stringResource(Res.string.password_placeholder)
+            )
 
-        AppPasswordField(
-            value = state.password,
-            onValueChange = { onIntent(RegisterIntent.EnterPassword(it)) },
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.passwordError != null,
-            errorMessage = state.passwordError?.asString(),
-            enabled = !state.isLoading,
-            label = stringResource(Res.string.password_label),
-            placeholder = stringResource(Res.string.password_placeholder)
-        )
+            AppPasswordField(
+                value = state.repeatPassword,
+                onValueChange = { onIntent(RegisterIntent.EnterRepeatPassword(it)) },
+                isError = state.repeatPasswordError != null,
+                errorMessage = state.repeatPasswordError?.asString(),
+                enabled = !state.isLoading,
+                label = stringResource(Res.string.repeat_password_label),
+                placeholder = stringResource(Res.string.password_placeholder)
+            )
 
-        AppPasswordField(
-            value = state.repeatPassword,
-            onValueChange = { onIntent(RegisterIntent.EnterRepeatPassword(it)) },
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.repeatPasswordError != null,
-            errorMessage = state.repeatPasswordError?.asString(),
-            enabled = !state.isLoading,
-            label = stringResource(Res.string.repeat_password_label),
-            placeholder = stringResource(Res.string.password_placeholder)
-        )
+            RegisterCheckBox(
+                checked = state.isTermsAccepted,
+                onCheckedChange = { onIntent(RegisterIntent.AcceptTerms(it)) },
+            )
+        }
 
         AppPrimaryButton(
             text = stringResource(Res.string.register_button_text),
@@ -231,9 +236,9 @@ internal fun RegisterContent(
                 focusManager.clearFocus()
                 onIntent(RegisterIntent.Submit)
             },
-            enabled = !state.isLoading,
+            enabled = state.isRegisterButtonEnabled,
             isLoading = state.isLoading,
-            modifier = Modifier.padding(top = 48.dp, bottom = 24.dp),
+            modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
             shakingState = errorShakingState
         )
 
