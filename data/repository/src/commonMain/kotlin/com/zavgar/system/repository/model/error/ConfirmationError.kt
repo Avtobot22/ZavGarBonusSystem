@@ -4,6 +4,8 @@ sealed interface ConfirmationError {
 
     data object InvalidCodeError : ConfirmationError
 
+    data object TooManyRequestError : ConfirmationError
+
     data object ServerError : ConfirmationError
 
     data object NetworkError : ConfirmationError

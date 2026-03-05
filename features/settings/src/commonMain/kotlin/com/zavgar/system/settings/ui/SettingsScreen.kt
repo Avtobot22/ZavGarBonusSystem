@@ -10,12 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,18 +25,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.designsystem.components.button.AppMenuButton
+import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
+import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.home_title_setting
-import com.zavgar.system.resources.settings_about_app_button
 import com.zavgar.system.resources.settings_logout_button
 import com.zavgar.system.resources.settings_profil_details_button
 import com.zavgar.system.settings.presentation.SettingsEvent
 import com.zavgar.system.settings.presentation.SettingsIntent
 import com.zavgar.system.settings.presentation.SettingsState
 import com.zavgar.system.settings.presentation.SettingsViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -47,13 +46,11 @@ import org.koin.compose.koinInject
 fun SettingsScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToProfileDetail: () -> Unit,
-    onNavigateToAboutApp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SettingsLoader(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToProfileDetail = onNavigateToProfileDetail,
-        onNavigateToAboutApp = onNavigateToAboutApp,
         modifier = modifier
     )
 }
@@ -62,7 +59,6 @@ fun SettingsScreen(
 internal fun SettingsLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToProfileDetail: () -> Unit,
-    onNavigateToAboutApp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = koinInject()
 ) {
@@ -72,13 +68,15 @@ internal fun SettingsLoader(
     ObserveAsEvents(viewModel.event) { event ->
         when (event) {
             is SettingsEvent.NavigateToProfileDetail -> onNavigateToProfileDetail()
-            is SettingsEvent.NavigateToAboutApp -> onNavigateToAboutApp()
             is SettingsEvent.NavigateToLogin -> onNavigateToLogin()
             is SettingsEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = event.message.suspendAsString(),
-                    duration = SnackbarDuration.Short
-                )
+                launch {
+                    snackbarHostState.showCustomSnackbar(
+                        type = event.message.type,
+                        message = event.message.message.suspendAsString(),
+                        withDismissAction = true,
+                    )
+                }
             }
         }
     }
@@ -102,7 +100,13 @@ internal fun SettingsScaffold(
         containerColor = Color.Transparent,
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        topBar = {
+            AppTopBar(
+                title = stringResource(Res.string.home_title_setting),
+                modifier = Modifier.padding(top = 24.dp)
+            )
+        },
     ) { paddingValues ->
 
         when (state) {
@@ -131,46 +135,29 @@ internal fun SettingsContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        AppTopBar(
-            title = stringResource(Res.string.home_title_setting),
-            modifier = Modifier.padding(top = 60.dp, bottom = 120.dp)
-        )
-
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AppMenuButton(
-                    text = stringResource(Res.string.settings_profil_details_button),
-                    icon = Icons.Default.Person,
-                    onClick = { onIntent(SettingsIntent.ToProfileDetail) }
-                )
+            AppMenuButton(
+                text = stringResource(Res.string.settings_profil_details_button),
+                icon = Icons.Default.Person,
+                onClick = { onIntent(SettingsIntent.ToProfileDetail) }
+            )
 
-                AppMenuButton(
-                    text = stringResource(Res.string.settings_about_app_button),
-                    icon = Icons.Default.Info,
-                    onClick = { onIntent(SettingsIntent.ToAboutApp) }
-                )
-
-                AppMenuButton(
-                    text = stringResource(Res.string.settings_logout_button),
-                    icon = Icons.AutoMirrored.Filled.ExitToApp,
-                    onClick = { onIntent(SettingsIntent.Logout) },
-                    isDestructive = true
-                )
-            }
+            AppMenuButton(
+                text = stringResource(Res.string.settings_logout_button),
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
+                onClick = { onIntent(SettingsIntent.Logout) },
+                isDestructive = true
+            )
         }
     }
 }

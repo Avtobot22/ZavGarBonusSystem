@@ -5,6 +5,8 @@ sealed interface ResetPasswordError {
 
     data object UserNotFound : ResetPasswordError
 
+    data object TooManyRequestError : ResetPasswordError
+
     data object ServerError : ResetPasswordError
 
     data object NetworkError : ResetPasswordError

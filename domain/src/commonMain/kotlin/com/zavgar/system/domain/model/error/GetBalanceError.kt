@@ -4,6 +4,8 @@ sealed interface GetBalanceError {
 
     data object NotAuthorizedError : GetBalanceError
 
+    data object TooManyRequestError : GetBalanceError
+
     data object ServerError : GetBalanceError
 
     data object NetworkError : GetBalanceError

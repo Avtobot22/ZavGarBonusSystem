@@ -13,9 +13,10 @@ import com.zavgar.system.account.model.ProfileGetResult
 import com.zavgar.system.account.model.ProfileRequest
 import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.util.SnackBarMessage
+import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.designsystem.components.snackbar.SnackBarType
 import com.zavgar.system.domain.usecase.ChangePasswordUseCase
 import com.zavgar.system.domain.usecase.DeleteProfileUseCase
 import com.zavgar.system.domain.usecase.DeleteSessionUseCase
@@ -26,7 +27,6 @@ import com.zavgar.system.domain.usecase.validation.ValidateNameUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
-import com.zavgar.system.resources.password_update_error
 import com.zavgar.system.resources.password_update_success
 import com.zavgar.system.resources.profile_delete_success
 import com.zavgar.system.resources.profile_update_success
@@ -68,29 +68,39 @@ class AccountViewModel(
             is AccountIntent.ClosePasswordDialog -> handleClosePasswordDialog()
             is AccountIntent.DismissPasswordDialog -> handleDismissPasswordDialog()
             is AccountIntent.Submit -> handleSubmit()
+            is AccountIntent.Retry -> handleRetry()
         }
     }
 
     private fun initProfile() {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = AccountState.ScreenState.Loading, isLoading = true) }
 
             when (val result = getProfileUseCase().toProfileGetResult()) {
                 is ProfileGetResult.Success ->
                     setState {
                         copy(
+                            screenState = AccountState.ScreenState.Content,
                             name = result.profileResponse.name,
                             birthDate = result.profileResponse.birthDate,
                             birthDateText = result.profileResponse.birthDate.toDisplayString()
                         )
                     }
 
-                is ProfileGetResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message, SnackBarType.ERROR) }
+                is ProfileGetResult.Error -> {
+                    setState { copy(screenState = AccountState.ScreenState.Error) }
+                    setEvent { AccountEvent.ShowSnackbar(result.message) }
+                }
+
                 is ProfileGetResult.TokenExpired -> handleLogout()
             }
 
             setState { copy(isLoading = false) }
         }
+    }
+
+    private fun handleRetry() {
+        initProfile()
     }
 
     private fun handleEnterName(name: String) = setState {
@@ -172,18 +182,17 @@ class AccountViewModel(
                 is ChangePasswordResult.Success -> {
                     setEvent {
                         AccountEvent.ShowSnackbar(
-                            UiText.Resource(Res.string.password_update_success),
-                            SnackBarType.SUCCESS
+                            SnackBarMessage(
+                                message = UiText.Resource(Res.string.password_update_success),
+                                type = SnackBarType.SUCCESS
+                            )
                         )
                     }
                     setState { copy(isPasswordDialogOpen = false) }
                 }
 
                 is ChangePasswordResult.Error -> setEvent {
-                    AccountEvent.ShowSnackbar(
-                        UiText.Resource(Res.string.password_update_error),
-                        SnackBarType.WARNING
-                    )
+                    AccountEvent.ShowSnackbar(result.message)
                 }
 
                 is ChangePasswordResult.TokenExpired -> handleLogout()
@@ -209,14 +218,16 @@ class AccountViewModel(
                 is DeleteResult.Success -> {
                     setEvent {
                         AccountEvent.ShowSnackbar(
-                            UiText.Resource(Res.string.profile_delete_success),
-                            SnackBarType.SUCCESS
+                            SnackBarMessage(
+                                message = UiText.Resource(Res.string.profile_delete_success),
+                                type = SnackBarType.SUCCESS
+                            )
                         )
                     }
                     setEvent { AccountEvent.NavigateToLogin }
                 }
 
-                is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message, SnackBarType.ERROR) }
+                is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
                 is DeleteResult.TokenExpired -> handleLogout()
             }
 
@@ -266,16 +277,15 @@ class AccountViewModel(
             when (result) {
                 is ProfileUpdateResult.Success -> setEvent {
                     AccountEvent.ShowSnackbar(
-                        UiText.Resource(Res.string.profile_update_success),
-                        SnackBarType.SUCCESS
+                        SnackBarMessage(
+                            message = UiText.Resource(Res.string.profile_update_success),
+                            type = SnackBarType.SUCCESS
+                        )
                     )
                 }
 
                 is ProfileUpdateResult.Error -> setEvent {
-                    AccountEvent.ShowSnackbar(
-                        result.message,
-                        type = SnackBarType.ERROR
-                    )
+                    AccountEvent.ShowSnackbar(result.message)
                 }
 
                 is ProfileUpdateResult.TokenExpired -> setEvent { AccountEvent.NavigateToLogin }
@@ -288,9 +298,14 @@ class AccountViewModel(
             val result = deleteSessionUseCase()
             result.getOrElse { exception ->
                 setEvent {
-                    AccountEvent.ShowSnackbar(exception.message?.let {
-                        UiText.DynamicString(it)
-                    } ?: UiText.Resource(Res.string.error_unknown_error), type = SnackBarType.ERROR)
+                    AccountEvent.ShowSnackbar(
+                        SnackBarMessage(
+                            message = exception.message?.let {
+                                UiText.DynamicString(it)
+                            } ?: UiText.Resource(Res.string.error_unknown_error),
+                            type = SnackBarType.ERROR
+                        )
+                    )
                 }
             }
         }

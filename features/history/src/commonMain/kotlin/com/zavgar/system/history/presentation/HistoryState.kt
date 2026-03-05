@@ -9,6 +9,8 @@ import kotlinx.datetime.todayIn
 import kotlin.time.Clock
 
 data class HistoryState(
+    val screenState: ScreenState = ScreenState.Initial,
+
     val periodStart: LocalDate = defaultStartDate,
     val periodStartText: String = defaultStartDate.toDisplayString(),
     val periodEnd: LocalDate = defaultEndDate,
@@ -16,8 +18,6 @@ data class HistoryState(
 
     val history: List<HistoryItem> = emptyList(),
 
-
-    val isLoadingFirstPage: Boolean = false,
     val isLoadingNextPage: Boolean = false,
     val isRefreshing: Boolean = false,
 
@@ -27,6 +27,15 @@ data class HistoryState(
     val datePickerOpen: DatePickerType? = null
 
 ) {
+
+    sealed interface ScreenState {
+        data object Initial : ScreenState
+        data object Loading : ScreenState
+        data object Reloading : ScreenState
+        data object Content : ScreenState
+        data object Error : ScreenState
+    }
+
     companion object {
         private val defaultEndDate: LocalDate
             get() = Clock.System.todayIn(TimeZone.currentSystemDefault())

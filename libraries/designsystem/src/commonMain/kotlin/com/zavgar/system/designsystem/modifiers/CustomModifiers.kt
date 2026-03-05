@@ -15,6 +15,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
 
 private const val GRADIENT_LENGTH = 500f
 
@@ -47,3 +48,8 @@ fun Modifier.shimmerAnimation(shape: Shape = MaterialTheme.shapes.small): Modifi
 
     return background(brush, shape)
 }
+
+fun Modifier.shakable(state: ShackingState): Modifier =
+    graphicsLayer {
+        translationX = state.xPosition.value
+    }

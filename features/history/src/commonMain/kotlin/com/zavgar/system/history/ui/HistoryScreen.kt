@@ -18,7 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,8 +28,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -45,8 +45,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.designsystem.components.chip.AppDateChip
+import com.zavgar.system.designsystem.components.content.AnimatedState
+import com.zavgar.system.designsystem.components.content.AppProgressIndicator
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
+import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
+import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
+import com.zavgar.system.designsystem.modifiers.ShackingState
+import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.history.model.DatePickerType
@@ -83,16 +90,24 @@ internal fun HistoryLoader(
     viewModel: HistoryViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val errorShackingState = rememberShackingState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.event) { event ->
         when (event) {
             is HistoryEvent.Logout -> onNavigateToLogin()
             is HistoryEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = event.message.suspendAsString(),
-                    duration = SnackbarDuration.Short
-                )
+                launch {
+                    errorShackingState.shake()
+                }
+
+                launch {
+                    snackbarHostState.showCustomSnackbar(
+                        type = event.message.type,
+                        message = event.message.message.suspendAsString(),
+                        withDismissAction = true,
+                    )
+                }
             }
         }
     }
@@ -101,6 +116,7 @@ internal fun HistoryLoader(
         state = state,
         onIntent = viewModel::handleIntent,
         snackbarHostState = snackbarHostState,
+        errorShackingState = errorShackingState,
         modifier = modifier
     )
 }
@@ -110,18 +126,34 @@ internal fun HistoryScaffold(
     state: HistoryState,
     onIntent: (HistoryIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    errorShackingState: ShackingState,
     modifier: Modifier
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val showFab by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
+    val historyNotEmpty = state.history.isNotEmpty()
+    val isLoadingFirstPage = state.screenState is HistoryState.ScreenState.Loading
+            || state.screenState is HistoryState.ScreenState.Initial
+            || state.screenState is HistoryState.ScreenState.Reloading
+
+    val showFab by remember(historyNotEmpty, isLoadingFirstPage) {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 2 && historyNotEmpty && !isLoadingFirstPage
+        }
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        topBar = {
+            AppTopBar(
+                title = stringResource(Res.string.home_title_history),
+                modifier = Modifier.padding(top = 24.dp)
+            )
+        },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = showFab,
@@ -144,12 +176,32 @@ internal fun HistoryScaffold(
             }
         }
     ) { paddingValues ->
-        HistoryContent(
-            state = state,
-            onIntent = onIntent,
-            listState = listState,
-            modifier = Modifier.padding(paddingValues)
-        )
+        AnimatedState(targetState = state) { state ->
+            when (state.screenState) {
+                HistoryState.ScreenState.Error -> ErrorScreen(
+                    onRetry = { onIntent(HistoryIntent.Retry) },
+                    modifier = Modifier.padding(paddingValues),
+                    shakingState = errorShackingState
+                )
+
+                HistoryState.ScreenState.Initial,
+                HistoryState.ScreenState.Loading -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AppProgressIndicator()
+                }
+
+                else -> HistoryContent(
+                    state = state,
+                    onIntent = onIntent,
+                    listState = listState,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+        }
     }
 }
 
@@ -160,6 +212,8 @@ internal fun HistoryContent(
     listState: LazyListState,
     modifier: Modifier = Modifier
 ) {
+    val scrollState = rememberScrollState()
+
     val shouldLoadMore by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
@@ -178,93 +232,84 @@ internal fun HistoryContent(
 
     Column(
         modifier = modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AppTopBar(
-            title = stringResource(Res.string.home_title_history),
-            modifier = Modifier.padding(top = 60.dp)
-        )
-
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier.padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.padding(vertical = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AppDateChip(
-                    value = state.periodStartText,
-                    label = stringResource(Res.string.history_period_start),
-                    onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.START)) },
-                )
-                AppDateChip(
-                    value = state.periodEndText,
-                    label = stringResource(Res.string.history_period_end),
-                    onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.END)) },
-                )
+            AppDateChip(
+                value = state.periodStartText,
+                label = stringResource(Res.string.history_period_start),
+                onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.START)) },
+            )
+            AppDateChip(
+                value = state.periodEndText,
+                label = stringResource(Res.string.history_period_end),
+                onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.END)) },
+            )
 
-                AppDatePicker(
-                    initialDate = if (state.datePickerOpen == DatePickerType.START) state.periodStart else state.periodEnd,
-                    isOpen = state.datePickerOpen != null,
-                    onDismiss = { onIntent(HistoryIntent.DismissDatePicker) },
-                    onConfirm = {
-                        onIntent(
-                            HistoryIntent.CloseDatePicker(
-                                if (state.datePickerOpen == DatePickerType.START) DatePickerType.START else DatePickerType.END,
-                                it
-                            )
+            AppDatePicker(
+                initialDate = if (state.datePickerOpen == DatePickerType.START) state.periodStart else state.periodEnd,
+                isOpen = state.datePickerOpen != null,
+                onDismiss = { onIntent(HistoryIntent.DismissDatePicker) },
+                onConfirm = {
+                    onIntent(
+                        HistoryIntent.CloseDatePicker(
+                            if (state.datePickerOpen == DatePickerType.START) DatePickerType.START else DatePickerType.END,
+                            it
                         )
-                    }
-                )
-            }
+                    )
+                }
+            )
+        }
 
-            PullToRefreshBox(
-                isRefreshing = state.isRefreshing,
-                onRefresh = { onIntent(HistoryIntent.Refresh) },
-                modifier = Modifier.fillMaxSize()
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { onIntent(HistoryIntent.Refresh) },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                shadowElevation = 8.dp,
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-                    shadowElevation = 8.dp,
-                ) {
-                    if (state.isLoadingFirstPage) {
-                        LoadingHistoryList()
-                    } else if (state.history.isEmpty()) {
-                        EmptyHistoryContent()
-                    } else {
+                if (state.screenState is HistoryState.ScreenState.Reloading) {
+                    LoadingHistoryList()
+                } else if (state.history.isEmpty()) {
+                    EmptyHistoryContent(
+                        Modifier.verticalScroll(scrollState),
+                    )
+                } else {
 
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 10.dp),
-                        ) {
-                            items(
-                                items = state.history,
-                                key = { item -> item.id }
-                            ) { item ->
-                                when (item) {
-                                    is HistoryItem.DateHeader -> DateHeaderItem(item)
-                                    is HistoryItem.TransactionItem -> TransactionItem(item)
-                                }
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 10.dp),
+                    ) {
+                        items(
+                            items = state.history,
+                            key = { item -> item.id }
+                        ) { item ->
+                            when (item) {
+                                is HistoryItem.DateHeader -> DateHeaderItem(item)
+                                is HistoryItem.TransactionItem -> TransactionItem(item)
                             }
+                        }
 
-                            if (state.isLoadingNextPage) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(modifier = Modifier.size(32.dp))
-                                    }
+                        if (state.isLoadingNextPage) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
                                 }
                             }
                         }
@@ -311,10 +356,10 @@ private fun HistoryScaffoldPreview() {
     )
 
     val previewState = HistoryState(
+        screenState = HistoryState.ScreenState.Content,
         history = sampleHistoryItems,
         periodStartText = "01.12.2023",
         periodEndText = "31.12.2023",
-        isLoadingFirstPage = false,
         isRefreshing = false,
         isLoadingNextPage = false
     )
@@ -324,7 +369,8 @@ private fun HistoryScaffoldPreview() {
                 state = previewState,
                 onIntent = {},
                 snackbarHostState = remember { SnackbarHostState() },
-                modifier = Modifier
+                modifier = Modifier,
+                errorShackingState = rememberShackingState()
             )
         }
     }
@@ -349,4 +395,3 @@ private fun EmptyHistoryContentPreview() {
         }
     }
 }
-

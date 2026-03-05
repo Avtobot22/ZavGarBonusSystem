@@ -1,6 +1,6 @@
 package com.zavgar.system.resetpassword.presentation
 
-import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.SnackBarMessage
 
 sealed interface ResetPasswordEvent {
 
@@ -8,5 +8,5 @@ sealed interface ResetPasswordEvent {
 
     data object NavigateToLogin : ResetPasswordEvent
 
-    data class ShowSnackbar(val message: UiText) : ResetPasswordEvent
+    data class ShowSnackbar(val message: SnackBarMessage) : ResetPasswordEvent
 }

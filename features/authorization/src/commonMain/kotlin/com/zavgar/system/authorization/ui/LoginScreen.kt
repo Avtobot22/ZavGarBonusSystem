@@ -12,8 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,9 +35,13 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.button.AppTextButton
 import com.zavgar.system.designsystem.components.logo.AppLogoColored
+import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
+import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
+import com.zavgar.system.designsystem.modifiers.ShackingState
+import com.zavgar.system.designsystem.modifiers.rememberShackingState
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.login_button_text
@@ -51,6 +53,7 @@ import com.zavgar.system.resources.login_password_placeholder
 import com.zavgar.system.resources.login_top_title
 import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -79,6 +82,7 @@ internal fun LoginLoader(
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val errorShakingState = rememberShackingState(power = ShackingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.event) { event ->
@@ -88,10 +92,16 @@ internal fun LoginLoader(
             is LoginEvent.NavigateToWallet -> onNavigateToWallet()
 
             is LoginEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = event.message.suspendAsString(),
-                    duration = SnackbarDuration.Short
-                )
+                launch {
+                    errorShakingState.shake()
+                }
+                launch {
+                    snackbarHostState.showCustomSnackbar(
+                        type = event.message.type,
+                        message = event.message.message.suspendAsString(),
+                        withDismissAction = true,
+                    )
+                }
             }
         }
     }
@@ -100,6 +110,7 @@ internal fun LoginLoader(
         state = state,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
+        errorShakingState = errorShakingState,
         modifier = modifier
     )
 }
@@ -109,16 +120,24 @@ internal fun LoginScaffold(
     state: LoginState,
     snackbarHostState: SnackbarHostState,
     onIntent: (LoginIntent) -> Unit,
+    errorShakingState: ShackingState,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        topBar = {
+            AppTopBar(
+                title = stringResource(Res.string.login_top_title),
+                modifier = Modifier.padding(top = 24.dp)
+            )
+        },
     ) { paddingValues ->
         LoginContent(
             state = state,
             onIntent = onIntent,
+            errorShakingState = errorShakingState,
             modifier = Modifier
                 .padding(paddingValues)
         )
@@ -129,6 +148,7 @@ internal fun LoginScaffold(
 internal fun LoginContent(
     state: LoginState,
     onIntent: (LoginIntent) -> Unit,
+    errorShakingState: ShackingState,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -143,13 +163,7 @@ internal fun LoginContent(
         verticalArrangement = Arrangement.Center
     ) {
         AppLogoColored(
-            modifier = Modifier.padding(vertical = 40.dp)
-        )
-
-        AppTopBar(
-            title = stringResource(Res.string.login_top_title),
-            modifier = Modifier
-                .padding(bottom = 20.dp)
+            modifier = Modifier.padding(vertical = 20.dp)
         )
 
         Column(
@@ -158,8 +172,6 @@ internal fun LoginContent(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            //        Logo
-
             AppValidatedTextField(
                 value = state.phone,
                 onValueChange = { onIntent(LoginIntent.EnterPhone(it)) },
@@ -209,7 +221,8 @@ internal fun LoginContent(
                 },
                 enabled = !state.isLoading,
                 isLoading = state.isLoading,
-                modifier = Modifier.padding(vertical = 24.dp)
+                modifier = Modifier.padding(vertical = 24.dp),
+                shakingState = errorShakingState
             )
 
             AppTextButton(
@@ -243,6 +256,7 @@ private fun LoginScreenPreview() {
             state = previewState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
+            errorShakingState = rememberShackingState()
         )
     }
 }
@@ -266,6 +280,7 @@ private fun LoginScreenLoadingPreview() {
             state = loadingState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
+            errorShakingState = rememberShackingState()
         )
     }
 }
@@ -289,6 +304,7 @@ private fun LoginScreenErrorPreview() {
             state = errorState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
+            errorShakingState = rememberShackingState()
         )
     }
 }

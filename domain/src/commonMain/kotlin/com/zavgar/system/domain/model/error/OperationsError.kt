@@ -7,6 +7,8 @@ sealed interface OperationsError {
 
     data object UserNotFound : OperationsError
 
+    data object TooManyRequestError : OperationsError
+
     data object ServerError : OperationsError
 
     data object NetworkError : OperationsError

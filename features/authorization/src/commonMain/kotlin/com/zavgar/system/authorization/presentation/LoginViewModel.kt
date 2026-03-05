@@ -1,7 +1,7 @@
 package com.zavgar.system.authorization.presentation
 
 import androidx.lifecycle.viewModelScope
-import com.zavgar.system.authorization.mapper.asUiText
+import com.zavgar.system.authorization.mapper.asSnackBarMessage
 import com.zavgar.system.authorization.mapper.toDomain
 import com.zavgar.system.authorization.mapper.toLoginResult
 import com.zavgar.system.authorization.model.LoginRequest
@@ -87,7 +87,7 @@ class LoginViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true) }
 
-            val result = loginUseCase(loginRequest.toDomain()).toLoginResult { it.asUiText() }
+            val result = loginUseCase(loginRequest.toDomain()).toLoginResult { it.asSnackBarMessage() }
 
             when (result) {
                 is LoginResult.Success -> {

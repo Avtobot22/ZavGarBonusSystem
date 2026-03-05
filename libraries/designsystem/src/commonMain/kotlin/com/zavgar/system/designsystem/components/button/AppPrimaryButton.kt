@@ -12,6 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zavgar.system.designsystem.modifiers.ShackingState
+import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.shakable
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 
 @Composable
@@ -21,12 +24,14 @@ fun AppPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isLoading: Boolean = false,
+    shakingState: ShackingState
 ) {
     Button(
         onClick = onClick,
         modifier = modifier
             .height(56.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .shakable(shakingState),
         enabled = enabled && !isLoading,
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
@@ -59,7 +64,8 @@ private fun AppPrimaryButtonEnabledPreview() {
             text = "Войти",
             onClick = {},
             enabled = true,
-            isLoading = false
+            isLoading = false,
+            shakingState = rememberShackingState()
         )
     }
 }
@@ -72,7 +78,8 @@ private fun AppPrimaryButtonLoadingPreview() {
             text = "Войти",
             onClick = {},
             enabled = true,
-            isLoading = true
+            isLoading = true,
+            shakingState = rememberShackingState()
         )
     }
 }
@@ -85,7 +92,8 @@ private fun AppPrimaryButtonNotEnabledPreview() {
             text = "Войти",
             onClick = {},
             enabled = false,
-            isLoading = false
+            isLoading = false,
+            shakingState = rememberShackingState()
         )
     }
 }

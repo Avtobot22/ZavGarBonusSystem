@@ -42,7 +42,8 @@ import qrgenerator.qrkitpainter.solidBrush
 fun AppQrCode(
     card: String,
     points: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showPoints: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -64,9 +65,7 @@ fun AppQrCode(
     }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier.fillMaxWidth().padding(16.dp),
         shape = MaterialTheme.shapes.large,
         elevation = CardDefaults.cardElevation(12.dp),
         colors = CardDefaults.cardColors(
@@ -74,44 +73,43 @@ fun AppQrCode(
         )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painter,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .size(230.dp),
+                    modifier = Modifier.padding(10.dp).size(230.dp),
                     contentDescription = "QR код для карты $card"
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "$points ",
-                    style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
+            if (showPoints) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "$points ",
+                        style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
 
-                Text(
-                    text = stringResource(Res.string.points),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center
-                )
+                    Text(
+                        text = stringResource(Res.string.points),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -121,9 +119,7 @@ fun AppQrCode(
 fun LoadingQrCode(modifier: Modifier = Modifier) {
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier.fillMaxWidth().padding(16.dp),
         shape = MaterialTheme.shapes.large,
         elevation = CardDefaults.cardElevation(12.dp),
         colors = CardDefaults.cardColors(
@@ -131,18 +127,12 @@ fun LoadingQrCode(modifier: Modifier = Modifier) {
         )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .size(230.dp)
-                    .clip(MaterialTheme.shapes.medium)
-                    .shimmerAnimation()
+                modifier = Modifier.padding(10.dp).size(230.dp).clip(MaterialTheme.shapes.medium).shimmerAnimation()
             )
 
             Row(
@@ -151,9 +141,7 @@ fun LoadingQrCode(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(width = 80.dp, height = 52.dp)
-                        .clip(MaterialTheme.shapes.small)
+                    modifier = Modifier.size(width = 80.dp, height = 52.dp).clip(MaterialTheme.shapes.small)
                         .shimmerAnimation()
                 )
             }
@@ -166,8 +154,7 @@ fun LoadingQrCode(modifier: Modifier = Modifier) {
 private fun AppQrCodePreview() {
     ZavGarThemePreview {
         AppQrCode(
-            card = "89831082464",
-            points = 1250
+            card = "89831082464", points = 1250
         )
     }
 }

@@ -24,9 +24,6 @@ class SettingsNavGraph : NavGraph {
                 },
                 onNavigateToProfileDetail = {
                     navEventController.sendEvent(SettingsEvent.ToProfileDetail)
-                },
-                onNavigateToAboutApp = {
-                    navEventController.sendEvent(SettingsEvent.ToAboutApp)
                 }
             )
         }

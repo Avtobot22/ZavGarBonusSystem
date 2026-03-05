@@ -1,6 +1,6 @@
 package com.zavgar.system.registration.presentation
 
-import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.SnackBarMessage
 
 sealed interface RegisterEvent {
 
@@ -8,5 +8,5 @@ sealed interface RegisterEvent {
 
     data object NavigateToLogin : RegisterEvent
 
-    data class ShowSnackbar(val message: UiText) : RegisterEvent
+    data class ShowSnackbar(val message: SnackBarMessage) : RegisterEvent
 }

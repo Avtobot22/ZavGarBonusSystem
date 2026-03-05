@@ -18,13 +18,6 @@ object SettingsEvent {
     }
 
     /**
-     * Triggered when the user clicks on "About App" within Settings.
-     */
-    data object ToAboutApp : Event {
-        override fun nextDestination(): Destination = SettingsDestination.AboutApp
-    }
-
-    /**
      * Triggered when the user confirms logging out.
      *
      * The Navigator should handle clearing the backstack so the user cannot

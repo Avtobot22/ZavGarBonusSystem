@@ -1,7 +1,7 @@
 package com.zavgar.system.confirmation.presentation
 
 import androidx.lifecycle.viewModelScope
-import com.zavgar.system.confirmation.mapper.asUiText
+import com.zavgar.system.confirmation.mapper.asSnackBarMessage
 import com.zavgar.system.confirmation.mapper.toConfirmationResult
 import com.zavgar.system.confirmation.mapper.toDomain
 import com.zavgar.system.confirmation.mapper.toResendConfirmationResult
@@ -10,6 +10,8 @@ import com.zavgar.system.confirmation.model.ConfirmationResult
 import com.zavgar.system.confirmation.model.ResendConfirmationResult
 import com.zavgar.system.confirmation.model.ResendRequest
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.util.SnackBarMessage
+import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.domain.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.usecase.ResendCodeUseCase
@@ -80,13 +82,18 @@ class ConfirmationViewModel(
 
         viewModelScope.launch {
             val result =
-                resendCodeUseCase(ResendRequest(currentState.phone).toDomain()).toResendConfirmationResult { it.asUiText() }
+                resendCodeUseCase(ResendRequest(currentState.phone).toDomain()).toResendConfirmationResult { it.asSnackBarMessage() }
 
             startTimer()
 
             when (result) {
                 is ResendConfirmationResult.Success -> setEvent {
-                    ConfirmationEvent.ShowSnackbar(UiText.Resource(Res.string.confirmation_resend_success))
+                    ConfirmationEvent.ShowSnackbar(
+                        SnackBarMessage(
+                            message = UiText.Resource(Res.string.confirmation_resend_success),
+                            type = SnackBarType.SUCCESS
+                        )
+                    )
                 }
 
                 is ResendConfirmationResult.Error -> setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
@@ -100,7 +107,8 @@ class ConfirmationViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true) }
 
-            val result = confirmationUseCase(confirmationRequest.toDomain()).toConfirmationResult { it.asUiText() }
+            val result =
+                confirmationUseCase(confirmationRequest.toDomain()).toConfirmationResult { it.asSnackBarMessage() }
 
             when (result) {
                 is ConfirmationResult.Success -> setEvent { ConfirmationEvent.NavigateToLogin }

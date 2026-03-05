@@ -1,6 +1,6 @@
 package com.zavgar.system.authorization.presentation
 
-import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.SnackBarMessage
 
 sealed interface LoginEvent {
 
@@ -10,5 +10,5 @@ sealed interface LoginEvent {
 
     data object NavigateToForgotPassword : LoginEvent
 
-    data class ShowSnackbar(val message: UiText) : LoginEvent
+    data class ShowSnackbar(val message: SnackBarMessage) : LoginEvent
 }

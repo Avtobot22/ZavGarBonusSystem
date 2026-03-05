@@ -2,6 +2,7 @@ package com.zavgar.system.domain.model.error
 
 sealed interface DeleteError {
     data object NotAuthorizedError : DeleteError
+    data object TooManyRequestError : DeleteError
 
     data object ServerError : DeleteError
 

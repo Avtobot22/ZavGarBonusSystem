@@ -60,10 +60,8 @@ val md_theme_light_inverseOnSurface = ZavgarBackground
 val md_theme_light_inverseSurface = ZavgarBlack
 
 // --- DARK THEME (Темная тема - инверсия) ---
-// Т.к. макета темной темы нет, создаем безопасную автоматическую инверсию.
-// Оранжевый делаем светлее (Pastel Orange), фон - темным (но не черным).
 
-val md_theme_dark_primary = Color(0xFFFFB784) // Более мягкий оранжевый
+val md_theme_dark_primary = ZavgarOrange
 val md_theme_dark_onPrimary = Color(0xFF4E2600) // Темный текст на светлом оранжевом
 val md_theme_dark_primaryContainer = Color(0xFF703800)
 val md_theme_dark_onPrimaryContainer = Color(0xFFFFDCC1)

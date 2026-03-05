@@ -7,7 +7,7 @@ import com.zavgar.system.domain.usecase.ResetPasswordUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePhoneUseCase
 import com.zavgar.system.domain.usecase.validation.ValidateRepeatedPasswordUseCase
-import com.zavgar.system.resetpassword.mapper.asUiText
+import com.zavgar.system.resetpassword.mapper.asSnackBarMessage
 import com.zavgar.system.resetpassword.mapper.toDomain
 import com.zavgar.system.resetpassword.mapper.toResetPasswordResult
 import com.zavgar.system.resetpassword.model.ResetPasswordRequest
@@ -97,7 +97,7 @@ class ResetPasswordViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true) }
 
-            val result = resetPasswordUseCase(resetPasswordRequest.toDomain()).toResetPasswordResult { it.asUiText() }
+            val result = resetPasswordUseCase(resetPasswordRequest.toDomain()).toResetPasswordResult { it.asSnackBarMessage() }
 
             when (result) {
                 is ResetPasswordResult.Success -> setEvent { ResetPasswordEvent.NavigateToConfirm(resetPasswordRequest.phone) }

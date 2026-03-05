@@ -11,4 +11,6 @@ sealed interface HistoryIntent {
 
     data object LoadNextPage : HistoryIntent
 
+    data object Retry : HistoryIntent
+
 }

@@ -20,7 +20,9 @@ fun Throwable.toAuthError(): AuthError {
         is ClientRequestException -> {
             // TODO нужно добавить обработку всех исключений которые бросает сервер
             when (response.status.value) {
+                400 -> AuthError.ValidationError
                 401 -> AuthError.UserNotFound
+                429 -> AuthError.TooManyRequestError
                 else -> AuthError.UnknownError(message)
             }
         }
@@ -40,6 +42,7 @@ fun Throwable.toRegisterError(): RegisterError {
             when (response.status.value) {
                 400 -> RegisterError.InvalidFormat
                 409 -> RegisterError.UserAlreadyExists
+                429 -> RegisterError.TooManyRequestError
                 else -> RegisterError.UnknownError(message)
             }
         }
@@ -58,6 +61,7 @@ fun Throwable.toConfirmationError(): ConfirmationError {
             // TODO нужно добавить обработку всех исключений которые бросает сервер
             when (response.status.value) {
                 400 -> ConfirmationError.InvalidCodeError
+                429 -> ConfirmationError.TooManyRequestError
                 else -> ConfirmationError.UnknownError(message)
             }
         }
@@ -77,6 +81,7 @@ fun Throwable.toResendConfirmationError(): ResendConfirmationError {
             // TODO нужно добавить обработку всех исключений которые бросает сервер
             when (response.status.value) {
                 400 -> ResendConfirmationError.InvalidPhone
+                429 -> ResendConfirmationError.TooManyRequestError
                 else -> ResendConfirmationError.UnknownError(message)
             }
         }
@@ -96,6 +101,7 @@ fun Throwable.toResetPasswordError(): ResetPasswordError {
             when (response.status.value) {
                 400 -> ResetPasswordError.InvalidPhoneError
                 404 -> ResetPasswordError.UserNotFound
+                429 -> ResetPasswordError.TooManyRequestError
                 else -> ResetPasswordError.UnknownError(message)
             }
         }
@@ -114,6 +120,7 @@ fun Throwable.toGetBalanceError(): GetBalanceError {
             // TODO нужно добавить обработку всех исключений которые бросает сервер
             when (response.status.value) {
                 401 -> GetBalanceError.NotAuthorizedError
+                429 -> GetBalanceError.TooManyRequestError
                 else -> GetBalanceError.UnknownError(message)
             }
         }
@@ -132,6 +139,7 @@ fun Throwable.toLogoutError(): LogoutError {
             // TODO нужно добавить обработку всех исключений которые бросает сервер
             when (response.status.value) {
                 401 -> LogoutError.NotAuthorizedError
+                429 -> LogoutError.TooManyRequestError
                 else -> LogoutError.UnknownError(message)
             }
         }
@@ -152,6 +160,7 @@ fun Throwable.toProfileError(): ProfileError {
                 400 -> ProfileError.ValidationError
                 401 -> ProfileError.NotAuthorizedError
                 404 -> ProfileError.UserNotFound
+                429 -> ProfileError.TooManyRequestError
                 else -> ProfileError.UnknownError(message)
             }
         }
@@ -171,6 +180,7 @@ fun Throwable.toChangePasswordError(): ChangePasswordError {
             when (response.status.value) {
                 400 -> ChangePasswordError.ValidationError
                 401 -> ChangePasswordError.NotAuthorizedError
+                429 -> ChangePasswordError.TooManyRequestError
                 else -> ChangePasswordError.UnknownError(message)
             }
         }
@@ -189,6 +199,7 @@ fun Throwable.toDeleteError(): DeleteError {
             // TODO нужно добавить обработку всех исключений которые бросает сервер
             when (response.status.value) {
                 401 -> DeleteError.NotAuthorizedError
+                429 -> DeleteError.TooManyRequestError
                 else -> DeleteError.UnknownError(message)
             }
         }
@@ -209,6 +220,7 @@ fun Throwable.toOperationsError(): OperationsError {
                 400 -> OperationsError.ValidationError
                 401 -> OperationsError.NotAuthorizedError
                 404 -> OperationsError.UserNotFound
+                429 -> OperationsError.TooManyRequestError
                 else -> OperationsError.UnknownError(message)
             }
         }

@@ -7,6 +7,8 @@ sealed interface ProfileError {
 
     data object UserNotFound : ProfileError
 
+    data object TooManyRequestError : ProfileError
+
     data object ServerError : ProfileError
 
     data object NetworkError : ProfileError

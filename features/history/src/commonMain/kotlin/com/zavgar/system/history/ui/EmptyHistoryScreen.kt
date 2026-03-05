@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zavgar.system.designsystem.components.text.AppTextMain
 import com.zavgar.system.designsystem.components.text.AppTextSecondary
@@ -22,7 +21,9 @@ import com.zavgar.system.resources.history_empty_title
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun EmptyHistoryContent(modifier: Modifier = Modifier) {
+internal fun EmptyHistoryContent(
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxSize()

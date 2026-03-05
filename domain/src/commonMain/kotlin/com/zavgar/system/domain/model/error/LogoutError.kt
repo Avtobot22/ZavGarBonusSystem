@@ -2,6 +2,7 @@ package com.zavgar.system.domain.model.error
 
 sealed interface LogoutError {
     data object NotAuthorizedError : LogoutError
+    data object TooManyRequestError : LogoutError
 
     data object ServerError : LogoutError
 

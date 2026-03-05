@@ -4,13 +4,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SnackbarVisuals
-
-enum class SnackBarType {
-    INFO,
-    SUCCESS,
-    WARNING,
-    ERROR
-}
+import com.zavgar.system.core.presentation.util.SnackBarType
 
 class CustomSnackbarVisuals(
     val type: SnackBarType,

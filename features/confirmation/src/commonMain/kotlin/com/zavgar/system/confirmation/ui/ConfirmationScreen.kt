@@ -8,13 +8,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,15 +31,20 @@ import com.zavgar.system.confirmation.presentation.ConfirmationViewModel
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
+import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
+import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.text.AppTextSecondary
 import com.zavgar.system.designsystem.components.textfield.OtpTextField
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
+import com.zavgar.system.designsystem.modifiers.ShackingState
+import com.zavgar.system.designsystem.modifiers.rememberShackingState
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_button_text
 import com.zavgar.system.resources.confirmation_resend_code
 import com.zavgar.system.resources.confirmation_text
 import com.zavgar.system.resources.confirmation_top_title
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -71,6 +73,7 @@ internal fun ConfirmationLoader(
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val errorShakingState = rememberShackingState(power = ShackingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(phone, isRegistration) {
@@ -81,10 +84,16 @@ internal fun ConfirmationLoader(
         when (event) {
             is ConfirmationEvent.NavigateToLogin -> onNavigateToLogin()
             is ConfirmationEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = event.message.suspendAsString(),
-                    duration = SnackbarDuration.Short
-                )
+                launch {
+                    errorShakingState.shake()
+                }
+                launch {
+                    snackbarHostState.showCustomSnackbar(
+                        type = event.message.type,
+                        message = event.message.message.suspendAsString(),
+                        withDismissAction = true,
+                    )
+                }
             }
         }
     }
@@ -93,6 +102,7 @@ internal fun ConfirmationLoader(
         state = state,
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
+        errorShakingState = errorShakingState,
         modifier = modifier
     )
 }
@@ -102,19 +112,24 @@ internal fun ConfirmationScaffold(
     state: ConfirmationState,
     snackbarHostState: SnackbarHostState,
     onIntent: (ConfirmationIntent) -> Unit,
+    errorShakingState: ShackingState,
     modifier: Modifier
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
         topBar = {
-
+            AppTopBar(
+                title = stringResource(Res.string.confirmation_top_title),
+                modifier = Modifier.padding(top = 24.dp)
+            )
         }
     ) { paddingValues ->
         ConfirmationContent(
             state = state,
             onIntent = onIntent,
+            errorShakingState = errorShakingState,
             modifier = Modifier
                 .padding(paddingValues)
                 .consumeWindowInsets(paddingValues)
@@ -126,6 +141,7 @@ internal fun ConfirmationScaffold(
 internal fun ConfirmationContent(
     state: ConfirmationState,
     onIntent: (ConfirmationIntent) -> Unit,
+    errorShakingState: ShackingState,
     modifier: Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -133,77 +149,65 @@ internal fun ConfirmationContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        AppTopBar(
-            title = stringResource(Res.string.confirmation_top_title),
-            modifier = Modifier.padding(bottom = 48.dp)
+
+        AppTextSecondary(
+            text = stringResource(Res.string.confirmation_text),
+            style = MaterialTheme.typography.bodyLarge,
         )
 
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        OtpTextField(
+            value = state.code,
+            onValueChange = { onIntent(ConfirmationIntent.EnterCode(it)) },
+            length = 6,
+            isError = state.codeError != null,
+            errorMessage = state.codeError?.asString(),
+            modifier = Modifier.padding(vertical = 44.dp),
+            enabled = !state.isLoading,
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.clickable { onIntent(ConfirmationIntent.ClickResend) }
         ) {
-
-            AppTextSecondary(
-                text = stringResource(Res.string.confirmation_text),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-
-            OtpTextField(
-                value = state.code,
-                onValueChange = { onIntent(ConfirmationIntent.EnterCode(it)) },
-                length = 6,
-                isError = state.codeError != null,
-                errorMessage = state.codeError?.asString(),
-                modifier = Modifier.padding(vertical = 44.dp),
-                enabled = !state.isLoading,
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.clickable { onIntent(ConfirmationIntent.ClickResend) }
-            ) {
-                if (state.timerSeconds > 0 || state.isLoading) {
-                    Text(
-                        text = stringResource(Res.string.confirmation_resend_code),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = state.timerSeconds.toString().padStart(2, '0'),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Text(
-                        text = stringResource(Res.string.confirmation_resend_code),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "60",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            if (state.timerSeconds > 0 || state.isLoading) {
+                Text(
+                    text = stringResource(Res.string.confirmation_resend_code),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = state.timerSeconds.toString().padStart(2, '0'),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Text(
+                    text = stringResource(Res.string.confirmation_resend_code),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "60",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-
-            AppPrimaryButton(
-                text = stringResource(Res.string.confirmation_button_text),
-                onClick = { onIntent(ConfirmationIntent.Submit) },
-                modifier = Modifier.padding(top = 35.dp),
-                enabled = !state.isLoading,
-                isLoading = state.isLoading
-            )
-
         }
+
+        AppPrimaryButton(
+            text = stringResource(Res.string.confirmation_button_text),
+            onClick = { onIntent(ConfirmationIntent.Submit) },
+            modifier = Modifier.padding(top = 35.dp),
+            enabled = !state.isLoading,
+            isLoading = state.isLoading,
+            shakingState = errorShakingState
+        )
     }
 }
 
@@ -220,7 +224,8 @@ fun ConfirmationScreenNormalPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
-            modifier = Modifier
+            modifier = Modifier,
+            errorShakingState = rememberShackingState()
         )
     }
 }
@@ -239,7 +244,8 @@ fun ConfirmationScreenErrorPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
-            modifier = Modifier
+            modifier = Modifier,
+            errorShakingState = rememberShackingState()
         )
     }
 }
@@ -258,7 +264,8 @@ fun ConfirmationScreenLoadingPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
-            modifier = Modifier
+            modifier = Modifier,
+            errorShakingState = rememberShackingState()
         )
     }
 }

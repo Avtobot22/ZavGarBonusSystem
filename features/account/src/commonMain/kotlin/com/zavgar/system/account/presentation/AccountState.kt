@@ -4,6 +4,7 @@ import com.zavgar.system.core.presentation.util.UiText
 import kotlinx.datetime.LocalDate
 
 data class AccountState(
+    val screenState: ScreenState = ScreenState.Initial,
 
     val name: String = "",
     val birthDate: LocalDate? = null,
@@ -25,4 +26,12 @@ data class AccountState(
     val confirmDeleteDialog: Boolean = false,
 
     val isLoading: Boolean = false
-)
+) {
+
+    sealed interface ScreenState {
+        data object Initial : ScreenState
+        data object Loading : ScreenState
+        data object Content : ScreenState
+        data object Error : ScreenState
+    }
+}

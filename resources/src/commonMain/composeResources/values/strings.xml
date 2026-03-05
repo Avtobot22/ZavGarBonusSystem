@@ -58,7 +58,7 @@
     <string name="home_bottom_title_wallet">Главная</string>
     <string name="points">бонусов</string>
     <string name="refresh_points">Обновить баллы</string>
-
+    <string name="info_offline_mode">Для получения остатка бонусов подключитесь к сети</string>
 
     <!--    Settings-->
     <string name="home_title_setting">Настройки</string>
@@ -88,6 +88,8 @@
     <string name="account_old_password_label">Старый пароль</string>
     <string name="account_new_password_label">Новый пароль</string>
 
+    <!--   Error/Empty Screen-->
+    <string name="update_button">Обновить</string>
 
     <!--    Error validation-->
     <string name="error_blank_phone">Номер телефона не может быть пустым</string>
@@ -111,15 +113,18 @@
     <!--    Error authorization-->
     <string name="error_user_not_found">Пользователь с указанными данными не найден, проверьте правильность введенных данных</string>
     <string name="error_user_already_exists">Пользователь с таким номером телефона уже существует</string>
-    <string name="error_invalid_format">Неверный формат входных данных попробуйте еще раз</string>
+    <string name="error_invalid_login">Неверный номер телефона или пароль, попробуйте еще раз</string>
+    <string name="error_invalid_format">Неверный формат входных данных, попробуйте еще раз</string>
     <string name="error_invalid_code">Неверный или истекший код, попробуйте еще раз</string>
+    <string name="error_too_many_requests">Слишком много запросов на сервер, повторите попытку позднее</string>
 
     <!--    Snackbar-->
     <string name="confirmation_resend_success">Код подверждения успешно отправлен на ваш номер телефона</string>
 
     <!--    Error internal-->
-    <string name="error_server_error">Ошибка сервера</string>
-    <string name="error_network_error">Ошибка сети</string>
-    <string name="error_unknown_error">Неизвестная ошибка</string>
+    <string name="error_server_error">Произошла внутренняя ошибка</string>
+    <string name="error_network_error">Отсутствует интернет соединение</string>
+    <string name="error_unknown_error">Что-то пошло не так</string>
+    <string name="unknown_error_description">Обновите страницу или зайдите позже</string>
 
 </resources>

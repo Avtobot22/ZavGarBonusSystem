@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.ic_alert
 import com.zavgar.system.resources.ic_dismiss
@@ -143,7 +144,7 @@ private fun SnackBar(
                     }
                     Text(
                         text = visuals.message,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

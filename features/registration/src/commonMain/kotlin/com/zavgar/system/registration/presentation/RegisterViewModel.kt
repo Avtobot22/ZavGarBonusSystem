@@ -10,7 +10,7 @@ import com.zavgar.system.domain.usecase.validation.ValidateNameUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePhoneUseCase
 import com.zavgar.system.domain.usecase.validation.ValidateRepeatedPasswordUseCase
-import com.zavgar.system.registration.mapper.asUiText
+import com.zavgar.system.registration.mapper.asSnackBarMessage
 import com.zavgar.system.registration.mapper.toDomain
 import com.zavgar.system.registration.mapper.toRegisterResult
 import com.zavgar.system.registration.model.RegisterRequest
@@ -169,7 +169,7 @@ class RegisterViewModel(
             setState { copy(isLoading = true) }
 
             val result =
-                registerUseCase(registerRequest.toDomain()).toRegisterResult { it.asUiText() }
+                registerUseCase(registerRequest.toDomain()).toRegisterResult { it.asSnackBarMessage() }
 
             setState { copy(isLoading = false) }
 

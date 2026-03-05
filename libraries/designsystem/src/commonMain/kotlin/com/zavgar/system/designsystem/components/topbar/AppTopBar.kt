@@ -64,7 +64,8 @@ fun AppProfilTopBar(
             contentDescription = "Back",
             modifier = Modifier
                 .size(48.dp)
-                .clickable { onBackClick() }
+                .clickable { onBackClick() },
+            tint = MaterialTheme.colorScheme.onBackground
         )
 
         AppTextMain(

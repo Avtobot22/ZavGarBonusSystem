@@ -1,15 +1,22 @@
 package com.zavgar.system.wallet.presentation
 
 data class WalletState(
-    val screenState: ScreenState = ScreenState.Loading,
+    val screenState: ScreenState = ScreenState.Initial,
     val phone: String = "",
-    val balance: Int = 0,
-    val timerSeconds: Int = 0,
-    val isRefreshing: Boolean = false
 ) {
 
-    enum class ScreenState {
-        Loading,
-        Content
+    sealed interface ScreenState {
+        data object Initial : ScreenState
+        data object Loading : ScreenState
+
+        data class Content(
+            val balance: Int = 0,
+            val timerSeconds: Int = 0,
+            val isRefreshing: Boolean = false,
+        ) : ScreenState
+
+        data object Error : ScreenState
+
+        data object Offline : ScreenState
     }
 }

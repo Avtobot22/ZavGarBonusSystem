@@ -2,6 +2,8 @@ package com.zavgar.system.history.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.util.SnackBarMessage
+import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.usecase.DeleteSessionUseCase
@@ -34,6 +36,7 @@ class HistoryViewModel(
             is HistoryIntent.DismissDatePicker -> handleDismissDatePicker()
             is HistoryIntent.Refresh -> handleRefresh()
             is HistoryIntent.LoadNextPage -> handleLoadNextPage()
+            is HistoryIntent.Retry -> handleRetry()
         }
     }
 
@@ -45,7 +48,14 @@ class HistoryViewModel(
         val newEnd = if (type == DatePickerType.END) date else currentEnd
 
         if (newStart > newEnd) {
-            setEvent { HistoryEvent.ShowSnackbar(UiText.Resource(Res.string.error_invalid_date_range)) }
+            setEvent {
+                HistoryEvent.ShowSnackbar(
+                    SnackBarMessage(
+                        message = UiText.Resource(Res.string.error_invalid_date_range),
+                        type = SnackBarType.WARNING
+                    )
+                )
+            }
             setState { copy(datePickerOpen = null) }
             return
         }
@@ -74,7 +84,10 @@ class HistoryViewModel(
     private fun loadData(isRefreshing: Boolean = false, isFirstPage: Boolean) {
         val state = currentState
 
-        if (isFirstPage && !isRefreshing && state.isLoadingFirstPage) return
+        val isLoading = state.screenState is HistoryState.ScreenState.Loading
+                || state.screenState is HistoryState.ScreenState.Reloading
+
+        if (isFirstPage && !isRefreshing && isLoading) return
 
         if (isRefreshing && state.isRefreshing) return
 
@@ -82,7 +95,13 @@ class HistoryViewModel(
 
         setState {
             copy(
-                isLoadingFirstPage = isFirstPage && !isRefreshing,
+                screenState = if (isFirstPage && !isRefreshing) {
+                    if (screenState is HistoryState.ScreenState.Content) {
+                        HistoryState.ScreenState.Reloading
+                    } else {
+                        HistoryState.ScreenState.Loading
+                    }
+                } else screenState,
                 isRefreshing = isRefreshing,
                 isLoadingNextPage = !isFirstPage,
                 history = if (isFirstPage && !isRefreshing) emptyList() else history
@@ -103,18 +122,28 @@ class HistoryViewModel(
             val result =
                 getOperationsUseCase(request.toDomain()).toTransactionsResult { it.toPresentation(historyItems) }
 
-            setState { copy(isLoadingFirstPage = false, isRefreshing = false, isLoadingNextPage = false) }
+            setState { copy(isRefreshing = false, isLoadingNextPage = false) }
 
             when (result) {
                 is TransactionsResult.Success -> setState {
                     copy(
+                        screenState = HistoryState.ScreenState.Content,
                         history = result.history.transactions,
                         nextCursor = result.history.nextCursor,
                         hasMore = result.history.hasMore,
                     )
                 }
 
-                is TransactionsResult.Error -> setEvent { HistoryEvent.ShowSnackbar(result.message) }
+                is TransactionsResult.Error -> {
+                    if (isFirstPage && !isRefreshing && currentState.history.isEmpty()) {
+                        setState { copy(screenState = HistoryState.ScreenState.Error) }
+                        setEvent { HistoryEvent.ShowSnackbar(result.message) }
+                    } else {
+                        setState { copy(screenState = HistoryState.ScreenState.Content) }
+                        setEvent { HistoryEvent.ShowSnackbar(result.message) }
+                    }
+                }
+
                 is TransactionsResult.TokenExpired -> handleLogout()
             }
         }
@@ -133,6 +162,10 @@ class HistoryViewModel(
         loadData(isRefreshing = true, isFirstPage = true)
     }
 
+    private fun handleRetry() {
+        loadData(isRefreshing = false, isFirstPage = true)
+    }
+
     private fun initData() {
         loadData(isRefreshing = false, isFirstPage = true)
     }
@@ -147,9 +180,12 @@ class HistoryViewModel(
             result.getOrElse { exception ->
                 setEvent {
                     HistoryEvent.ShowSnackbar(
-                        exception.message?.let {
-                            UiText.DynamicString(it)
-                        } ?: UiText.Resource(Res.string.error_unknown_error)
+                        SnackBarMessage(
+                            message = exception.message?.let {
+                                UiText.DynamicString(it)
+                            } ?: UiText.Resource(Res.string.error_unknown_error),
+                            type = SnackBarType.ERROR
+                        )
                     )
                 }
             }

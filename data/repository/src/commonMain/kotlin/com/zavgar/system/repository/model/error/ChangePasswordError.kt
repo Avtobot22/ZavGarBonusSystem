@@ -6,6 +6,8 @@ sealed interface ChangePasswordError {
 
     data object NotAuthorizedError : ChangePasswordError
 
+    data object TooManyRequestError : ChangePasswordError
+
     data object ServerError : ChangePasswordError
 
     data object NetworkError : ChangePasswordError
