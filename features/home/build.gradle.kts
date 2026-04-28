@@ -14,8 +14,7 @@ kotlin {
 
         commonMain.dependencies {
             implementation(projects.resources)
-            implementation(projects.features.navigationApi)
-            implementation(projects.features.navigation)
+            implementation(projects.libraries.navigationContracts)
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.designsystem)
             implementation(projects.libraries.parcelable)

@@ -19,7 +19,7 @@ sealed interface AccountIntent {
 
     data object DismissDatePicker : AccountIntent
 
-    data object OperPasswordDialog : AccountIntent
+    data object OpenPasswordDialog : AccountIntent
 
     data object ClosePasswordDialog : AccountIntent
 

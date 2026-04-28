@@ -1,4 +1,4 @@
-package com.zavgar.system.sharedValidation
+package com.zavgar.system.utils.validation
 
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.resources.Res
@@ -19,23 +19,17 @@ import com.zavgar.system.domain.model.validation.PasswordValidationError as Doma
 import com.zavgar.system.domain.model.validation.PhoneValidationError as DomainPhoneValidationError
 import com.zavgar.system.domain.model.validation.RepeatPasswordValidationError as DomainRepeatPasswordValidationError
 import com.zavgar.system.domain.model.validation.ValidationResult as DomainValidationResult
-import com.zavgar.system.sharedValidation.ValidationResult as PresentationValidationResult
+import com.zavgar.system.utils.validation.ValidationResult as PresentationValidationResult
 
 fun DomainPhoneValidationError.asUiText() = when (this) {
-
     DomainPhoneValidationError.Blank -> UiText.Resource(Res.string.error_blank_phone)
-
     DomainPhoneValidationError.InvalidFormat -> UiText.Resource(Res.string.error_invalid_format_phone)
-
     DomainPhoneValidationError.InvalidLength -> UiText.Resource(Res.string.error_invalid_length_phone)
 }
 
 fun DomainPasswordValidationError.asUiText() = when (this) {
-
     DomainPasswordValidationError.Blank -> UiText.Resource(Res.string.error_blank_password)
-
     DomainPasswordValidationError.Short -> UiText.Resource(Res.string.error_short_password)
-
 }
 
 fun DomainNameValidationError.asUiText() = when (this) {
@@ -58,7 +52,6 @@ fun DomainCodeValidationError.asUiText() = when (this) {
 fun <D, P> DomainValidationResult<D>.toPresentation(mapper: (D) -> P): PresentationValidationResult<P> {
     return when (this) {
         is DomainValidationResult.Success -> PresentationValidationResult.Success
-
         is DomainValidationResult.Error -> PresentationValidationResult.Error(mapper(this.error))
     }
 }

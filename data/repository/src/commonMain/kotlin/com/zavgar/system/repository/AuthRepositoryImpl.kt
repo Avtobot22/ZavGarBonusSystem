@@ -27,9 +27,8 @@ import com.zavgar.system.repository.mapper.toResendConfirmationError
 import com.zavgar.system.repository.mapper.toResetPasswordError
 import com.zavgar.system.repository.mapper.toSession
 import com.zavgar.system.repository.remote.AuthService
+import com.zavgar.system.repository.util.toRepoResult
 import kotlinx.coroutines.withContext
-import com.zavgar.system.repository.model.AppResult as RepoAppResult
-import com.zavgar.system.repository.model.error.AuthError as RepoAuthError
 
 class AuthRepositoryImpl(
     private val authService: AuthService,
@@ -38,93 +37,55 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
     override suspend fun login(loginRequest: LoginRequest): AppResult<Unit, AuthError> =
         withContext(dispatcherProvider.io) {
-
-            // Делаем запрос в сеть
-            val apiResult = authService.loginRequest(loginRequest.toRepo())
-
-            // Обрабатываем ошибку сети
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toAuthError())
-                    .toDomainAuth()
+            val response = when (val result = authService.loginRequest(loginRequest.toRepo())
+                .toRepoResult(Throwable::toAuthError)
+                .toDomainAuth()) {
+                is AppResult.Error -> return@withContext result
+                is AppResult.Success -> result.data
             }
 
-            // Сохранение сессии
             sessionDataSource.saveSession(response.toSession(loginRequest.phone))
                 .onFailure { exception ->
-                    return@withContext RepoAppResult.Error(
-                        RepoAuthError.UnknownError(exception.message ?: "Storage Error")
-                    ).toDomainAuth()
+                    return@withContext AppResult.Error(
+                        AuthError.UnknownError(exception.message ?: "Storage Error")
+                    )
                 }
 
-            // Успех
-            RepoAppResult.Success(Unit).toDomainAuth()
+            AppResult.Success(Unit)
         }
 
     override suspend fun register(registerRequest: RegisterRequest): AppResult<Unit, RegisterError> =
         withContext(dispatcherProvider.io) {
-
-            // Делаем запрос в сеть
-            val apiResult = authService.registerRequest(registerRequest.toRepo())
-
-            // Обрабатываем ошибку сети
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toRegisterError())
-                    .toDomainRegister()
-            }
-
-            // Успех
-            RepoAppResult.Success(response).toDomainRegister()
+            authService.registerRequest(registerRequest.toRepo())
+                .toRepoResult(Throwable::toRegisterError)
+                .toDomainRegister()
         }
 
     override suspend fun confirmRegistration(confirmationRequest: ConfirmationRequest): AppResult<Unit, ConfirmationError> =
         withContext(dispatcherProvider.io) {
-
-            val apiResult = authService.confirmRegistration(confirmationRequest.toRepo())
-
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toConfirmationError())
-                    .toDomainConfirmation()
-            }
-
-            RepoAppResult.Success(response).toDomainConfirmation()
+            authService.confirmRegistration(confirmationRequest.toRepo())
+                .toRepoResult(Throwable::toConfirmationError)
+                .toDomainConfirmation()
         }
 
     override suspend fun confirmReset(confirmationRequest: ConfirmationRequest): AppResult<Unit, ConfirmationError> =
         withContext(dispatcherProvider.io) {
-
-            val apiResult = authService.confirmReset(confirmationRequest.toRepo())
-
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toConfirmationError())
-                    .toDomainConfirmation()
-            }
-
-            RepoAppResult.Success(response).toDomainConfirmation()
+            authService.confirmReset(confirmationRequest.toRepo())
+                .toRepoResult(Throwable::toConfirmationError)
+                .toDomainConfirmation()
         }
 
     override suspend fun resendCode(resendRequest: ResendRequest): AppResult<Unit, ResendConfirmationError> =
         withContext(dispatcherProvider.io) {
-
-            val apiResult = authService.resendCode(resendRequest.toRepo())
-
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toResendConfirmationError())
-                    .toDomainResendConfirmation()
-            }
-
-            RepoAppResult.Success(response).toDomainResendConfirmation()
+            authService.resendCode(resendRequest.toRepo())
+                .toRepoResult(Throwable::toResendConfirmationError)
+                .toDomainResendConfirmation()
         }
 
     override suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest): AppResult<Unit, ResetPasswordError> =
         withContext(dispatcherProvider.io) {
-
-            val apiResult = authService.resetPassword(resetPasswordRequest.toRepo())
-
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toResetPasswordError())
-                    .toDomainResetPassword()
-            }
-
-            RepoAppResult.Success(response).toDomainResetPassword()
+            authService.resetPassword(resetPasswordRequest.toRepo())
+                .toRepoResult(Throwable::toResetPasswordError)
+                .toDomainResetPassword()
         }
 }

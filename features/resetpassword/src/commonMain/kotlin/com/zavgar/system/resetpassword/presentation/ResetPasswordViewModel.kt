@@ -12,9 +12,9 @@ import com.zavgar.system.resetpassword.mapper.toDomain
 import com.zavgar.system.resetpassword.mapper.toResetPasswordResult
 import com.zavgar.system.resetpassword.model.ResetPasswordRequest
 import com.zavgar.system.resetpassword.model.ResetPasswordResult
-import com.zavgar.system.sharedValidation.ValidationResult
-import com.zavgar.system.sharedValidation.asUiText
-import com.zavgar.system.sharedValidation.toPresentation
+import com.zavgar.system.utils.validation.ValidationResult
+import com.zavgar.system.utils.validation.asUiText
+import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.launch
 
 class ResetPasswordViewModel(
@@ -66,7 +66,7 @@ class ResetPasswordViewModel(
     }
 
     private fun handleSubmit() {
-        if (currentState.isLoading) return
+        if (currentState.screenState is ResetPasswordState.ScreenState.Submitting) return
 
         val state = currentState
 
@@ -95,7 +95,7 @@ class ResetPasswordViewModel(
     private fun performResetPassword(resetPasswordRequest: ResetPasswordRequest) {
 
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = ResetPasswordState.ScreenState.Submitting) }
 
             val result = resetPasswordUseCase(resetPasswordRequest.toDomain()).toResetPasswordResult { it.asSnackBarMessage() }
 
@@ -104,7 +104,7 @@ class ResetPasswordViewModel(
                 is ResetPasswordResult.Error -> setEvent { ResetPasswordEvent.ShowSnackbar(result.message) }
             }
 
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = ResetPasswordState.ScreenState.Idle) }
         }
 
     }

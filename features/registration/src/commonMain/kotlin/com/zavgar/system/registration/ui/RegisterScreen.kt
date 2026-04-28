@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,8 +34,8 @@ import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
-import com.zavgar.system.designsystem.modifiers.ShackingState
-import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.registration.presentation.RegisterEvent
 import com.zavgar.system.registration.presentation.RegisterIntent
@@ -58,6 +59,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
+private val PhoneMask = MaskVisualTransformation("+7 (###) ### ##-##")
+
 @Composable
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
@@ -79,7 +82,7 @@ internal fun RegisterLoader(
     viewModel: RegisterViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val errorShakingState = rememberShackingState(power = ShackingState.ShakePower.Low)
+    val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.event) { event ->
@@ -115,7 +118,7 @@ internal fun RegisterScaffold(
     state: RegisterState,
     snackbarHostState: SnackbarHostState,
     onIntent: (RegisterIntent) -> Unit,
-    errorShakingState: ShackingState,
+    errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -145,12 +148,11 @@ internal fun RegisterScaffold(
 internal fun RegisterContent(
     state: RegisterState,
     onIntent: (RegisterIntent) -> Unit,
-    errorShakingState: ShackingState,
+    errorShakingState: ShakingState,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
-    val phoneMask = remember { MaskVisualTransformation("+7 (###) ### ##-##") }
 
     AppDatePicker(
         initialDate = state.birthDate,
@@ -167,86 +169,113 @@ internal fun RegisterContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AppTextField(
-                value = state.name,
-                onValueChange = { onIntent(RegisterIntent.EnterName(it)) },
-                label = stringResource(Res.string.register_name_label),
-                placeholder = stringResource(Res.string.register_name_placeholder),
-                isError = state.nameError != null,
-                errorMessage = state.nameError?.asString(),
-                enabled = !state.isLoading
-            )
+        RegisterForm(state, onIntent, PhoneMask)
 
-            AppDatePickerField(
-                value = state.birthDateText,
-                onClick = { onIntent(RegisterIntent.OpenDatePicker) },
-                label = stringResource(Res.string.birth_date_label),
-                placeholder = stringResource(Res.string.birth_date_placeholder),
-                isError = state.birthDateError != null,
-                errorMessage = state.birthDateError?.asString(),
-                enabled = !state.isLoading,
-            )
+        RegisterButton(focusManager, onIntent, state, errorShakingState)
 
-            AppValidatedTextField(
-                value = state.phone,
-                onValueChange = { onIntent(RegisterIntent.EnterPhone(it)) },
-                isValid = state.isPhoneValid,
-                label = stringResource(Res.string.phone_label),
-                placeholder = stringResource(Res.string.phone_placeholder),
-                isError = state.phoneError != null,
-                errorMessage = state.phoneError?.asString(),
-                visualTransformation = phoneMask,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                enabled = !state.isLoading
-            )
+        HasAccountTextButton(onIntent, state)
+    }
+}
 
-            AppPasswordField(
-                value = state.password,
-                onValueChange = { onIntent(RegisterIntent.EnterPassword(it)) },
-                isError = state.passwordError != null,
-                errorMessage = state.passwordError?.asString(),
-                enabled = !state.isLoading,
-                label = stringResource(Res.string.password_label),
-                placeholder = stringResource(Res.string.password_placeholder)
-            )
+@Composable
+private fun HasAccountTextButton(
+    onIntent: (RegisterIntent) -> Unit,
+    state: RegisterState
+) {
+    AppTextButton(
+        textGray = stringResource(Res.string.register_button_text_has_account),
+        textOrange = stringResource(Res.string.register_button_text_login),
+        onClick = { onIntent(RegisterIntent.ClickLogin) },
+        enabled = state.screenState is RegisterState.ScreenState.Idle
+    )
+}
 
-            AppPasswordField(
-                value = state.repeatPassword,
-                onValueChange = { onIntent(RegisterIntent.EnterRepeatPassword(it)) },
-                isError = state.repeatPasswordError != null,
-                errorMessage = state.repeatPasswordError?.asString(),
-                enabled = !state.isLoading,
-                label = stringResource(Res.string.repeat_password_label),
-                placeholder = stringResource(Res.string.password_placeholder)
-            )
+@Composable
+private fun RegisterButton(
+    focusManager: FocusManager,
+    onIntent: (RegisterIntent) -> Unit,
+    state: RegisterState,
+    errorShakingState: ShakingState
+) {
+    AppPrimaryButton(
+        text = stringResource(Res.string.register_button_text),
+        onClick = {
+            focusManager.clearFocus()
+            onIntent(RegisterIntent.Submit)
+        },
+        enabled = state.isRegisterButtonEnabled,
+        isLoading = state.screenState is RegisterState.ScreenState.Submitting,
+        modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
+        shakingState = errorShakingState
+    )
+}
 
-            RegisterCheckBox(
-                checked = state.isTermsAccepted,
-                onCheckedChange = { onIntent(RegisterIntent.AcceptTerms(it)) },
-            )
-        }
-
-        AppPrimaryButton(
-            text = stringResource(Res.string.register_button_text),
-            onClick = {
-                focusManager.clearFocus()
-                onIntent(RegisterIntent.Submit)
-            },
-            enabled = state.isRegisterButtonEnabled,
-            isLoading = state.isLoading,
-            modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
-            shakingState = errorShakingState
+@Composable
+private fun RegisterForm(
+    state: RegisterState,
+    onIntent: (RegisterIntent) -> Unit,
+    phoneMask: MaskVisualTransformation
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppTextField(
+            value = state.name,
+            onValueChange = { onIntent(RegisterIntent.EnterName(it)) },
+            label = stringResource(Res.string.register_name_label),
+            placeholder = stringResource(Res.string.register_name_placeholder),
+            isError = state.nameError != null,
+            errorMessage = state.nameError?.asString(),
+            enabled = state.screenState is RegisterState.ScreenState.Idle
         )
 
-        AppTextButton(
-            textGray = stringResource(Res.string.register_button_text_has_account),
-            textOrange = stringResource(Res.string.register_button_text_login),
-            onClick = { onIntent(RegisterIntent.ClickLogin) },
-            enabled = !state.isLoading
+        AppDatePickerField(
+            value = state.birthDateText,
+            onClick = { onIntent(RegisterIntent.OpenDatePicker) },
+            label = stringResource(Res.string.birth_date_label),
+            placeholder = stringResource(Res.string.birth_date_placeholder),
+            isError = state.birthDateError != null,
+            errorMessage = state.birthDateError?.asString(),
+            enabled = state.screenState is RegisterState.ScreenState.Idle,
+        )
+
+        AppValidatedTextField(
+            value = state.phone,
+            onValueChange = { onIntent(RegisterIntent.EnterPhone(it)) },
+            isValid = state.isPhoneValid,
+            label = stringResource(Res.string.phone_label),
+            placeholder = stringResource(Res.string.phone_placeholder),
+            isError = state.phoneError != null,
+            errorMessage = state.phoneError?.asString(),
+            visualTransformation = phoneMask,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            enabled = state.screenState is RegisterState.ScreenState.Idle
+        )
+
+        AppPasswordField(
+            value = state.password,
+            onValueChange = { onIntent(RegisterIntent.EnterPassword(it)) },
+            isError = state.passwordError != null,
+            errorMessage = state.passwordError?.asString(),
+            enabled = state.screenState is RegisterState.ScreenState.Idle,
+            label = stringResource(Res.string.password_label),
+            placeholder = stringResource(Res.string.password_placeholder)
+        )
+
+        AppPasswordField(
+            value = state.repeatPassword,
+            onValueChange = { onIntent(RegisterIntent.EnterRepeatPassword(it)) },
+            isError = state.repeatPasswordError != null,
+            errorMessage = state.repeatPasswordError?.asString(),
+            enabled = state.screenState is RegisterState.ScreenState.Idle,
+            label = stringResource(Res.string.repeat_password_label),
+            placeholder = stringResource(Res.string.password_placeholder)
+        )
+
+        RegisterCheckBox(
+            checked = state.isTermsAccepted,
+            onCheckedChange = { onIntent(RegisterIntent.AcceptTerms(it)) },
         )
     }
 }
@@ -268,7 +297,6 @@ private fun RegisterScreenPreview() {
         birthDate = null,
         birthDateError = null,
         isDatePickerOpen = false,
-        isLoading = false
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -278,7 +306,7 @@ private fun RegisterScreenPreview() {
             state = previewState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShackingState()
+            errorShakingState = rememberShakingState()
         )
     }
 }
@@ -299,7 +327,7 @@ private fun RegisterScreenLoadingPreview() {
         birthDate = null,
         birthDateError = null,
         isDatePickerOpen = false,
-        isLoading = true
+        screenState = RegisterState.ScreenState.Submitting
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -309,7 +337,7 @@ private fun RegisterScreenLoadingPreview() {
             state = loadingState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShackingState()
+            errorShakingState = rememberShakingState()
         )
     }
 }
@@ -330,7 +358,6 @@ private fun RegisterScreenErrorPreview() {
         birthDate = null,
         birthDateError = UiText.DynamicString("Выберите дату рождения"),
         isDatePickerOpen = false,
-        isLoading = false
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -340,7 +367,7 @@ private fun RegisterScreenErrorPreview() {
             state = errorState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShackingState()
+            errorShakingState = rememberShakingState()
         )
     }
 }

@@ -4,7 +4,7 @@ sealed interface ChangePasswordError {
 
     data object ValidationError : ChangePasswordError
 
-    data object NotAuthorizedError : ChangePasswordError
+    data object NotAuthorizedError : ChangePasswordError, NotAuthorized
 
     data object TooManyRequestError : ChangePasswordError
 

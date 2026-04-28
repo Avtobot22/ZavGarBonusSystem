@@ -3,6 +3,7 @@ package com.zavgar.system.datastore.datasource
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import com.zavgar.system.coroutines.runSuspendCatching
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.zavgar.system.datastore.exception.SessionNotFoundException
 import com.zavgar.system.datastore.mapper.toDataStore
@@ -25,7 +26,7 @@ internal class SessionDataSourceImpl(
     }
 
     override suspend fun saveSession(session: RepoSession): Result<Unit> {
-        return runCatching {
+        return runSuspendCatching {
             val dataStoreSession = session.toDataStore()
 
             dataStore.edit { settings ->
@@ -37,7 +38,7 @@ internal class SessionDataSourceImpl(
     }
 
     override suspend fun saveTokens(accessToken: String, refreshToken: String): Result<Unit> {
-        return runCatching {
+        return runSuspendCatching {
             dataStore.edit { settings ->
                 settings[APP_ACCESS_TOKEN] = accessToken
                 settings[APP_REFRESH_TOKEN] = refreshToken
@@ -46,7 +47,7 @@ internal class SessionDataSourceImpl(
     }
 
     override suspend fun getSession(): Result<RepoSession> {
-        return runCatching {
+        return runSuspendCatching {
             val preferences = dataStore.data.first()
 
             val accessToken = preferences[APP_ACCESS_TOKEN]
@@ -63,7 +64,7 @@ internal class SessionDataSourceImpl(
     }
 
     override suspend fun getAccessToken(): Result<String> {
-        return runCatching {
+        return runSuspendCatching {
             val preferences = dataStore.data.first()
 
             val accessToken = preferences[APP_ACCESS_TOKEN]
@@ -77,7 +78,7 @@ internal class SessionDataSourceImpl(
     }
 
     override suspend fun getRefreshToken(): Result<String> {
-        return runCatching {
+        return runSuspendCatching {
             val preferences = dataStore.data.first()
 
             val refreshToken = preferences[APP_REFRESH_TOKEN]
@@ -91,7 +92,7 @@ internal class SessionDataSourceImpl(
     }
 
     override suspend fun deleteSession(): Result<Unit> {
-        return runCatching {
+        return runSuspendCatching {
             dataStore.edit { settings ->
                 settings.clear()
             }

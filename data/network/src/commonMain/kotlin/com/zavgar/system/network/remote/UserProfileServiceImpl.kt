@@ -1,5 +1,6 @@
 package com.zavgar.system.network.remote
 
+import com.zavgar.system.coroutines.runSuspendCatching
 import com.zavgar.system.network.mapper.toNetwork
 import com.zavgar.system.network.mapper.toRepo
 import com.zavgar.system.network.model.ProfileResponse
@@ -17,7 +18,7 @@ import io.ktor.http.path
 class UserProfileServiceImpl(
     private val client: HttpClient,
 ) : UserProfileService {
-    override suspend fun getProfile() = runCatching {
+    override suspend fun getProfile() = runSuspendCatching {
         val response = client.get {
             url {
                 path("auth/profile")
@@ -28,7 +29,7 @@ class UserProfileServiceImpl(
     }
 
 
-    override suspend fun updateProfile(profileRequest: ProfileRequest) = runCatching {
+    override suspend fun updateProfile(profileRequest: ProfileRequest) = runSuspendCatching {
         val response = client.put {
             url {
                 path("auth/profile")
@@ -39,7 +40,7 @@ class UserProfileServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun changePassword(changePasswordRequest: ChangePasswordRequest) = runCatching {
+    override suspend fun changePassword(changePasswordRequest: ChangePasswordRequest) = runSuspendCatching {
         val response = client.put {
             url {
                 path("auth/password")
@@ -51,7 +52,7 @@ class UserProfileServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun logout() = runCatching {
+    override suspend fun logout() = runSuspendCatching {
         val response = client.delete {
             url {
                 path("auth/logout")
@@ -61,7 +62,7 @@ class UserProfileServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun delete(): Result<Unit> = runCatching {
+    override suspend fun delete(): Result<Unit> = runSuspendCatching {
         val response = client.delete {
             url {
                 path("auth/delete")

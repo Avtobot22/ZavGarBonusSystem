@@ -1,6 +1,10 @@
 package com.zavgar.system.settings.presentation
 
-sealed interface SettingsState {
-    data object Content : SettingsState
-    data object Loading : SettingsState
+data class SettingsState(
+    val screenState: ScreenState = ScreenState.Content,
+) {
+    sealed interface ScreenState {
+        data object Content : ScreenState
+        data object Loading : ScreenState
+    }
 }

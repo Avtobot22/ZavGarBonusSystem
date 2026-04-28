@@ -14,8 +14,8 @@ import com.zavgar.system.repository.mapper.toGetBalanceError
 import com.zavgar.system.repository.mapper.toOperationsError
 import com.zavgar.system.repository.mapper.toRepo
 import com.zavgar.system.repository.remote.LoyaltyService
+import com.zavgar.system.repository.util.toRepoResult
 import kotlinx.coroutines.withContext
-import com.zavgar.system.repository.model.AppResult as RepoAppResult
 
 class LoyaltyRepositoryImpl(
     private val loyaltyService: LoyaltyService,
@@ -24,26 +24,15 @@ class LoyaltyRepositoryImpl(
 
     override suspend fun getBalance(): AppResult<Balance, GetBalanceError> =
         withContext(dispatcherProvider.io) {
-            val apiResult = loyaltyService.getBalance()
-
-            val apiResponse = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toGetBalanceError())
-                    .toDomainBalance()
-            }
-
-            RepoAppResult.Success(apiResponse).toDomainBalance()
+            loyaltyService.getBalance()
+                .toRepoResult(Throwable::toGetBalanceError)
+                .toDomainBalance()
         }
 
     override suspend fun getOperations(transactionsRequest: TransactionsRequest): AppResult<TransactionsPageResponse, OperationsError> =
         withContext(dispatcherProvider.io) {
-
-            val apiResult = loyaltyService.getOperations(transactionsRequest.toRepo())
-
-            val response = apiResult.getOrElse { exception ->
-                return@withContext RepoAppResult.Error(exception.toOperationsError())
-                    .toDomainOperations()
-            }
-
-            RepoAppResult.Success(response).toDomainOperations()
+            loyaltyService.getOperations(transactionsRequest.toRepo())
+                .toRepoResult(Throwable::toOperationsError)
+                .toDomainOperations()
         }
 }

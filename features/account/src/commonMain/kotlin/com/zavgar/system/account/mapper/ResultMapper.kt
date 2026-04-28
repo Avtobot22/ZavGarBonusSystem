@@ -21,63 +21,6 @@ import com.zavgar.system.resources.error_user_not_found
 import com.zavgar.system.resources.password_update_error
 import com.zavgar.system.account.model.ProfileResponse as UiProfileResponse
 
-fun <T, E> AppResult<T, E>.toProfileUpdateResult(
-    errorMapper: (E) -> SnackBarMessage,
-    isTokenExpired: (E) -> Boolean
-): ProfileUpdateResult {
-    return when (this) {
-        is AppResult.Success -> ProfileUpdateResult.Success
-        is AppResult.Error -> if (isTokenExpired(this.error)) {
-            ProfileUpdateResult.TokenExpired
-        } else {
-            ProfileUpdateResult.Error(errorMapper(this.error))
-        }
-    }
-}
-
-fun <T, E> AppResult<T, E>.toChangePasswordResult(
-    errorMapper: (E) -> SnackBarMessage,
-    isTokenExpired: (E) -> Boolean
-): ChangePasswordResult {
-    return when (this) {
-        is AppResult.Success -> ChangePasswordResult.Success
-        is AppResult.Error -> if (isTokenExpired(this.error)) {
-            ChangePasswordResult.TokenExpired
-        } else {
-            ChangePasswordResult.Error(errorMapper(this.error))
-        }
-    }
-}
-
-fun <T, E> AppResult<T, E>.toDeleteResult(
-    errorMapper: (E) -> SnackBarMessage,
-    isTokenExpired: (E) -> Boolean
-): DeleteResult {
-    return when (this) {
-        is AppResult.Success -> DeleteResult.Success
-        is AppResult.Error -> if (isTokenExpired(this.error)) {
-            DeleteResult.TokenExpired
-        } else {
-            DeleteResult.Error(errorMapper(this.error))
-        }
-    }
-}
-
-fun <T, E> AppResult<T, E>.toProfileGetResult(
-    errorMapper: (E) -> SnackBarMessage,
-    dataMapper: (T) -> UiProfileResponse,
-    isTokenExpired: (E) -> Boolean
-): ProfileGetResult {
-    return when (this) {
-        is AppResult.Success -> ProfileGetResult.Success(dataMapper(this.data))
-        is AppResult.Error -> if (isTokenExpired(this.error)) {
-            ProfileGetResult.TokenExpired
-        } else {
-            ProfileGetResult.Error(errorMapper(this.error))
-        }
-    }
-}
-
 fun ProfileError.asSnackBarMessage() = when (this) {
     is ProfileError.ValidationError -> SnackBarMessage(
         message = UiText.Resource(Res.string.error_invalid_format),
@@ -174,17 +117,22 @@ fun DeleteError.asSnackBarMessage() = when (this) {
     )
 }
 
-fun AppResult<Unit, ProfileError>.toProfileUpdateResult() =
-    toProfileUpdateResult(ProfileError::asSnackBarMessage) { it is ProfileError.NotAuthorizedError }
+fun AppResult<Unit, ProfileError>.toProfileUpdateResult(): ProfileUpdateResult = when (this) {
+    is AppResult.Success -> ProfileUpdateResult.Success
+    is AppResult.Error -> ProfileUpdateResult.Error(error.asSnackBarMessage())
+}
 
-fun AppResult<Unit, ChangePasswordError>.toChangePasswordResult() =
-    toChangePasswordResult(ChangePasswordError::asSnackBarMessage) { it is ChangePasswordError.NotAuthorizedError }
+fun AppResult<Unit, ChangePasswordError>.toChangePasswordResult(): ChangePasswordResult = when (this) {
+    is AppResult.Success -> ChangePasswordResult.Success
+    is AppResult.Error -> ChangePasswordResult.Error(error.asSnackBarMessage())
+}
 
-fun AppResult<Unit, DeleteError>.toDeleteResult() =
-    toDeleteResult(DeleteError::asSnackBarMessage) { it is DeleteError.NotAuthorizedError }
+fun AppResult<Unit, DeleteError>.toDeleteResult(): DeleteResult = when (this) {
+    is AppResult.Success -> DeleteResult.Success
+    is AppResult.Error -> DeleteResult.Error(error.asSnackBarMessage())
+}
 
-fun AppResult<ProfileResponse, ProfileError>.toProfileGetResult() =
-    toProfileGetResult(
-        ProfileError::asSnackBarMessage,
-        ProfileResponse::toPresentation
-    ) { it is ProfileError.NotAuthorizedError }
+fun AppResult<ProfileResponse, ProfileError>.toProfileGetResult(): ProfileGetResult = when (this) {
+    is AppResult.Success -> ProfileGetResult.Success(data.toPresentation())
+    is AppResult.Error -> ProfileGetResult.Error(error.asSnackBarMessage())
+}

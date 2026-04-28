@@ -1,10 +1,9 @@
 package com.zavgar.system.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -14,11 +13,8 @@ import com.zavgar.system.appstate.ZavGarAppState
 import com.zavgar.system.designsystem.animation.BottomBarEnterTransition
 import com.zavgar.system.designsystem.animation.BottomBarExitTransition
 import com.zavgar.system.designsystem.background.GlowBackground
-import com.zavgar.system.navigation.compose.Navigation
 import com.zavgar.system.navigationapi.bottombar.AppBottomBar
-import com.zavgar.system.navigationapi.controller.NavBackStack
 import com.zavgar.system.navigationapi.controller.NavEventController
-import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.destination.TopLevelDestinations
 import com.zavgar.system.navigationapi.event.HomeEvent
 import com.zavgar.system.navigationapi.marker.TopLevel
@@ -29,17 +25,20 @@ import org.koin.compose.koinInject
 @Composable
 fun Home(
     appState: ZavGarAppState,
-    modifier: Modifier = Modifier
+    content: @Composable (PaddingValues) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     HomeLoader(
         appState = appState,
-        modifier = modifier
+        content = content,
+        modifier = modifier,
     )
 }
 
 @Composable
 private fun HomeLoader(
     appState: ZavGarAppState,
+    content: @Composable (PaddingValues) -> Unit,
     modifier: Modifier,
     navEventController: NavEventController = koinInject(),
 ) {
@@ -59,11 +58,10 @@ private fun HomeLoader(
         isEdgeToEdge = appState.navBackStack.isEdgeToEdge,
         lastValidSection = lastValidSection,
         setCurrentState = setCurrentState,
-        navBackStack = appState.navBackStack,
+        content = content,
         modifier = modifier,
     )
 }
-
 
 @Composable
 private fun HomeScaffold(
@@ -72,10 +70,9 @@ private fun HomeScaffold(
     isEdgeToEdge: Boolean,
     lastValidSection: TopLevel?,
     setCurrentState: (TopLevel) -> Unit,
-    navBackStack: NavBackStack<Destination>,
-    modifier: Modifier = Modifier
+    content: @Composable (PaddingValues) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-
     val windowInsets = if (isEdgeToEdge) {
         WindowInsets(0, 0, 0, 0)
     } else {
@@ -102,13 +99,7 @@ private fun HomeScaffold(
         },
     ) { paddingValues ->
         GlowBackground {
-            Navigation(
-                navBackStack = navBackStack,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .consumeWindowInsets(paddingValues)
-            )
+            content(paddingValues)
         }
     }
 }

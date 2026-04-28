@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zavgar.system.designsystem.modifiers.ShackingState
-import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.modifiers.shakable
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 
@@ -24,7 +24,7 @@ fun AppPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isLoading: Boolean = false,
-    shakingState: ShackingState
+    shakingState: ShakingState
 ) {
     Button(
         onClick = onClick,
@@ -65,7 +65,7 @@ private fun AppPrimaryButtonEnabledPreview() {
             onClick = {},
             enabled = true,
             isLoading = false,
-            shakingState = rememberShackingState()
+            shakingState = rememberShakingState()
         )
     }
 }
@@ -79,7 +79,7 @@ private fun AppPrimaryButtonLoadingPreview() {
             onClick = {},
             enabled = true,
             isLoading = true,
-            shakingState = rememberShackingState()
+            shakingState = rememberShakingState()
         )
     }
 }
@@ -93,7 +93,7 @@ private fun AppPrimaryButtonNotEnabledPreview() {
             onClick = {},
             enabled = false,
             isLoading = false,
-            shakingState = rememberShackingState()
+            shakingState = rememberShakingState()
         )
     }
 }

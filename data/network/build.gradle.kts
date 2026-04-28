@@ -11,8 +11,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core)
-            
             implementation(projects.data.repository)
+            implementation(projects.libraries.coroutines)
 
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)

@@ -62,7 +62,7 @@ android {
 
 dependencies {
     implementation(projects.shared)
-    implementation(projects.features.navigationApi)
+    implementation(projects.libraries.navigationContracts)
 
     implementation(libs.logcat)
     implementation(libs.androidx.activity)

@@ -1,5 +1,6 @@
 package com.zavgar.system.network.remote
 
+import com.zavgar.system.coroutines.runSuspendCatching
 import com.zavgar.system.network.mapper.toNetwork
 import com.zavgar.system.network.mapper.toRepo
 import com.zavgar.system.repository.model.request.ConfirmationRequest
@@ -19,7 +20,7 @@ import com.zavgar.system.network.model.LoginResponse as NetworkLoginResponse
 class AuthServiceImpl(
     private val client: HttpClient
 ) : AuthService {
-    override suspend fun loginRequest(loginRequest: LoginRequest) = runCatching {
+    override suspend fun loginRequest(loginRequest: LoginRequest) = runSuspendCatching {
         val response = client.post {
             url {
                 path("auth/login")
@@ -31,7 +32,7 @@ class AuthServiceImpl(
         response.body<NetworkLoginResponse>().toRepo()
     }
 
-    override suspend fun registerRequest(registerRequest: RegisterRequest) = runCatching {
+    override suspend fun registerRequest(registerRequest: RegisterRequest) = runSuspendCatching {
         val response = client.post {
             url {
                 path("auth/register")
@@ -43,7 +44,7 @@ class AuthServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun confirmRegistration(confirmationRequest: ConfirmationRequest) = runCatching {
+    override suspend fun confirmRegistration(confirmationRequest: ConfirmationRequest) = runSuspendCatching {
         val response = client.post {
             url {
                 path("auth/confirm/register")
@@ -55,7 +56,7 @@ class AuthServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun confirmReset(confirmationRequest: ConfirmationRequest) = runCatching {
+    override suspend fun confirmReset(confirmationRequest: ConfirmationRequest) = runSuspendCatching {
         val response = client.post {
             url {
                 path("auth/confirm/reset")
@@ -67,7 +68,7 @@ class AuthServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun resendCode(resendRequest: ResendRequest) = runCatching {
+    override suspend fun resendCode(resendRequest: ResendRequest) = runSuspendCatching {
         val response = client.post {
             url {
                 path("auth/refresh/code")
@@ -79,7 +80,7 @@ class AuthServiceImpl(
         response.body<Unit>()
     }
 
-    override suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest) = runCatching {
+    override suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest) = runSuspendCatching {
         val response = client.post {
             url {
                 path("auth/reset")

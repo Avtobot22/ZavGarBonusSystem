@@ -7,7 +7,7 @@ plugins {
 }
 
 kotlin {
-    configureTargets("shared-validation")
+    configureTargets("utils-validation")
 
     sourceSets {
 
@@ -28,6 +28,6 @@ kotlin {
     }
 
     androidLibrary {
-        namespace = "com.zavgar.system.sharedValidation"
+        namespace = "com.zavgar.system.utils.validation"
     }
 }

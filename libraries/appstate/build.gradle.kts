@@ -13,7 +13,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.libraries.parcelable)
-            implementation(projects.features.navigationApi)
+            implementation(projects.libraries.navigationContracts)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.navigation.ui)

@@ -6,9 +6,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 
-class ShackingState(
+class ShakingState(
     private val power: ShakePower,
-    private val direction: ShackingDirections,
+    private val direction: ShakingDirections,
 ) {
 
     val xPosition = Animatable(0f)
@@ -17,7 +17,7 @@ class ShackingState(
         val shakeAnimationSpec: AnimationSpec<Float> = tween(duration)
 
         when (direction) {
-            ShackingDirections.LEFT_THEN_RIGHT -> shakeToLeftThenRight(shakeAnimationSpec)
+            ShakingDirections.LEFT_THEN_RIGHT -> shakeToLeftThenRight(shakeAnimationSpec)
         }
     }
 
@@ -41,18 +41,18 @@ class ShackingState(
         data class Custom(val power: Float) : ShakePower(power)
     }
 
-    enum class ShackingDirections {
+    enum class ShakingDirections {
         LEFT_THEN_RIGHT,
     }
 }
 
 @Composable
-fun rememberShackingState(
-    power: ShackingState.ShakePower = ShackingState.ShakePower.Medium,
-    direction: ShackingState.ShackingDirections = ShackingState.ShackingDirections.LEFT_THEN_RIGHT,
-): ShackingState {
+fun rememberShakingState(
+    power: ShakingState.ShakePower = ShakingState.ShakePower.Medium,
+    direction: ShakingState.ShakingDirections = ShakingState.ShakingDirections.LEFT_THEN_RIGHT,
+): ShakingState {
     return remember {
-        ShackingState(
+        ShakingState(
             power,
             direction
         )

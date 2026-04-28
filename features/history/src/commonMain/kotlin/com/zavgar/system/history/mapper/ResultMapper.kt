@@ -15,21 +15,6 @@ import com.zavgar.system.resources.error_server_error
 import com.zavgar.system.resources.error_too_many_requests
 import com.zavgar.system.resources.error_user_not_found
 
-fun <T, E> AppResult<T, E>.toTransactionsResult(
-    errorMapper: (E) -> SnackBarMessage,
-    isTokenExpired: (E) -> Boolean,
-    dataMapper: (T) -> History,
-): TransactionsResult {
-    return when (this) {
-        is AppResult.Success -> TransactionsResult.Success(dataMapper(this.data))
-        is AppResult.Error -> if (isTokenExpired(this.error)) {
-            TransactionsResult.TokenExpired
-        } else {
-            TransactionsResult.Error(errorMapper(this.error))
-        }
-    }
-}
-
 fun OperationsError.asSnackBarMessage(): SnackBarMessage = when (this) {
     is OperationsError.ValidationError -> SnackBarMessage(
         message = UiText.Resource(Res.string.error_invalid_format),
@@ -67,5 +52,9 @@ fun OperationsError.asSnackBarMessage(): SnackBarMessage = when (this) {
     )
 }
 
-fun AppResult<TransactionsPageResponse, OperationsError>.toTransactionsResult(dataMapper: (TransactionsPageResponse) -> History) =
-    toTransactionsResult(OperationsError::asSnackBarMessage, { it is OperationsError.NotAuthorizedError }, dataMapper)
+fun AppResult<TransactionsPageResponse, OperationsError>.toTransactionsResult(
+    dataMapper: (TransactionsPageResponse) -> History,
+): TransactionsResult = when (this) {
+    is AppResult.Success -> TransactionsResult.Success(dataMapper(data))
+    is AppResult.Error -> TransactionsResult.Error(error.asSnackBarMessage())
+}

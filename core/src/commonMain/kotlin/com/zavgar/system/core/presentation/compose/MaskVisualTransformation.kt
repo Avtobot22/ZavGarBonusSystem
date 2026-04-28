@@ -13,22 +13,22 @@ class MaskVisualTransformation(
     private val specialSymbolsIndices = mask.indices.filter { mask[it] != maskChar }
 
     override fun filter(text: AnnotatedString): TransformedText {
-        var out = ""
+        val out = StringBuilder(mask.length)
         var maskIndex = 0
         var textIndex = 0
 
         while (textIndex < text.text.length && maskIndex < mask.length) {
             if (mask[maskIndex] == maskChar) {
-                out += text.text[textIndex]
+                out.append(text.text[textIndex])
                 textIndex++
                 maskIndex++
             } else {
-                out += mask[maskIndex]
+                out.append(mask[maskIndex])
                 maskIndex++
             }
         }
 
-        return TransformedText(AnnotatedString(out), offsetMapping)
+        return TransformedText(AnnotatedString(out.toString()), offsetMapping)
     }
 
     private val offsetMapping = object : OffsetMapping {

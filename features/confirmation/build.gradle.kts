@@ -18,8 +18,8 @@ kotlin {
 
             implementation(projects.domain)
             implementation(projects.resources)
-            implementation(projects.sharedValidation)
-            implementation(projects.features.navigationApi)
+            implementation(projects.utils.validation)
+            implementation(projects.libraries.navigationContracts)
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.designsystem)
             implementation(projects.libraries.parcelable)

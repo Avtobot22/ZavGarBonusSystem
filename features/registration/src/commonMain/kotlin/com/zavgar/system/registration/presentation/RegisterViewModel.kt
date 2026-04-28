@@ -15,9 +15,9 @@ import com.zavgar.system.registration.mapper.toDomain
 import com.zavgar.system.registration.mapper.toRegisterResult
 import com.zavgar.system.registration.model.RegisterRequest
 import com.zavgar.system.registration.model.RegisterResult
-import com.zavgar.system.sharedValidation.ValidationResult
-import com.zavgar.system.sharedValidation.asUiText
-import com.zavgar.system.sharedValidation.toPresentation
+import com.zavgar.system.utils.validation.ValidationResult
+import com.zavgar.system.utils.validation.asUiText
+import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
@@ -107,7 +107,7 @@ class RegisterViewModel(
     private fun handleClickLogin() = setEvent { RegisterEvent.NavigateToLogin }
 
     private fun handleSubmit() {
-        if (currentState.isLoading) return
+        if (currentState.screenState is RegisterState.ScreenState.Submitting) return
 
         val state = currentState
         val nameResult = validateNameUseCase(state.name).toPresentation { it.asUiText() }
@@ -173,12 +173,12 @@ class RegisterViewModel(
 
     private fun performRegister(registerRequest: RegisterRequest) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = RegisterState.ScreenState.Submitting) }
 
             val result =
                 registerUseCase(registerRequest.toDomain()).toRegisterResult { it.asSnackBarMessage() }
 
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = RegisterState.ScreenState.Idle) }
 
             when (result) {
                 is RegisterResult.Success -> {

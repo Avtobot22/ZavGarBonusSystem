@@ -17,22 +17,22 @@ import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
+import com.zavgar.system.domain.logout.LogoutHandler
+import com.zavgar.system.domain.model.onTokenExpired
 import com.zavgar.system.domain.usecase.ChangePasswordUseCase
 import com.zavgar.system.domain.usecase.DeleteProfileUseCase
-import com.zavgar.system.domain.usecase.DeleteSessionUseCase
 import com.zavgar.system.domain.usecase.GetProfileUseCase
 import com.zavgar.system.domain.usecase.UpdateProfileUseCase
 import com.zavgar.system.domain.usecase.validation.ValidateBirthDateUseCase
 import com.zavgar.system.domain.usecase.validation.ValidateNameUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
 import com.zavgar.system.resources.Res
-import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.password_update_success
 import com.zavgar.system.resources.profile_delete_success
 import com.zavgar.system.resources.profile_update_success
-import com.zavgar.system.sharedValidation.ValidationResult
-import com.zavgar.system.sharedValidation.asUiText
-import com.zavgar.system.sharedValidation.toPresentation
+import com.zavgar.system.utils.validation.ValidationResult
+import com.zavgar.system.utils.validation.asUiText
+import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
@@ -41,7 +41,7 @@ class AccountViewModel(
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
     private val deleteProfileUseCase: DeleteProfileUseCase,
-    private val deleteSessionUseCase: DeleteSessionUseCase,
+    private val logoutHandler: LogoutHandler,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val validateNameUseCase: ValidateNameUseCase,
     private val validateBirthDateUseCase: ValidateBirthDateUseCase
@@ -64,7 +64,7 @@ class AccountViewModel(
             is AccountIntent.OpenDatePicker -> handleOpenDatePicker()
             is AccountIntent.CloseDatePicker -> handleCloseDatePicker()
             is AccountIntent.DismissDatePicker -> handleDismissDatePicker()
-            is AccountIntent.OperPasswordDialog -> handleOpenPasswordDialog()
+            is AccountIntent.OpenPasswordDialog -> handleOpenPasswordDialog()
             is AccountIntent.ClosePasswordDialog -> handleClosePasswordDialog()
             is AccountIntent.DismissPasswordDialog -> handleDismissPasswordDialog()
             is AccountIntent.Submit -> handleSubmit()
@@ -76,7 +76,11 @@ class AccountViewModel(
         viewModelScope.launch {
             setState { copy(screenState = AccountState.ScreenState.Loading, isLoading = true) }
 
-            when (val result = getProfileUseCase().toProfileGetResult()) {
+            val appResult = getProfileUseCase().onTokenExpired(logoutHandler)
+            setState { copy(isLoading = false) }
+            appResult ?: return@launch
+
+            when (val result = appResult.toProfileGetResult()) {
                 is ProfileGetResult.Success ->
                     setState {
                         copy(
@@ -91,11 +95,7 @@ class AccountViewModel(
                     setState { copy(screenState = AccountState.ScreenState.Error) }
                     setEvent { AccountEvent.ShowSnackbar(result.message) }
                 }
-
-                is ProfileGetResult.TokenExpired -> handleLogout()
             }
-
-            setState { copy(isLoading = false) }
         }
     }
 
@@ -169,16 +169,14 @@ class AccountViewModel(
         viewModelScope.launch {
             setState { copy(isPasswordDialogLoading = true) }
 
-            val result = changePasswordUseCase(
-                ChangePasswordRequest(
-                    state.oldPassword,
-                    state.newPassword
-                ).toDomain()
-            ).toChangePasswordResult()
+            val appResult = changePasswordUseCase(
+                ChangePasswordRequest(state.oldPassword, state.newPassword).toDomain()
+            ).onTokenExpired(logoutHandler)
 
             setState { copy(isPasswordDialogLoading = false) }
+            appResult ?: return@launch
 
-            when (result) {
+            when (val result = appResult.toChangePasswordResult()) {
                 is ChangePasswordResult.Success -> {
                     setEvent {
                         AccountEvent.ShowSnackbar(
@@ -194,8 +192,6 @@ class AccountViewModel(
                 is ChangePasswordResult.Error -> setEvent {
                     AccountEvent.ShowSnackbar(result.message)
                 }
-
-                is ChangePasswordResult.TokenExpired -> handleLogout()
             }
         }
     }
@@ -214,7 +210,11 @@ class AccountViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true) }
 
-            when (val result = deleteProfileUseCase().toDeleteResult()) {
+            val appResult = deleteProfileUseCase().onTokenExpired(logoutHandler)
+            setState { copy(isLoading = false) }
+            appResult ?: return@launch
+
+            when (val result = appResult.toDeleteResult()) {
                 is DeleteResult.Success -> {
                     setEvent {
                         AccountEvent.ShowSnackbar(
@@ -228,15 +228,8 @@ class AccountViewModel(
                 }
 
                 is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
-                is DeleteResult.TokenExpired -> handleLogout()
             }
-
-            setState { copy(isLoading = false) }
-
-
         }
-
-        setEvent { AccountEvent.NavigateToLogin }
     }
 
     private fun handleSubmit() {
@@ -255,12 +248,10 @@ class AccountViewModel(
 
         if (!isFormValid) return
 
-        val birthDate = state.birthDate ?: return
-
         performUpdate(
             ProfileRequest(
                 name = state.name,
-                birthDate = birthDate
+                birthDate = requireNotNull(state.birthDate)
             )
         )
 
@@ -270,11 +261,11 @@ class AccountViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true) }
 
-            val result = updateProfileUseCase(profileRequest.toDomain()).toProfileUpdateResult()
-
+            val appResult = updateProfileUseCase(profileRequest.toDomain()).onTokenExpired(logoutHandler)
             setState { copy(isLoading = false) }
+            appResult ?: return@launch
 
-            when (result) {
+            when (val result = appResult.toProfileUpdateResult()) {
                 is ProfileUpdateResult.Success -> setEvent {
                     AccountEvent.ShowSnackbar(
                         SnackBarMessage(
@@ -287,30 +278,8 @@ class AccountViewModel(
                 is ProfileUpdateResult.Error -> setEvent {
                     AccountEvent.ShowSnackbar(result.message)
                 }
-
-                is ProfileUpdateResult.TokenExpired -> setEvent { AccountEvent.NavigateToLogin }
             }
         }
-    }
-
-    private fun handleLogout() {
-        viewModelScope.launch {
-            val result = deleteSessionUseCase()
-            result.getOrElse { exception ->
-                setEvent {
-                    AccountEvent.ShowSnackbar(
-                        SnackBarMessage(
-                            message = exception.message?.let {
-                                UiText.DynamicString(it)
-                            } ?: UiText.Resource(Res.string.error_unknown_error),
-                            type = SnackBarType.ERROR
-                        )
-                    )
-                }
-            }
-        }
-
-        setEvent { AccountEvent.NavigateToLogin }
     }
 
     private fun formValidation(

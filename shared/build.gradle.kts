@@ -19,7 +19,7 @@ kotlin {
 
             implementation(projects.domain)
 
-            implementation(projects.features.navigationApi)
+            implementation(projects.libraries.navigationContracts)
             implementation(projects.features.registration)
             implementation(projects.features.authorization)
             implementation(projects.features.confirmation)
@@ -36,6 +36,7 @@ kotlin {
             implementation(projects.libraries.designsystem)
             implementation(projects.libraries.appstate)
             implementation(projects.libraries.parcelable)
+            implementation(projects.libraries.events)
 
             implementation(projects.resources)
 

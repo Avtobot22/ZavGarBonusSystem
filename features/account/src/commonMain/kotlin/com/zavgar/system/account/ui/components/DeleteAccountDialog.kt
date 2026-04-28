@@ -1,4 +1,4 @@
-package com.zavgar.system.account.ui
+package com.zavgar.system.account.ui.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

@@ -1,5 +1,6 @@
 package com.zavgar.system.domain.di
 
+import com.zavgar.system.domain.logout.LogoutHandler
 import com.zavgar.system.domain.usecase.ChangePasswordUseCase
 import com.zavgar.system.domain.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.usecase.DeleteProfileUseCase
@@ -45,8 +46,8 @@ val domainModule = module {
     factoryOf(::ResendCodeUseCase)
     factoryOf(::ResetPasswordUseCase)
     factoryOf(::LogoutUseCase)
-    factoryOf(::ResetPasswordUseCase)
     factoryOf(::DeleteProfileUseCase)
+    factoryOf(::LogoutHandler)
 
     // Validation UseCase
     factoryOf(::ValidatePhoneUseCase)

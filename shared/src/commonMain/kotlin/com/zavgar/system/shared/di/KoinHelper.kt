@@ -5,6 +5,7 @@ import com.zavgar.system.authorization.di.authorizationModule
 import com.zavgar.system.confirmation.di.confirmationModule
 import com.zavgar.system.coroutines.di.coroutinesModule
 import com.zavgar.system.datastore.di.dataStoreModule
+import com.zavgar.system.events.di.eventsModule
 import com.zavgar.system.designsystem.di.designSystemModule
 import com.zavgar.system.domain.di.domainModule
 import com.zavgar.system.history.di.historyModule
@@ -38,17 +39,26 @@ fun initKoin(appModule: Module = module { }) {
     }
 }
 
-// TODO Все модули приложения
 internal val appModules = listOf(
+    // Infrastructure
     sharedModule,
-    coroutinesModule,
-    designSystemModule,
-    networkModule,
-    repositoryModule,
-    dataStoreModule,
-    domainModule,
+    coroutinesModule,       // CoroutineDispatcherProvider, AppCoroutineScope
+    eventsModule,           // AppEventBus
+    designSystemModule,     // Theme, design system components
+
+    // Data
+    dataStoreModule,        // DataStore, SessionDataSource
+    networkModule,          // HttpClient, *Service implementations
+    repositoryModule,       // Repository implementations
+
+    // Domain
+    domainModule,           // Use cases, LogoutHandler
+
+    // Navigation
+    navigationModule,       // NavEventController
+
+    // Features
     authorizationModule,
-    navigationModule,
     registrationModule,
     confirmationModule,
     resetPasswordModule,

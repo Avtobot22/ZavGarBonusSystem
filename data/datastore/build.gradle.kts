@@ -10,6 +10,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.data.repository)
+            implementation(projects.libraries.coroutines)
 
             implementation(libs.koin.core)
             implementation(libs.androidx.datastore)

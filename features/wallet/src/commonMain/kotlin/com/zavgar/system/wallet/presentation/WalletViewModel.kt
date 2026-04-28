@@ -5,11 +5,11 @@ import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.usecase.DeleteSessionUseCase
+import com.zavgar.system.domain.logout.LogoutHandler
+import com.zavgar.system.domain.model.onTokenExpired
 import com.zavgar.system.domain.usecase.GetSessionUseCase
 import com.zavgar.system.domain.usecase.GetUserBalanceUseCase
 import com.zavgar.system.resources.Res
-import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode
 import com.zavgar.system.wallet.mapper.toBalanceResult
 import com.zavgar.system.wallet.mapper.toPresentation
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 class WalletViewModel(
     private val getUserBalanceUseCase: GetUserBalanceUseCase,
     private val getSessionUseCase: GetSessionUseCase,
-    private val deleteSessionUseCase: DeleteSessionUseCase
+    private val logoutHandler: LogoutHandler,
 ) : BaseViewModel<WalletState, WalletIntent, WalletEvent>(WalletState()) {
 
     private var cooldownJob: Job? = null
@@ -76,7 +76,8 @@ class WalletViewModel(
                 }
             }
 
-            when (val result = getUserBalanceUseCase().toBalanceResult()) {
+            val appResult = getUserBalanceUseCase().onTokenExpired(logoutHandler) ?: return@launch
+            when (val result = appResult.toBalanceResult()) {
                 is BalanceResult.Success -> {
                     val current = currentState.screenState
                     val content = if (current is WalletState.ScreenState.Content) {
@@ -112,8 +113,6 @@ class WalletViewModel(
                         setEvent { WalletEvent.ShowSnackbar(result.message) }
                     }
                 }
-
-                is BalanceResult.TokenExpired -> handleLogout()
             }
         }
     }
@@ -142,22 +141,12 @@ class WalletViewModel(
             getSessionUseCase().toPresentation().fold(onSuccess = { session ->
                 setState { copy(phone = session.phone) }
                 fetchBalance(isInitial = true)
-            }, onFailure = { handleLogout() })
+            }, onFailure = { logoutHandler.logout() })
         }
     }
 
-    private fun handleLogout() {
-        viewModelScope.launch {
-            val result = deleteSessionUseCase()
-            result.getOrElse { exception ->
-                setEvent {
-                    WalletEvent.ShowSnackbar(
-                        SnackBarMessage(message = exception.message?.let {
-                            UiText.DynamicString(it)
-                        } ?: UiText.Resource(Res.string.error_unknown_error), type = SnackBarType.ERROR))
-                }
-            }
-        }
-        setEvent { WalletEvent.NavigateToLogin }
+    override fun onCleared() {
+        super.onCleared()
+        cooldownJob?.cancel()
     }
 }

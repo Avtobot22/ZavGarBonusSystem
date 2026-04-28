@@ -49,7 +49,7 @@ fun Modifier.shimmerAnimation(shape: Shape = MaterialTheme.shapes.small): Modifi
     return background(brush, shape)
 }
 
-fun Modifier.shakable(state: ShackingState): Modifier =
+fun Modifier.shakable(state: ShakingState): Modifier =
     graphicsLayer {
         translationX = state.xPosition.value
     }

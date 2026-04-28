@@ -6,7 +6,8 @@ import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.domain.usecase.DeleteSessionUseCase
+import com.zavgar.system.domain.logout.LogoutHandler
+import com.zavgar.system.domain.model.onTokenExpired
 import com.zavgar.system.domain.usecase.GetOperationsUseCase
 import com.zavgar.system.history.mapper.toDomain
 import com.zavgar.system.history.mapper.toPresentation
@@ -16,13 +17,12 @@ import com.zavgar.system.history.model.TransactionsRequest
 import com.zavgar.system.history.model.TransactionsResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_date_range
-import com.zavgar.system.resources.error_unknown_error
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 class HistoryViewModel(
     private val getOperationsUseCase: GetOperationsUseCase,
-    private val deleteSessionUseCase: DeleteSessionUseCase
+    private val logoutHandler: LogoutHandler,
 ) : BaseViewModel<HistoryState, HistoryIntent, HistoryEvent>(HistoryState()) {
 
     init {
@@ -84,14 +84,9 @@ class HistoryViewModel(
     private fun loadData(isRefreshing: Boolean = false, isFirstPage: Boolean) {
         val state = currentState
 
-        val isLoading = state.screenState is HistoryState.ScreenState.Loading
-                || state.screenState is HistoryState.ScreenState.Reloading
-
-        if (isFirstPage && !isRefreshing && isLoading) return
-
+        if (isFirstPage && !canLoadFirstPage(state, isRefreshing)) return
         if (isRefreshing && state.isRefreshing) return
-
-        if (!isFirstPage && (state.isLoadingNextPage || !state.hasMore || state.nextCursor == null)) return
+        if (!isFirstPage && !canLoadNextPage(state)) return
 
         setState {
             copy(
@@ -119,12 +114,11 @@ class HistoryViewModel(
 
             val historyItems = if (!isFirstPage) state.history else emptyList()
 
-            val result =
-                getOperationsUseCase(request.toDomain()).toTransactionsResult { it.toPresentation(historyItems) }
-
+            val appResult = getOperationsUseCase(request.toDomain()).onTokenExpired(logoutHandler)
             setState { copy(isRefreshing = false, isLoadingNextPage = false) }
+            appResult ?: return@launch
 
-            when (result) {
+            when (val result = appResult.toTransactionsResult { it.toPresentation(historyItems) }) {
                 is TransactionsResult.Success -> setState {
                     copy(
                         screenState = HistoryState.ScreenState.Content,
@@ -143,8 +137,6 @@ class HistoryViewModel(
                         setEvent { HistoryEvent.ShowSnackbar(result.message) }
                     }
                 }
-
-                is TransactionsResult.TokenExpired -> handleLogout()
             }
         }
 
@@ -174,23 +166,12 @@ class HistoryViewModel(
         loadData(isRefreshing = false, isFirstPage = false)
     }
 
-    private fun handleLogout() {
-        viewModelScope.launch {
-            val result = deleteSessionUseCase()
-            result.getOrElse { exception ->
-                setEvent {
-                    HistoryEvent.ShowSnackbar(
-                        SnackBarMessage(
-                            message = exception.message?.let {
-                                UiText.DynamicString(it)
-                            } ?: UiText.Resource(Res.string.error_unknown_error),
-                            type = SnackBarType.ERROR
-                        )
-                    )
-                }
-            }
-        }
-
-        setEvent { HistoryEvent.Logout }
+    private fun canLoadFirstPage(state: HistoryState, isRefreshing: Boolean): Boolean {
+        val isAlreadyLoading = state.screenState is HistoryState.ScreenState.Loading ||
+                state.screenState is HistoryState.ScreenState.Reloading
+        return !(isAlreadyLoading && !isRefreshing)
     }
+
+    private fun canLoadNextPage(state: HistoryState): Boolean =
+        !state.isLoadingNextPage && state.hasMore && state.nextCursor != null
 }

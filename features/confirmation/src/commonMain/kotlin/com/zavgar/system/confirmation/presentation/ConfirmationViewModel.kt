@@ -18,9 +18,9 @@ import com.zavgar.system.domain.usecase.ResendCodeUseCase
 import com.zavgar.system.domain.usecase.validation.ValidateCodeUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_resend_success
-import com.zavgar.system.sharedValidation.ValidationResult
-import com.zavgar.system.sharedValidation.asUiText
-import com.zavgar.system.sharedValidation.toPresentation
+import com.zavgar.system.utils.validation.ValidationResult
+import com.zavgar.system.utils.validation.asUiText
+import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,7 +65,7 @@ class ConfirmationViewModel(
     }
 
     private fun handleSubmit() {
-        if (currentState.isLoading) return
+        if (currentState.screenState is ConfirmationState.ScreenState.Submitting) return
         val isValid = validateCodeUseCase(currentState.code).toPresentation { it.asUiText() }
 
         if (isValid is ValidationResult.Error) {
@@ -78,7 +78,7 @@ class ConfirmationViewModel(
     }
 
     private fun handleResend() {
-        if (currentState.timerSeconds > 0 || currentState.isLoading) return
+        if (currentState.timerSeconds > 0 || currentState.screenState is ConfirmationState.ScreenState.Submitting) return
 
         viewModelScope.launch {
             val result =
@@ -105,7 +105,7 @@ class ConfirmationViewModel(
 
     private fun performConfirmation(confirmationRequest: ConfirmationRequest) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = ConfirmationState.ScreenState.Submitting) }
 
             val result =
                 confirmationUseCase(confirmationRequest.toDomain()).toConfirmationResult { it.asSnackBarMessage() }
@@ -115,7 +115,7 @@ class ConfirmationViewModel(
                 is ConfirmationResult.Error -> setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
             }
 
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = ConfirmationState.ScreenState.Idle) }
         }
     }
 

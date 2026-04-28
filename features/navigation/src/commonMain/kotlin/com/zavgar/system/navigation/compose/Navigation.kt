@@ -12,6 +12,7 @@ import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.event.ClearAndNavigate
 import com.zavgar.system.navigationapi.event.ClearAndNavigateToTopLevel
+import com.zavgar.system.navigationapi.event.Event
 import com.zavgar.system.navigationapi.event.ReplaceNavigation
 import com.zavgar.system.navigationapi.marker.TopLevel
 import org.koin.compose.koinInject
@@ -37,45 +38,9 @@ private fun NavigationLoader(
 
     val dialogStrategy = remember { DialogSceneStrategy<Destination>() }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(navEventController) {
         navEventController.eventState.collect { event ->
-            val destination = event.nextDestination()
-
-            when {
-                // Back navigation
-                destination is Destination.Back -> {
-                    navBackStack.removeLast()
-                }
-
-                // Clear all and navigate to TopLevel (Auth success → Wallet)
-                event is ClearAndNavigateToTopLevel -> {
-                    navBackStack.clearAndNavigateToTopLevel(destination)
-                }
-
-                // Clear all and navigate (Logout → Login)
-                event is ClearAndNavigate -> {
-                    navBackStack.clearAndNavigate(destination)
-                }
-
-                // Replace current destination (Splash → Login/Wallet)
-                event is ReplaceNavigation -> {
-                    navBackStack.replaceTop(destination)
-                }
-
-                // TopLevel tab switching
-                destination is TopLevel -> {
-                    if (destination == navBackStack.topLevelKey) {
-                        navBackStack.clearTopLevel(destination)
-                    } else {
-                        navBackStack.addTopLevel(destination)
-                    }
-                }
-
-                // Regular navigation
-                else -> {
-                    navBackStack.add(destination)
-                }
-            }
+            handleNavEvent(event, navBackStack)
         }
     }
 
@@ -86,4 +51,22 @@ private fun NavigationLoader(
         entryProvider = navGraphProvider.navigationGraph,
         modifier = modifier,
     )
+}
+
+private fun handleNavEvent(
+    event: Event,
+    navBackStack: NavBackStack<Destination>,
+) {
+    val destination = event.nextDestination()
+    when {
+        destination is Destination.Back -> navBackStack.removeLast()
+        event is ClearAndNavigateToTopLevel -> navBackStack.clearAndNavigateToTopLevel(destination)
+        event is ClearAndNavigate -> navBackStack.clearAndNavigate(destination)
+        event is ReplaceNavigation -> navBackStack.replaceTop(destination)
+        destination is TopLevel -> {
+            if (destination == navBackStack.topLevelKey) navBackStack.clearTopLevel(destination)
+            else navBackStack.addTopLevel(destination)
+        }
+        else -> navBackStack.add(destination)
+    }
 }

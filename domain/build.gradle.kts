@@ -13,6 +13,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.logging)
             implementation(libs.kotlinx.datetime)
+            implementation(projects.libraries.events)
         }
 
     }

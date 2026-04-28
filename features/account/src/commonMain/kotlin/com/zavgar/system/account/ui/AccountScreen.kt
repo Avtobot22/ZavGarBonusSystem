@@ -24,6 +24,8 @@ import com.zavgar.system.account.presentation.AccountEvent
 import com.zavgar.system.account.presentation.AccountIntent
 import com.zavgar.system.account.presentation.AccountState
 import com.zavgar.system.account.presentation.AccountViewModel
+import com.zavgar.system.account.ui.components.ChangePasswordDialog
+import com.zavgar.system.account.ui.components.DeleteAccountDialog
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppOutlinedButton
@@ -36,8 +38,8 @@ import com.zavgar.system.designsystem.components.textfield.AppClickablePasswordF
 import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.topbar.AppProfilTopBar
-import com.zavgar.system.designsystem.modifiers.ShackingState
-import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
@@ -76,7 +78,7 @@ internal fun AccountLoader(
     viewModel: AccountViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val errorShakingState = rememberShackingState()
+    val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.event) { event ->
@@ -112,7 +114,7 @@ internal fun AccountScaffold(
     state: AccountState,
     snackbarHostState: SnackbarHostState,
     onIntent: (AccountIntent) -> Unit,
-    errorShakingState: ShackingState,
+    errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -167,44 +169,9 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
             .verticalScroll(scrollState)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
     ) {
-        AppTextField(
-            value = state.name,
-            onValueChange = { onIntent(AccountIntent.EnterName(it)) },
-            label = stringResource(Res.string.register_name_label),
-            placeholder = stringResource(Res.string.register_name_placeholder),
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.nameError != null,
-            errorMessage = state.nameError?.asString(),
-            enabled = !state.isLoading
-        )
-
-        AppDatePickerField(
-            value = state.birthDateText,
-            onClick = { onIntent(AccountIntent.OpenDatePicker) },
-            label = stringResource(Res.string.birth_date_label),
-            placeholder = stringResource(Res.string.birth_date_placeholder),
-            modifier = Modifier.padding(vertical = 11.dp),
-            isError = state.birthDateError != null,
-            errorMessage = state.birthDateError?.asString(),
-            enabled = !state.isLoading,
-        )
-
-        AppDatePicker(
-            initialDate = state.birthDate,
-            isOpen = state.isDatePickerOpen,
-            onDismiss = { onIntent(AccountIntent.DismissDatePicker) },
-            onConfirm = { onIntent(AccountIntent.EnterBirthDate(it)) }
-        )
-
-        AppClickablePasswordField(
-            value = stringResource(Res.string.account_password_pattern),
-            onClick = { onIntent(AccountIntent.OperPasswordDialog) },
-            label = stringResource(Res.string.account_password_label),
-            enabled = !state.isLoading,
-            modifier = Modifier.padding(vertical = 11.dp),
-        )
+        AccountForm(state, onIntent)
 
         AppOutlinedButton(
             text = stringResource(Res.string.account_confirm),
@@ -214,9 +181,49 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
             },
             enabled = !state.isLoading,
             isLoading = state.isLoading,
-            modifier = Modifier.padding(top = 80.dp)
+            modifier = Modifier.padding(top = 60.dp)
         )
     }
+}
+
+@Composable
+private fun AccountForm(
+    state: AccountState,
+    onIntent: (AccountIntent) -> Unit
+) {
+    AppTextField(
+        value = state.name,
+        onValueChange = { onIntent(AccountIntent.EnterName(it)) },
+        label = stringResource(Res.string.register_name_label),
+        placeholder = stringResource(Res.string.register_name_placeholder),
+        isError = state.nameError != null,
+        errorMessage = state.nameError?.asString(),
+        enabled = !state.isLoading
+    )
+
+    AppDatePickerField(
+        value = state.birthDateText,
+        onClick = { onIntent(AccountIntent.OpenDatePicker) },
+        label = stringResource(Res.string.birth_date_label),
+        placeholder = stringResource(Res.string.birth_date_placeholder),
+        isError = state.birthDateError != null,
+        errorMessage = state.birthDateError?.asString(),
+        enabled = !state.isLoading,
+    )
+
+    AppDatePicker(
+        initialDate = state.birthDate,
+        isOpen = state.isDatePickerOpen,
+        onDismiss = { onIntent(AccountIntent.DismissDatePicker) },
+        onConfirm = { onIntent(AccountIntent.EnterBirthDate(it)) }
+    )
+
+    AppClickablePasswordField(
+        value = stringResource(Res.string.account_password_pattern),
+        onClick = { onIntent(AccountIntent.OpenPasswordDialog) },
+        label = stringResource(Res.string.account_password_label),
+        enabled = !state.isLoading,
+    )
 }
 
 @Composable
@@ -249,7 +256,7 @@ fun AccountScreenPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }
@@ -275,7 +282,7 @@ fun AccountScreenLoadingPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }
@@ -301,7 +308,7 @@ fun AccountScreenWithErrorsPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }

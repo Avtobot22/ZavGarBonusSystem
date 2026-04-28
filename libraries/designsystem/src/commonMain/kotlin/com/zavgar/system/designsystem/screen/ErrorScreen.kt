@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.text.AppTextMain
 import com.zavgar.system.designsystem.components.text.AppTextSecondary
-import com.zavgar.system.designsystem.modifiers.ShackingState
-import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
@@ -32,7 +32,7 @@ import org.jetbrains.compose.resources.vectorResource
 fun ErrorScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
-    shakingState: ShackingState
+    shakingState: ShakingState
 ) {
     Column(
         modifier = modifier
@@ -79,7 +79,7 @@ private fun ErrorScreenPreview() {
         Screen {
             ErrorScreen(
                 onRetry = {},
-                shakingState = rememberShackingState()
+                shakingState = rememberShakingState()
             )
         }
     }

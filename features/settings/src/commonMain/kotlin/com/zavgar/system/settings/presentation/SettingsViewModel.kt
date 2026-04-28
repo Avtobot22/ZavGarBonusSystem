@@ -10,8 +10,7 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val logoutUseCase: LogoutUseCase,
-
-    ) : BaseViewModel<SettingsState, SettingsIntent, SettingsEvent>(SettingsState.Content) {
+) : BaseViewModel<SettingsState, SettingsIntent, SettingsEvent>(SettingsState()) {
 
     override fun handleIntent(intent: SettingsIntent) {
         when (intent) {
@@ -22,15 +21,13 @@ class SettingsViewModel(
 
     private fun handleLogout() {
         viewModelScope.launch {
-            setState { SettingsState.Loading }
+            setState { copy(screenState = SettingsState.ScreenState.Loading) }
             val result = logoutUseCase().toLogoutResult { it.asSnackBarMessage() }
             when (result) {
                 is LogoutResult.Success -> setEvent { SettingsEvent.NavigateToLogin }
                 is LogoutResult.Error -> {
-                    setState { SettingsState.Content }
-                    setEvent {
-                        SettingsEvent.ShowSnackbar(result.message)
-                    }
+                    setState { copy(screenState = SettingsState.ScreenState.Content) }
+                    setEvent { SettingsEvent.ShowSnackbar(result.message) }
                 }
             }
         }
@@ -39,6 +36,4 @@ class SettingsViewModel(
     private fun handleToProfileDetail() {
         setEvent { SettingsEvent.NavigateToProfileDetail }
     }
-
-
 }

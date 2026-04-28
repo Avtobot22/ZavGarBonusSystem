@@ -9,7 +9,7 @@ plugins {
 }
 
 kotlin {
-    configureTargets("navigation-api")
+    configureTargets("navigation-contracts")
 
     sourceSets {
         commonMain.dependencies {

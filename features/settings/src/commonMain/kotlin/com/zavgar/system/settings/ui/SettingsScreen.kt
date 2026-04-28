@@ -109,15 +109,13 @@ internal fun SettingsScaffold(
         },
     ) { paddingValues ->
 
-        when (state) {
-            is SettingsState.Content -> SettingsContent(
-                state = state,
+        when (state.screenState) {
+            is SettingsState.ScreenState.Content -> SettingsContent(
                 onIntent = onIntent,
-                modifier = Modifier
-                    .padding(paddingValues)
+                modifier = Modifier.padding(paddingValues)
             )
 
-            is SettingsState.Loading -> SettingsLoading(
+            is SettingsState.ScreenState.Loading -> SettingsLoading(
                 modifier = Modifier.padding(paddingValues)
             )
         }
@@ -126,7 +124,6 @@ internal fun SettingsScaffold(
 
 @Composable
 internal fun SettingsContent(
-    state: SettingsState.Content,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -175,7 +172,7 @@ internal fun SettingsLoading(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun SettingsScaffoldPreview() {
-    val mockState = SettingsState.Content
+    val mockState = SettingsState()
     val mockSnackbarHostState = remember { SnackbarHostState() }
 
     ZavGarThemePreview {
@@ -192,7 +189,7 @@ private fun SettingsScaffoldPreview() {
 @Preview
 @Composable
 private fun SettingsScaffoldLoadingPreview() {
-    val mockState = SettingsState.Loading
+    val mockState = SettingsState(screenState = SettingsState.ScreenState.Loading)
     val mockSnackbarHostState = remember { SnackbarHostState() }
 
     ZavGarThemePreview {

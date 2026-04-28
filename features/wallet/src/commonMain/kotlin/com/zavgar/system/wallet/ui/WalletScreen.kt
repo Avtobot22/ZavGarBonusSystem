@@ -19,8 +19,8 @@ import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
-import com.zavgar.system.designsystem.modifiers.ShackingState
-import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
@@ -53,7 +53,7 @@ internal fun WalletLoader(
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val errorShakingState = rememberShackingState()
+    val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.event) { event ->
@@ -88,7 +88,7 @@ internal fun WalletScaffold(
     state: WalletState,
     snackbarHostState: SnackbarHostState,
     onIntent: (WalletIntent) -> Unit,
-    errorShakingState: ShackingState,
+    errorShakingState: ShakingState,
     modifier: Modifier
 ) {
     Scaffold(
@@ -164,7 +164,7 @@ private fun WalletScaffoldContentPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }
@@ -183,7 +183,7 @@ private fun WalletScaffoldLoadingPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }
@@ -202,7 +202,7 @@ private fun WalletScaffoldErrorPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }
@@ -221,7 +221,7 @@ private fun WalletScaffoldOfflinePreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShackingState()
+                errorShakingState = rememberShakingState()
             )
         }
     }

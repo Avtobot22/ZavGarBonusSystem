@@ -3,7 +3,7 @@ package com.zavgar.system.domain.model.error
 sealed interface ProfileError {
     data object ValidationError : ProfileError
 
-    data object NotAuthorizedError : ProfileError
+    data object NotAuthorizedError : ProfileError, NotAuthorized
 
     data object UserNotFound : ProfileError
 

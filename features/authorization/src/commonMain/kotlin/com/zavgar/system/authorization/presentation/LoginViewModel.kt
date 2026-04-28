@@ -10,9 +10,9 @@ import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.domain.usecase.LoginUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
 import com.zavgar.system.domain.usecase.validation.ValidatePhoneUseCase
-import com.zavgar.system.sharedValidation.ValidationResult
-import com.zavgar.system.sharedValidation.asUiText
-import com.zavgar.system.sharedValidation.toPresentation
+import com.zavgar.system.utils.validation.ValidationResult
+import com.zavgar.system.utils.validation.asUiText
+import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
@@ -56,7 +56,7 @@ class LoginViewModel(
         }
 
     private fun handleSubmit() {
-        if (currentState.isLoading) return
+        if (currentState.screenState is LoginState.ScreenState.Submitting) return
 
         val state = currentState
         val phoneResult = validatePhoneUseCase(state.phone).toPresentation { it.asUiText() }
@@ -85,21 +85,16 @@ class LoginViewModel(
 
     private fun performLogin(loginRequest: LoginRequest) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = LoginState.ScreenState.Submitting) }
 
             val result = loginUseCase(loginRequest.toDomain()).toLoginResult { it.asSnackBarMessage() }
 
             when (result) {
-                is LoginResult.Success -> {
-                    setEvent { LoginEvent.NavigateToWallet }
-                }
-
-                is LoginResult.Error -> {
-                    setEvent { LoginEvent.ShowSnackbar(result.message) }
-                }
+                is LoginResult.Success -> setEvent { LoginEvent.NavigateToWallet }
+                is LoginResult.Error -> setEvent { LoginEvent.ShowSnackbar(result.message) }
             }
 
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = LoginState.ScreenState.Idle) }
         }
     }
 }

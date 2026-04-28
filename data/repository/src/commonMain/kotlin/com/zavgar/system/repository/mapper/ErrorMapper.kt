@@ -18,7 +18,7 @@ import kotlinx.io.IOException
 fun Throwable.toAuthError(): AuthError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> AuthError.ValidationError
                 401 -> AuthError.UserNotFound
@@ -38,7 +38,7 @@ fun Throwable.toAuthError(): AuthError {
 fun Throwable.toRegisterError(): RegisterError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> RegisterError.InvalidFormat
                 409 -> RegisterError.UserAlreadyExists
@@ -58,7 +58,7 @@ fun Throwable.toRegisterError(): RegisterError {
 fun Throwable.toConfirmationError(): ConfirmationError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> ConfirmationError.InvalidCodeError
                 429 -> ConfirmationError.TooManyRequestError
@@ -78,7 +78,7 @@ fun Throwable.toConfirmationError(): ConfirmationError {
 fun Throwable.toResendConfirmationError(): ResendConfirmationError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> ResendConfirmationError.InvalidPhone
                 429 -> ResendConfirmationError.TooManyRequestError
@@ -97,7 +97,7 @@ fun Throwable.toResendConfirmationError(): ResendConfirmationError {
 fun Throwable.toResetPasswordError(): ResetPasswordError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> ResetPasswordError.InvalidPhoneError
                 404 -> ResetPasswordError.UserNotFound
@@ -117,7 +117,7 @@ fun Throwable.toResetPasswordError(): ResetPasswordError {
 fun Throwable.toGetBalanceError(): GetBalanceError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 401 -> GetBalanceError.NotAuthorizedError
                 429 -> GetBalanceError.TooManyRequestError
@@ -136,7 +136,7 @@ fun Throwable.toGetBalanceError(): GetBalanceError {
 fun Throwable.toLogoutError(): LogoutError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 401 -> LogoutError.NotAuthorizedError
                 429 -> LogoutError.TooManyRequestError
@@ -155,7 +155,7 @@ fun Throwable.toLogoutError(): LogoutError {
 fun Throwable.toProfileError(): ProfileError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> ProfileError.ValidationError
                 401 -> ProfileError.NotAuthorizedError
@@ -176,7 +176,7 @@ fun Throwable.toProfileError(): ProfileError {
 fun Throwable.toChangePasswordError(): ChangePasswordError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> ChangePasswordError.ValidationError
                 401 -> ChangePasswordError.NotAuthorizedError
@@ -196,7 +196,7 @@ fun Throwable.toChangePasswordError(): ChangePasswordError {
 fun Throwable.toDeleteError(): DeleteError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 401 -> DeleteError.NotAuthorizedError
                 429 -> DeleteError.TooManyRequestError
@@ -215,7 +215,7 @@ fun Throwable.toDeleteError(): DeleteError {
 fun Throwable.toOperationsError(): OperationsError {
     return when (this) {
         is ClientRequestException -> {
-            // TODO нужно добавить обработку всех исключений которые бросает сервер
+
             when (response.status.value) {
                 400 -> OperationsError.ValidationError
                 401 -> OperationsError.NotAuthorizedError

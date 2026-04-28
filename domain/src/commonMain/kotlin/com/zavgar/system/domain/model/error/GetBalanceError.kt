@@ -2,7 +2,7 @@ package com.zavgar.system.domain.model.error
 
 sealed interface GetBalanceError {
 
-    data object NotAuthorizedError : GetBalanceError
+    data object NotAuthorizedError : GetBalanceError, NotAuthorized
 
     data object TooManyRequestError : GetBalanceError
 

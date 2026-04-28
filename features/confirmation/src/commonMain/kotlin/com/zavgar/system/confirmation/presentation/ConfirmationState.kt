@@ -11,13 +11,18 @@ data class ConfirmationState(
 
     val codeError: UiText? = null,
 
-    val isLoading: Boolean = false,
+    val screenState: ScreenState = ScreenState.Idle,
 
     val timerSeconds: Int = 0
 ) {
+    sealed interface ScreenState {
+        data object Idle : ScreenState
+        data object Submitting : ScreenState
+    }
+
     val isCodeValid: Boolean
         get() = code.length == 6
 
     val isConfirmButtonEnabled: Boolean
-        get() = isCodeValid && !isLoading
+        get() = isCodeValid && screenState is ScreenState.Idle
 }

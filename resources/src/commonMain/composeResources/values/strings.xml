@@ -44,10 +44,12 @@
     <string name="register_button_text_has_account">Уже есть аккаунт?</string>
     <string name="register_button_text_login">Войти</string>
 
+    <!--    Confirmation-->
     <string name="confirmation_top_title">Введите код подтверждения</string>
     <string name="confirmation_text">Мы отправили SMS с кодом подверждения на ваш телефон</string>
     <string name="confirmation_resend_code">Отправить код повторно</string>
     <string name="confirmation_button_text">Подтвердить</string>
+    <string name="confirmation_default_time">60</string>
 
     <!--    Reset-->
     <string name="reset_top_title">Востановление пароля</string>

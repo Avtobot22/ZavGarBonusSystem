@@ -1,5 +1,6 @@
 package com.zavgar.system.network.remote
 
+import com.zavgar.system.coroutines.runSuspendCatching
 import com.zavgar.system.network.mapper.toNetwork
 import com.zavgar.system.network.mapper.toRepo
 import com.zavgar.system.repository.model.request.TransactionsRequest
@@ -19,7 +20,7 @@ class LoyaltyServiceImpl(
     private val client: HttpClient
 ) : LoyaltyService {
 
-    override suspend fun getBalance(): Result<BalanceResponse> = runCatching {
+    override suspend fun getBalance(): Result<BalanceResponse> = runSuspendCatching {
         val response = client.get {
             url {
                 path("users/me/balance")
@@ -30,7 +31,7 @@ class LoyaltyServiceImpl(
     }
 
     override suspend fun getOperations(transactionsRequest: TransactionsRequest): Result<TransactionsPageResponse> =
-        runCatching {
+        runSuspendCatching {
             val response = client.post {
                 url {
                     path("users/me/operations")

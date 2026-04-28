@@ -13,21 +13,6 @@ import com.zavgar.system.resources.error_too_many_requests
 import com.zavgar.system.resources.error_user_not_found
 import com.zavgar.system.wallet.model.BalanceResult
 
-fun <T, E> AppResult<T, E>.toBalanceResult(
-    errorMapper: (E) -> SnackBarMessage,
-    dataMapper: (T) -> Int,
-    isTokenExpired: (E) -> Boolean
-): BalanceResult {
-    return when (this) {
-        is AppResult.Success -> BalanceResult.Success(dataMapper(data))
-        is AppResult.Error -> if (isTokenExpired(this.error)) {
-            BalanceResult.TokenExpired
-        } else {
-            BalanceResult.Error(errorMapper(this.error))
-        }
-    }
-}
-
 fun Balance.toPresentation() = this.balance
 
 fun GetBalanceError.asSnackBarMessage() = when (this) {
@@ -57,8 +42,7 @@ fun GetBalanceError.asSnackBarMessage() = when (this) {
     )
 }
 
-fun AppResult<Balance, GetBalanceError>.toBalanceResult() =
-    toBalanceResult(
-        GetBalanceError::asSnackBarMessage,
-        Balance::toPresentation
-    ) { it is GetBalanceError.NotAuthorizedError }
+fun AppResult<Balance, GetBalanceError>.toBalanceResult(): BalanceResult = when (this) {
+    is AppResult.Success -> BalanceResult.Success(data.toPresentation())
+    is AppResult.Error -> BalanceResult.Error(error.asSnackBarMessage())
+}

@@ -1,9 +1,9 @@
 package com.zavgar.system.repository.mapper
 
+import com.zavgar.system.domain.model.AppResult
 import com.zavgar.system.domain.model.response.Balance
 import com.zavgar.system.repository.model.response.BalanceResponse
 import com.zavgar.system.repository.model.response.ProfileResponse
-import com.zavgar.system.domain.model.AppResult as DomainAppResult
 import com.zavgar.system.domain.model.error.AuthError as DomainAuthError
 import com.zavgar.system.domain.model.error.ChangePasswordError as DomainChangePasswordError
 import com.zavgar.system.domain.model.error.ConfirmationError as DomainConfirmationError
@@ -17,7 +17,6 @@ import com.zavgar.system.domain.model.error.ResendConfirmationError as DomainRes
 import com.zavgar.system.domain.model.error.ResetPasswordError as DomainResetPasswordError
 import com.zavgar.system.domain.model.response.ProfileResponse as DomainProfileResponse
 import com.zavgar.system.domain.model.response.TransactionsPageResponse as DomainTransactionsPageResponse
-import com.zavgar.system.repository.model.AppResult as RepoAppResult
 import com.zavgar.system.repository.model.error.AuthError as RepoAuthError
 import com.zavgar.system.repository.model.error.ChangePasswordError as RepoChangePasswordError
 import com.zavgar.system.repository.model.error.ConfirmationError as RepoConfirmationError
@@ -31,9 +30,6 @@ import com.zavgar.system.repository.model.error.ResendConfirmationError as RepoR
 import com.zavgar.system.repository.model.error.ResetPasswordError as RepoResetPasswordError
 import com.zavgar.system.repository.model.response.TransactionsPageResponse as RepoTransactionsPageResponse
 
-/**
- * Маппер для AuthError.
- */
 fun RepoAuthError.toDomain() = when (this) {
     RepoAuthError.ValidationError -> DomainAuthError.ValidationError
     RepoAuthError.UserNotFound -> DomainAuthError.UserNotFound
@@ -43,9 +39,6 @@ fun RepoAuthError.toDomain() = when (this) {
     is RepoAuthError.UnknownError -> DomainAuthError.UnknownError(this.message)
 }
 
-/**
- * Маппер для RegisterError.
- */
 fun RepoRegisterError.toDomain() = when (this) {
     RepoRegisterError.InvalidFormat -> DomainRegisterError.InvalidFormat
     RepoRegisterError.UserAlreadyExists -> DomainRegisterError.UserAlreadyExists
@@ -55,9 +48,6 @@ fun RepoRegisterError.toDomain() = when (this) {
     is RepoRegisterError.UnknownError -> DomainRegisterError.UnknownError(this.message)
 }
 
-/**
- * Маппер для ConfirmationError.
- */
 fun RepoConfirmationError.toDomain() = when (this) {
     RepoConfirmationError.InvalidCodeError -> DomainConfirmationError.InvalidCodeError
     RepoConfirmationError.TooManyRequestError -> DomainConfirmationError.TooManyRequestError
@@ -66,9 +56,6 @@ fun RepoConfirmationError.toDomain() = when (this) {
     is RepoConfirmationError.UnknownError -> DomainConfirmationError.UnknownError(this.message)
 }
 
-/**
- * Маппер для ResendConfirmationError.
- */
 fun RepoResendConfirmationError.toDomain() = when (this) {
     RepoResendConfirmationError.InvalidPhone -> DomainResendConfirmationError.InvalidPhone
     RepoResendConfirmationError.TooManyRequestError -> DomainResendConfirmationError.TooManyRequestError
@@ -77,9 +64,6 @@ fun RepoResendConfirmationError.toDomain() = when (this) {
     is RepoResendConfirmationError.UnknownError -> DomainResendConfirmationError.UnknownError(this.message)
 }
 
-/**
- * Маппер для ResetPasswordError.
- */
 fun RepoResetPasswordError.toDomain() = when (this) {
     RepoResetPasswordError.InvalidPhoneError -> DomainResetPasswordError.InvalidPhoneError
     RepoResetPasswordError.UserNotFound -> DomainResetPasswordError.UserNotFound
@@ -89,9 +73,6 @@ fun RepoResetPasswordError.toDomain() = when (this) {
     is RepoResetPasswordError.UnknownError -> DomainResetPasswordError.UnknownError(this.message)
 }
 
-/**
- * Маппер для GetBalanceError.
- */
 fun RepoGetBalanceError.toDomain() = when (this) {
     RepoGetBalanceError.NotAuthorizedError -> DomainGetBalanceError.NotAuthorizedError
     RepoGetBalanceError.TooManyRequestError -> DomainGetBalanceError.TooManyRequestError
@@ -100,9 +81,6 @@ fun RepoGetBalanceError.toDomain() = when (this) {
     is RepoGetBalanceError.UnknownError -> DomainGetBalanceError.UnknownError(this.message)
 }
 
-/**
- * Маппер для LogoutError.
- */
 fun RepoLogoutError.toDomain() = when (this) {
     RepoLogoutError.NotAuthorizedError -> DomainLogoutError.NotAuthorizedError
     RepoLogoutError.TooManyRequestError -> DomainLogoutError.TooManyRequestError
@@ -111,9 +89,6 @@ fun RepoLogoutError.toDomain() = when (this) {
     is RepoLogoutError.UnknownError -> DomainLogoutError.UnknownError(this.message)
 }
 
-/**
- * Маппер для ProfileError.
- */
 fun RepoProfileError.toDomain() = when (this) {
     RepoProfileError.ValidationError -> DomainProfileError.ValidationError
     RepoProfileError.NotAuthorizedError -> DomainProfileError.NotAuthorizedError
@@ -124,9 +99,6 @@ fun RepoProfileError.toDomain() = when (this) {
     is RepoProfileError.UnknownError -> DomainProfileError.UnknownError(this.message)
 }
 
-/**
- * Маппер для ChangePasswordError.
- */
 fun RepoChangePasswordError.toDomain() = when (this) {
     RepoChangePasswordError.ValidationError -> DomainChangePasswordError.ValidationError
     RepoChangePasswordError.NotAuthorizedError -> DomainChangePasswordError.NotAuthorizedError
@@ -136,9 +108,6 @@ fun RepoChangePasswordError.toDomain() = when (this) {
     is RepoChangePasswordError.UnknownError -> DomainChangePasswordError.UnknownError(this.message)
 }
 
-/**
- * Маппер для DeleteError.
- */
 fun RepoDeleteError.toDomain() = when (this) {
     RepoDeleteError.NotAuthorizedError -> DomainDeleteError.NotAuthorizedError
     RepoDeleteError.TooManyRequestError -> DomainDeleteError.TooManyRequestError
@@ -147,9 +116,6 @@ fun RepoDeleteError.toDomain() = when (this) {
     is RepoDeleteError.UnknownError -> DomainDeleteError.UnknownError(this.message)
 }
 
-/**
- * Маппер для OperationsError.
- */
 fun RepoOperationsError.toDomain() = when (this) {
     RepoOperationsError.ValidationError -> DomainOperationsError.ValidationError
     RepoOperationsError.NotAuthorizedError -> DomainOperationsError.NotAuthorizedError
@@ -160,55 +126,60 @@ fun RepoOperationsError.toDomain() = when (this) {
     is RepoOperationsError.UnknownError -> DomainOperationsError.UnknownError(this.message)
 }
 
-/**
- * Универсальный маппер для любого AppResult.
- */
-inline fun <T_Repo, T_Domain, E_Repo, E_Domain> RepoAppResult<T_Repo, E_Repo>.toDomain(
+inline fun <T, E_Repo, E_Domain> AppResult<T, E_Repo>.mapError(
     crossinline errorMapper: (E_Repo) -> E_Domain,
-    crossinline dataMapper: (T_Repo) -> T_Domain
-): DomainAppResult<T_Domain, E_Domain> {
-    return when (this) {
-        is RepoAppResult.Success -> DomainAppResult.Success(dataMapper(this.data))
-        is RepoAppResult.Error -> DomainAppResult.Error(errorMapper(this.error))
-    }
+): AppResult<T, E_Domain> = when (this) {
+    is AppResult.Success -> AppResult.Success(this.data)
+    is AppResult.Error -> AppResult.Error(errorMapper(this.error))
 }
 
-/**
- * Удобные extension функции для конкретных типов ошибок
- */
+fun AppResult<Unit, RepoAuthError>.toDomainAuth(): AppResult<Unit, DomainAuthError> =
+    mapError(RepoAuthError::toDomain)
 
-fun RepoAppResult<Unit, RepoAuthError>.toDomainAuth(): DomainAppResult<Unit, DomainAuthError> =
-    toDomain(RepoAuthError::toDomain) { }
+fun AppResult<Unit, RepoRegisterError>.toDomainRegister(): AppResult<Unit, DomainRegisterError> =
+    mapError(RepoRegisterError::toDomain)
 
-fun RepoAppResult<Unit, RepoRegisterError>.toDomainRegister(): DomainAppResult<Unit, DomainRegisterError> =
-    toDomain(RepoRegisterError::toDomain) { }
+fun AppResult<Unit, RepoConfirmationError>.toDomainConfirmation(): AppResult<Unit, DomainConfirmationError> =
+    mapError(RepoConfirmationError::toDomain)
 
-fun RepoAppResult<Unit, RepoConfirmationError>.toDomainConfirmation(): DomainAppResult<Unit, DomainConfirmationError> =
-    toDomain(RepoConfirmationError::toDomain) { }
+fun AppResult<Unit, RepoResendConfirmationError>.toDomainResendConfirmation(): AppResult<Unit, DomainResendConfirmationError> =
+    mapError(RepoResendConfirmationError::toDomain)
 
-fun RepoAppResult<Unit, RepoResendConfirmationError>.toDomainResendConfirmation(): DomainAppResult<Unit, DomainResendConfirmationError> =
-    toDomain(RepoResendConfirmationError::toDomain) { }
+fun AppResult<Unit, RepoResetPasswordError>.toDomainResetPassword(): AppResult<Unit, DomainResetPasswordError> =
+    mapError(RepoResetPasswordError::toDomain)
 
-fun RepoAppResult<Unit, RepoResetPasswordError>.toDomainResetPassword(): DomainAppResult<Unit, DomainResetPasswordError> =
-    toDomain(RepoResetPasswordError::toDomain) { }
+fun AppResult<BalanceResponse, RepoGetBalanceError>.toDomainBalance(): AppResult<Balance, DomainGetBalanceError> =
+    mapError(RepoGetBalanceError::toDomain).let {
+        when (it) {
+            is AppResult.Success -> AppResult.Success(it.data.toDomain())
+            is AppResult.Error -> AppResult.Error(it.error)
+        }
+    }
 
-fun RepoAppResult<BalanceResponse, RepoGetBalanceError>.toDomainBalance(): DomainAppResult<Balance, DomainGetBalanceError> =
-    toDomain(RepoGetBalanceError::toDomain, BalanceResponse::toDomain)
+fun AppResult<Unit, RepoLogoutError>.toDomainLogout(): AppResult<Unit, DomainLogoutError> =
+    mapError(RepoLogoutError::toDomain)
 
-fun RepoAppResult<Unit, RepoLogoutError>.toDomainLogout(): DomainAppResult<Unit, DomainLogoutError> =
-    toDomain(RepoLogoutError::toDomain) { }
+fun AppResult<Unit, RepoProfileError>.toDomainProfileUpdate(): AppResult<Unit, DomainProfileError> =
+    mapError(RepoProfileError::toDomain)
 
-fun RepoAppResult<Unit, RepoProfileError>.toDomainProfileUpdate(): DomainAppResult<Unit, DomainProfileError> =
-    toDomain(RepoProfileError::toDomain) {}
+fun AppResult<ProfileResponse, RepoProfileError>.toDomainProfile(): AppResult<DomainProfileResponse, DomainProfileError> =
+    mapError(RepoProfileError::toDomain).let {
+        when (it) {
+            is AppResult.Success -> AppResult.Success(it.data.toDomain())
+            is AppResult.Error -> AppResult.Error(it.error)
+        }
+    }
 
-fun RepoAppResult<ProfileResponse, RepoProfileError>.toDomainProfile(): DomainAppResult<DomainProfileResponse, DomainProfileError> =
-    toDomain(RepoProfileError::toDomain, ProfileResponse::toDomain)
+fun AppResult<Unit, RepoChangePasswordError>.toDomainChangePassword(): AppResult<Unit, DomainChangePasswordError> =
+    mapError(RepoChangePasswordError::toDomain)
 
-fun RepoAppResult<Unit, RepoChangePasswordError>.toDomainChangePassword(): DomainAppResult<Unit, DomainChangePasswordError> =
-    toDomain(RepoChangePasswordError::toDomain) {}
+fun AppResult<Unit, RepoDeleteError>.toDomainDelete(): AppResult<Unit, DomainDeleteError> =
+    mapError(RepoDeleteError::toDomain)
 
-fun RepoAppResult<Unit, RepoDeleteError>.toDomainDelete(): DomainAppResult<Unit, DomainDeleteError> =
-    toDomain(RepoDeleteError::toDomain) {}
-
-fun RepoAppResult<RepoTransactionsPageResponse, RepoOperationsError>.toDomainOperations(): DomainAppResult<DomainTransactionsPageResponse, DomainOperationsError> =
-    toDomain(RepoOperationsError::toDomain, RepoTransactionsPageResponse::toDomain)
+fun AppResult<RepoTransactionsPageResponse, RepoOperationsError>.toDomainOperations(): AppResult<DomainTransactionsPageResponse, DomainOperationsError> =
+    mapError(RepoOperationsError::toDomain).let {
+        when (it) {
+            is AppResult.Success -> AppResult.Success(it.data.toDomain())
+            is AppResult.Error -> AppResult.Error(it.error)
+        }
+    }

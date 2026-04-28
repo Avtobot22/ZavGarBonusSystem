@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,8 +31,8 @@ import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.components.topbar.AppTopBar
-import com.zavgar.system.designsystem.modifiers.ShackingState
-import com.zavgar.system.designsystem.modifiers.rememberShackingState
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resetpassword.presentation.ResetPasswordEvent
 import com.zavgar.system.resetpassword.presentation.ResetPasswordIntent
@@ -54,6 +55,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
+private val PhoneMask = MaskVisualTransformation("+7 (###) ### ##-##")
+
 @Composable
 fun ResetPasswordScreen(
     onNavigateToConfirm: (phone: String) -> Unit,
@@ -75,7 +78,7 @@ internal fun ResetPasswordLoader(
     viewModel: ResetPasswordViewModel = koinInject()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val errorShakingState = rememberShackingState(power = ShackingState.ShakePower.Low)
+    val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarhostState = remember { SnackbarHostState() }
 
     ObserveAsEvents(viewModel.event) { event ->
@@ -111,7 +114,7 @@ internal fun ResetPasswordScaffold(
     state: ResetPasswordState,
     snackbarHostState: SnackbarHostState,
     onIntent: (ResetPasswordIntent) -> Unit,
-    errorShakingState: ShackingState,
+    errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -139,12 +142,11 @@ internal fun ResetPasswordScaffold(
 internal fun ResetPasswordContent(
     state: ResetPasswordState,
     onIntent: (ResetPasswordIntent) -> Unit,
-    errorShakingState: ShackingState,
+    errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
-    val phoneMask = remember { MaskVisualTransformation("+7 (###) ### ##-##") }
 
     Column(
         modifier = modifier
@@ -155,62 +157,88 @@ internal fun ResetPasswordContent(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
-        ) {
+        ResetAccountForm(state, onIntent, PhoneMask)
 
-            AppValidatedTextField(
-                value = state.phone,
-                onValueChange = { onIntent(ResetPasswordIntent.EnterPhone(it)) },
-                isValid = state.isPhoneValid,
-                label = stringResource(Res.string.phone_label),
-                placeholder = stringResource(Res.string.phone_placeholder),
-                isError = state.phoneError != null,
-                errorMessage = state.phoneError?.asString(),
-                visualTransformation = phoneMask,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                enabled = !state.isLoading
-            )
+        ResetAccountButton(focusManager, onIntent, state, errorShakingState)
 
-            AppPasswordField(
-                value = state.password,
-                onValueChange = { onIntent(ResetPasswordIntent.EnterPassword(it)) },
-                isError = state.passwordError != null,
-                errorMessage = state.passwordError?.asString(),
-                enabled = !state.isLoading,
-                label = stringResource(Res.string.password_label),
-                placeholder = stringResource(Res.string.password_placeholder)
-            )
+        ReturnToLoginTextButton(onIntent, state)
+    }
+}
 
-            AppPasswordField(
-                value = state.repeatPassword,
-                onValueChange = { onIntent(ResetPasswordIntent.EnterRepeatPassword(it)) },
-                isError = state.repeatPasswordError != null,
-                errorMessage = state.repeatPasswordError?.asString(),
-                enabled = !state.isLoading,
-                label = stringResource(Res.string.repeat_password_label),
-                placeholder = stringResource(Res.string.password_placeholder)
-            )
-        }
+@Composable
+private fun ReturnToLoginTextButton(
+    onIntent: (ResetPasswordIntent) -> Unit,
+    state: ResetPasswordState
+) {
+    AppTextButton(
+        textGray = stringResource(Res.string.reset_password_button_text_return),
+        textOrange = stringResource(Res.string.reset_password_button_text_login),
+        onClick = { onIntent(ResetPasswordIntent.ClickLogin) },
+        enabled = state.screenState is ResetPasswordState.ScreenState.Idle
+    )
+}
 
-        AppPrimaryButton(
-            text = stringResource(Res.string.reset_password_button_text),
-            onClick = {
-                focusManager.clearFocus()
-                onIntent(ResetPasswordIntent.Submit)
-            },
-            enabled = state.isResetPasswordButtonEnabled,
-            isLoading = state.isLoading,
-            modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
-            shakingState = errorShakingState
+@Composable
+private fun ResetAccountButton(
+    focusManager: FocusManager,
+    onIntent: (ResetPasswordIntent) -> Unit,
+    state: ResetPasswordState,
+    errorShakingState: ShakingState
+) {
+    AppPrimaryButton(
+        text = stringResource(Res.string.reset_password_button_text),
+        onClick = {
+            focusManager.clearFocus()
+            onIntent(ResetPasswordIntent.Submit)
+        },
+        enabled = state.isResetPasswordButtonEnabled,
+        isLoading = state.screenState is ResetPasswordState.ScreenState.Submitting,
+        modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
+        shakingState = errorShakingState
+    )
+}
+
+@Composable
+private fun ResetAccountForm(
+    state: ResetPasswordState,
+    onIntent: (ResetPasswordIntent) -> Unit,
+    phoneMask: MaskVisualTransformation
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
+    ) {
+        AppValidatedTextField(
+            value = state.phone,
+            onValueChange = { onIntent(ResetPasswordIntent.EnterPhone(it)) },
+            isValid = state.isPhoneValid,
+            label = stringResource(Res.string.phone_label),
+            placeholder = stringResource(Res.string.phone_placeholder),
+            isError = state.phoneError != null,
+            errorMessage = state.phoneError?.asString(),
+            visualTransformation = phoneMask,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            enabled = state.screenState is ResetPasswordState.ScreenState.Idle
         )
 
-        AppTextButton(
-            textGray = stringResource(Res.string.reset_password_button_text_return),
-            textOrange = stringResource(Res.string.reset_password_button_text_login),
-            onClick = { onIntent(ResetPasswordIntent.ClickLogin) },
-            enabled = !state.isLoading
+        AppPasswordField(
+            value = state.password,
+            onValueChange = { onIntent(ResetPasswordIntent.EnterPassword(it)) },
+            isError = state.passwordError != null,
+            errorMessage = state.passwordError?.asString(),
+            enabled = state.screenState is ResetPasswordState.ScreenState.Idle,
+            label = stringResource(Res.string.password_label),
+            placeholder = stringResource(Res.string.password_placeholder)
+        )
+
+        AppPasswordField(
+            value = state.repeatPassword,
+            onValueChange = { onIntent(ResetPasswordIntent.EnterRepeatPassword(it)) },
+            isError = state.repeatPasswordError != null,
+            errorMessage = state.repeatPasswordError?.asString(),
+            enabled = state.screenState is ResetPasswordState.ScreenState.Idle,
+            label = stringResource(Res.string.repeat_password_label),
+            placeholder = stringResource(Res.string.password_placeholder)
         )
     }
 }
@@ -224,7 +252,6 @@ private fun ResetPasswordScaffoldPreview() {
                 phone = "",
                 password = "",
                 repeatPassword = "",
-                isLoading = false,
                 isPhoneValid = false,
                 phoneError = null,
                 passwordError = null,
@@ -232,7 +259,7 @@ private fun ResetPasswordScaffoldPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
-            errorShakingState = rememberShackingState()
+            errorShakingState = rememberShakingState()
         )
     }
 }
@@ -246,7 +273,7 @@ private fun ResetPasswordScaffoldLoadingPreview() {
                 phone = "9831082464",
                 password = "password123",
                 repeatPassword = "password123",
-                isLoading = true,
+                screenState = ResetPasswordState.ScreenState.Submitting,
                 isPhoneValid = true,
                 phoneError = null,
                 passwordError = null,
@@ -254,7 +281,7 @@ private fun ResetPasswordScaffoldLoadingPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
-            errorShakingState = rememberShackingState()
+            errorShakingState = rememberShakingState()
         )
     }
 }
@@ -268,7 +295,6 @@ private fun ResetPasswordScaffoldErrorPreview() {
                 phone = "9831082464",
                 password = "123",
                 repeatPassword = "1234",
-                isLoading = false,
                 isPhoneValid = false,
                 phoneError = UiText.Resource(Res.string.error_blank_phone),
                 passwordError = UiText.Resource(Res.string.error_short_password),
@@ -276,7 +302,7 @@ private fun ResetPasswordScaffoldErrorPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
-            errorShakingState = rememberShackingState()
+            errorShakingState = rememberShakingState()
         )
     }
 }

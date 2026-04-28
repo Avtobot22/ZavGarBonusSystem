@@ -12,13 +12,18 @@ data class ResetPasswordState(
     val passwordError: UiText? = null,
     val repeatPasswordError: UiText? = null,
 
-    val isLoading: Boolean = false,
+    val screenState: ScreenState = ScreenState.Idle,
 ) {
+    sealed interface ScreenState {
+        data object Idle : ScreenState
+        data object Submitting : ScreenState
+    }
+
     val isFormFilled: Boolean
         get() = phone.isNotBlank() &&
                 password.isNotBlank() &&
                 repeatPassword.isNotBlank()
 
     val isResetPasswordButtonEnabled: Boolean
-        get() = isFormFilled && !isLoading
+        get() = isFormFilled && screenState is ScreenState.Idle
 }
