@@ -19,6 +19,8 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.koin.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.runtime)
+            implementation(libs.androidx.lifecycle.compose)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
 

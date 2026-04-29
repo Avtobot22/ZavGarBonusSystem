@@ -69,7 +69,8 @@ androidx_activity_compose = { module = "androidx.activity:activity-compose", ver
 androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx_datastore = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 androidx_lifecycle_viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle_viewmodel" }
-androidx_lifecycle_runtime = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_runtime" }
+androidx_lifecycle_runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle_runtime" }
+androidx_lifecycle_compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_runtime" }
 
 #Compose
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose_runtime" }
