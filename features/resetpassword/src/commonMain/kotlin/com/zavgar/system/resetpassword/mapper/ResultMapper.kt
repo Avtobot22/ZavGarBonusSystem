@@ -3,8 +3,8 @@ package com.zavgar.system.resetpassword.mapper
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.model.AppResult
-import com.zavgar.system.domain.model.error.ResetPasswordError
+import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.resetpassword.domain.error.ResetPasswordError
 import com.zavgar.system.resetpassword.model.ResetPasswordResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_phone

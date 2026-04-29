@@ -3,8 +3,8 @@ package com.zavgar.system.registration.mapper
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.model.AppResult
-import com.zavgar.system.domain.model.error.RegisterError
+import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.registration.domain.error.RegisterError
 import com.zavgar.system.registration.model.RegisterResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_format

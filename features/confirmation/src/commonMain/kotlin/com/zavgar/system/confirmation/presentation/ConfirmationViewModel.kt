@@ -1,21 +1,20 @@
 package com.zavgar.system.confirmation.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.confirmation.mapper.asSnackBarMessage
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.confirmation.mapper.toConfirmationResult
-import com.zavgar.system.confirmation.mapper.toDomain
 import com.zavgar.system.confirmation.mapper.toResendConfirmationResult
-import com.zavgar.system.confirmation.model.ConfirmationRequest
 import com.zavgar.system.confirmation.model.ConfirmationResult
 import com.zavgar.system.confirmation.model.ResendConfirmationResult
-import com.zavgar.system.confirmation.model.ResendRequest
+import com.zavgar.system.confirmation.domain.model.ConfirmationRequest
+import com.zavgar.system.confirmation.domain.model.ResendRequest
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.usecase.ConfirmationUseCase
-import com.zavgar.system.domain.usecase.ResendCodeUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateCodeUseCase
+import com.zavgar.system.confirmation.domain.usecase.ConfirmationUseCase
+import com.zavgar.system.confirmation.domain.usecase.ResendCodeUseCase
+import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_resend_success
 import com.zavgar.system.utils.validation.ValidationResult
@@ -23,7 +22,6 @@ import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class ConfirmationViewModel(
     private val validateCodeUseCase: ValidateCodeUseCase,
@@ -80,9 +78,9 @@ class ConfirmationViewModel(
     private fun handleResend() {
         if (currentState.timerSeconds > 0 || currentState.screenState is ConfirmationState.ScreenState.Submitting) return
 
-        viewModelScope.launch {
+        launchTry {
             val result =
-                resendCodeUseCase(ResendRequest(currentState.phone).toDomain()).toResendConfirmationResult { it.asSnackBarMessage() }
+                resendCodeUseCase(ResendRequest(currentState.phone)).toResendConfirmationResult { it.asSnackBarMessage() }
 
             startTimer()
 
@@ -100,15 +98,21 @@ class ConfirmationViewModel(
             }
 
 
+        } catch {
+            setEvent {
+                ConfirmationEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
+            }
         }
     }
 
     private fun performConfirmation(confirmationRequest: ConfirmationRequest) {
-        viewModelScope.launch {
+        launchTry {
             setState { copy(screenState = ConfirmationState.ScreenState.Submitting) }
 
             val result =
-                confirmationUseCase(confirmationRequest.toDomain()).toConfirmationResult { it.asSnackBarMessage() }
+                confirmationUseCase(confirmationRequest).toConfirmationResult { it.asSnackBarMessage() }
 
             when (result) {
                 is ConfirmationResult.Success -> setEvent { ConfirmationEvent.NavigateToLogin }
@@ -116,17 +120,26 @@ class ConfirmationViewModel(
             }
 
             setState { copy(screenState = ConfirmationState.ScreenState.Idle) }
+        } catch {
+            setState { copy(screenState = ConfirmationState.ScreenState.Idle) }
+            setEvent {
+                ConfirmationEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
+            }
         }
     }
 
     private fun startTimer() {
         timerJob?.cancel()
         setState { copy(timerSeconds = TIMER_DURATION_SECONDS) }
-        timerJob = viewModelScope.launch {
+        timerJob = launchTry {
             for (seconds in (TIMER_DURATION_SECONDS - 1) downTo 0) {
                 delay(1000)
                 setState { copy(timerSeconds = seconds) }
             }
+        } catch {
+            // ignore — timer never produces real errors
         }
     }
 }

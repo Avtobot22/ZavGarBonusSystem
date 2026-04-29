@@ -5,9 +5,9 @@ import com.zavgar.system.confirmation.model.ResendConfirmationResult
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.model.AppResult
-import com.zavgar.system.domain.model.error.ConfirmationError
-import com.zavgar.system.domain.model.error.ResendConfirmationError
+import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.confirmation.domain.error.ConfirmationError
+import com.zavgar.system.confirmation.domain.error.ResendConfirmationError
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_code
 import com.zavgar.system.resources.error_invalid_phone

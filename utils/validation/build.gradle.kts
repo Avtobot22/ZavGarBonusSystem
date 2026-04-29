@@ -13,7 +13,7 @@ kotlin {
 
         commonMain.dependencies {
             implementation(projects.core)
-            implementation(projects.domain)
+            implementation(projects.utils.result)
             implementation(projects.resources)
 
             implementation(libs.compose.runtime)
@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.compose.components.resources)
 
             implementation(libs.koin.compose)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime)
         }

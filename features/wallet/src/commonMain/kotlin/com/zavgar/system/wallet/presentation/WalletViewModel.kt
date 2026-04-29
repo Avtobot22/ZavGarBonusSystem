@@ -1,22 +1,19 @@
 package com.zavgar.system.wallet.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.logout.LogoutHandler
-import com.zavgar.system.domain.model.onTokenExpired
-import com.zavgar.system.domain.usecase.GetSessionUseCase
-import com.zavgar.system.domain.usecase.GetUserBalanceUseCase
+import com.zavgar.system.domain.session.LogoutHandler
+import com.zavgar.system.domain.session.usecase.GetSessionUseCase
+import com.zavgar.system.wallet.domain.usecase.GetUserBalanceUseCase
 import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode
 import com.zavgar.system.wallet.mapper.toBalanceResult
-import com.zavgar.system.wallet.mapper.toPresentation
 import com.zavgar.system.wallet.model.BalanceResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class WalletViewModel(
     private val getUserBalanceUseCase: GetUserBalanceUseCase,
@@ -62,7 +59,7 @@ class WalletViewModel(
     }
 
     private fun fetchBalance(isInitial: Boolean) {
-        viewModelScope.launch {
+        launchTry {
             if (isInitial) {
                 setState { copy(screenState = WalletState.ScreenState.Loading) }
             } else {
@@ -76,8 +73,7 @@ class WalletViewModel(
                 }
             }
 
-            val appResult = getUserBalanceUseCase().onTokenExpired(logoutHandler) ?: return@launch
-            when (val result = appResult.toBalanceResult()) {
+            when (val result = getUserBalanceUseCase().toBalanceResult()) {
                 is BalanceResult.Success -> {
                     val current = currentState.screenState
                     val content = if (current is WalletState.ScreenState.Content) {
@@ -114,6 +110,21 @@ class WalletViewModel(
                     }
                 }
             }
+        } catch {
+            val current = currentState.screenState
+            if (current is WalletState.ScreenState.Content) {
+                setState { copy(screenState = current.copy(isRefreshing = false)) }
+            } else if (isInitial) {
+                setState { copy(screenState = WalletState.ScreenState.Error) }
+            }
+            setEvent {
+                WalletEvent.ShowSnackbar(
+                    SnackBarMessage(
+                        message = UiText.Resource(Res.string.error_unknown_error),
+                        type = SnackBarType.ERROR
+                    )
+                )
+            }
         }
     }
 
@@ -125,7 +136,7 @@ class WalletViewModel(
             setState { copy(screenState = current.copy(timerSeconds = COOLDOWN_SECONDS)) }
         }
 
-        cooldownJob = viewModelScope.launch {
+        cooldownJob = launchTry {
             for (seconds in (COOLDOWN_SECONDS - 1) downTo 0) {
                 delay(1000)
                 val state = currentState.screenState
@@ -133,15 +144,19 @@ class WalletViewModel(
                     setState { copy(screenState = state.copy(timerSeconds = seconds)) }
                 }
             }
+        } catch {
+            // ignore — timer never produces real errors
         }
     }
 
     private fun initializeData() {
-        viewModelScope.launch {
-            getSessionUseCase().toPresentation().fold(onSuccess = { session ->
+        launchTry {
+            getSessionUseCase().fold(onSuccess = { session ->
                 setState { copy(phone = session.phone) }
                 fetchBalance(isInitial = true)
             }, onFailure = { logoutHandler.logout() })
+        } catch {
+            logoutHandler.logout()
         }
     }
 

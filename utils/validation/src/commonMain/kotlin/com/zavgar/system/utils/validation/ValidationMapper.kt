@@ -12,46 +12,38 @@ import com.zavgar.system.resources.error_invalid_length_phone
 import com.zavgar.system.resources.error_passwords_not_match
 import com.zavgar.system.resources.error_short_code
 import com.zavgar.system.resources.error_short_password
-import com.zavgar.system.domain.model.validation.BirthDateValidationError as DomainBirthDateValidationError
-import com.zavgar.system.domain.model.validation.CodeValidationError as DomainCodeValidationError
-import com.zavgar.system.domain.model.validation.NameValidationError as DomainNameValidationError
-import com.zavgar.system.domain.model.validation.PasswordValidationError as DomainPasswordValidationError
-import com.zavgar.system.domain.model.validation.PhoneValidationError as DomainPhoneValidationError
-import com.zavgar.system.domain.model.validation.RepeatPasswordValidationError as DomainRepeatPasswordValidationError
-import com.zavgar.system.domain.model.validation.ValidationResult as DomainValidationResult
-import com.zavgar.system.utils.validation.ValidationResult as PresentationValidationResult
 
-fun DomainPhoneValidationError.asUiText() = when (this) {
-    DomainPhoneValidationError.Blank -> UiText.Resource(Res.string.error_blank_phone)
-    DomainPhoneValidationError.InvalidFormat -> UiText.Resource(Res.string.error_invalid_format_phone)
-    DomainPhoneValidationError.InvalidLength -> UiText.Resource(Res.string.error_invalid_length_phone)
+fun PhoneValidationError.asUiText() = when (this) {
+    PhoneValidationError.Blank -> UiText.Resource(Res.string.error_blank_phone)
+    PhoneValidationError.InvalidFormat -> UiText.Resource(Res.string.error_invalid_format_phone)
+    PhoneValidationError.InvalidLength -> UiText.Resource(Res.string.error_invalid_length_phone)
 }
 
-fun DomainPasswordValidationError.asUiText() = when (this) {
-    DomainPasswordValidationError.Blank -> UiText.Resource(Res.string.error_blank_password)
-    DomainPasswordValidationError.Short -> UiText.Resource(Res.string.error_short_password)
+fun PasswordValidationError.asUiText() = when (this) {
+    PasswordValidationError.Blank -> UiText.Resource(Res.string.error_blank_password)
+    PasswordValidationError.Short -> UiText.Resource(Res.string.error_short_password)
 }
 
-fun DomainNameValidationError.asUiText() = when (this) {
-    DomainNameValidationError.Blank -> UiText.Resource(Res.string.error_blank_name)
+fun NameValidationError.asUiText() = when (this) {
+    NameValidationError.Blank -> UiText.Resource(Res.string.error_blank_name)
 }
 
-fun DomainBirthDateValidationError.asUiText() = when (this) {
-    DomainBirthDateValidationError.Blank -> UiText.Resource(Res.string.error_blank_birth_date)
+fun BirthDateValidationError.asUiText() = when (this) {
+    BirthDateValidationError.Blank -> UiText.Resource(Res.string.error_blank_birth_date)
 }
 
-fun DomainRepeatPasswordValidationError.asUiText() = when (this) {
-    DomainRepeatPasswordValidationError.NotMatching -> UiText.Resource(Res.string.error_passwords_not_match)
+fun RepeatPasswordValidationError.asUiText() = when (this) {
+    RepeatPasswordValidationError.NotMatching -> UiText.Resource(Res.string.error_passwords_not_match)
 }
 
-fun DomainCodeValidationError.asUiText() = when (this) {
-    DomainCodeValidationError.Blank -> UiText.Resource(Res.string.error_blank_code)
-    DomainCodeValidationError.TooShort -> UiText.Resource(Res.string.error_short_code)
+fun CodeValidationError.asUiText() = when (this) {
+    CodeValidationError.Blank -> UiText.Resource(Res.string.error_blank_code)
+    CodeValidationError.TooShort -> UiText.Resource(Res.string.error_short_code)
 }
 
-fun <D, P> DomainValidationResult<D>.toPresentation(mapper: (D) -> P): PresentationValidationResult<P> {
+fun <D, P> ValidationResult<D>.toPresentation(mapper: (D) -> P): ValidationResult<P> {
     return when (this) {
-        is DomainValidationResult.Success -> PresentationValidationResult.Success
-        is DomainValidationResult.Error -> PresentationValidationResult.Error(mapper(this.error))
+        is ValidationResult.Success -> ValidationResult.Success
+        is ValidationResult.Error -> ValidationResult.Error(mapper(this.error))
     }
 }

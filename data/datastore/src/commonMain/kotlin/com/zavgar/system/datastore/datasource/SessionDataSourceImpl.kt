@@ -3,15 +3,11 @@ package com.zavgar.system.datastore.datasource
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import com.zavgar.system.coroutines.runSuspendCatching
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.zavgar.system.coroutines.runSuspendCatching
 import com.zavgar.system.datastore.exception.SessionNotFoundException
-import com.zavgar.system.datastore.mapper.toDataStore
-import com.zavgar.system.datastore.mapper.toRepo
-import com.zavgar.system.repository.datasource.SessionDataSource
+import com.zavgar.system.datastore.model.Session
 import kotlinx.coroutines.flow.first
-import com.zavgar.system.datastore.model.Session as DataStoreSession
-import com.zavgar.system.repository.model.response.Session as RepoSession
 
 internal class SessionDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
@@ -25,14 +21,12 @@ internal class SessionDataSourceImpl(
         val APP_PHONE = stringPreferencesKey("app_phone")
     }
 
-    override suspend fun saveSession(session: RepoSession): Result<Unit> {
+    override suspend fun saveSession(session: Session): Result<Unit> {
         return runSuspendCatching {
-            val dataStoreSession = session.toDataStore()
-
             dataStore.edit { settings ->
-                settings[APP_ACCESS_TOKEN] = dataStoreSession.accessToken
-                settings[APP_REFRESH_TOKEN] = dataStoreSession.refreshToken
-                settings[APP_PHONE] = dataStoreSession.phone
+                settings[APP_ACCESS_TOKEN] = session.accessToken
+                settings[APP_REFRESH_TOKEN] = session.refreshToken
+                settings[APP_PHONE] = session.phone
             }
         }
     }
@@ -46,7 +40,7 @@ internal class SessionDataSourceImpl(
         }
     }
 
-    override suspend fun getSession(): Result<RepoSession> {
+    override suspend fun getSession(): Result<Session> {
         return runSuspendCatching {
             val preferences = dataStore.data.first()
 
@@ -55,8 +49,7 @@ internal class SessionDataSourceImpl(
             val phone = preferences[APP_PHONE]
 
             if (!accessToken.isNullOrBlank() && !phone.isNullOrBlank() && !refreshToken.isNullOrBlank()) {
-                val session = DataStoreSession(accessToken = accessToken, phone = phone, refreshToken = refreshToken)
-                session.toRepo()
+                Session(accessToken = accessToken, phone = phone, refreshToken = refreshToken)
             } else {
                 throw SessionNotFoundException("Session data is missing in storage")
             }

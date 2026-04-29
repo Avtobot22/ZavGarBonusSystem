@@ -1,24 +1,24 @@
 package com.zavgar.system.registration.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.domain.usecase.RegisterUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateBirthDateUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateNameUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePhoneUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateRepeatedPasswordUseCase
+import com.zavgar.system.registration.domain.usecase.RegisterUseCase
+import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
+import com.zavgar.system.utils.validation.ValidateNameUseCase
+import com.zavgar.system.utils.validation.ValidatePasswordUseCase
+import com.zavgar.system.utils.validation.ValidatePhoneUseCase
+import com.zavgar.system.utils.validation.ValidateRepeatedPasswordUseCase
+import com.zavgar.system.registration.domain.model.RegisterRequest
 import com.zavgar.system.registration.mapper.asSnackBarMessage
-import com.zavgar.system.registration.mapper.toDomain
 import com.zavgar.system.registration.mapper.toRegisterResult
-import com.zavgar.system.registration.model.RegisterRequest
 import com.zavgar.system.registration.model.RegisterResult
+import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 class RegisterViewModel(
@@ -172,11 +172,11 @@ class RegisterViewModel(
     }
 
     private fun performRegister(registerRequest: RegisterRequest) {
-        viewModelScope.launch {
+        launchTry {
             setState { copy(screenState = RegisterState.ScreenState.Submitting) }
 
             val result =
-                registerUseCase(registerRequest.toDomain()).toRegisterResult { it.asSnackBarMessage() }
+                registerUseCase(registerRequest).toRegisterResult { it.asSnackBarMessage() }
 
             setState { copy(screenState = RegisterState.ScreenState.Idle) }
 
@@ -189,6 +189,13 @@ class RegisterViewModel(
                     setEvent { RegisterEvent.ShowSnackbar(result.message) }
                 }
 
+            }
+        } catch {
+            setState { copy(screenState = RegisterState.ScreenState.Idle) }
+            setEvent {
+                RegisterEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
             }
         }
     }

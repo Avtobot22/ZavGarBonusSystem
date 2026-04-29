@@ -1,13 +1,14 @@
 package com.zavgar.system.network.di
 
+import com.zavgar.system.datastore.datasource.SessionDataSource
+import com.zavgar.system.domain.session.LogoutHandler
 import com.zavgar.system.network.model.LoginResponse
+import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.network.remote.AuthServiceImpl
+import com.zavgar.system.network.remote.LoyaltyService
 import com.zavgar.system.network.remote.LoyaltyServiceImpl
+import com.zavgar.system.network.remote.UserProfileService
 import com.zavgar.system.network.remote.UserProfileServiceImpl
-import com.zavgar.system.repository.datasource.SessionDataSource
-import com.zavgar.system.repository.remote.AuthService
-import com.zavgar.system.repository.remote.LoyaltyService
-import com.zavgar.system.repository.remote.UserProfileService
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
@@ -55,6 +56,7 @@ val networkModule = module {
     single(named("authClient")) {
         val sessionDataSource = get<SessionDataSource>()
         val publicClient = get<HttpClient>(named("publicClient"))
+        val koinScope = this
 
         HttpClient {
             configureCommon(get(), BASE_URL)
@@ -78,7 +80,8 @@ val networkModule = module {
                     refreshTokens {
 
                         val oldRefreshToken =
-                            sessionDataSource.getRefreshToken().getOrNull() ?: return@refreshTokens null
+                            sessionDataSource.getRefreshToken().getOrNull()
+                                ?: return@refreshTokens triggerLogout(koinScope.get())
 
                         try {
                             val response = publicClient.post("auth/refresh/token") {
@@ -90,20 +93,23 @@ val networkModule = module {
                             if (response.status.isSuccess()) {
                                 val newTokens: LoginResponse = response.body()
 
-                                sessionDataSource.saveTokens(
+                                val saveResult = sessionDataSource.saveTokens(
                                     accessToken = newTokens.accessToken,
                                     refreshToken = newTokens.refreshToken
                                 )
+                                if (saveResult.isFailure) {
+                                    return@refreshTokens triggerLogout(koinScope.get())
+                                }
 
                                 BearerTokens(
                                     accessToken = newTokens.accessToken,
                                     refreshToken = newTokens.refreshToken
                                 )
                             } else {
-                                null
+                                triggerLogout(koinScope.get())
                             }
                         } catch (_: Exception) {
-                            null
+                            triggerLogout(koinScope.get())
                         }
                     }
                 }
@@ -122,6 +128,11 @@ val networkModule = module {
     single<LoyaltyService> {
         LoyaltyServiceImpl(get(named("authClient")))
     }
+}
+
+private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
+    logoutHandler.logout()
+    return null
 }
 
 private fun HttpClientConfig<*>.configureCommon(json: Json, baseUrl: String) {

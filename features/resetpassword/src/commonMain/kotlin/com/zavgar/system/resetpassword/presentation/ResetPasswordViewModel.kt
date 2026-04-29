@@ -1,21 +1,21 @@
 package com.zavgar.system.resetpassword.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.usecase.ResetPasswordUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePhoneUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateRepeatedPasswordUseCase
+import com.zavgar.system.resetpassword.domain.usecase.ResetPasswordUseCase
+import com.zavgar.system.utils.validation.ValidatePasswordUseCase
+import com.zavgar.system.utils.validation.ValidatePhoneUseCase
+import com.zavgar.system.utils.validation.ValidateRepeatedPasswordUseCase
 import com.zavgar.system.resetpassword.mapper.asSnackBarMessage
-import com.zavgar.system.resetpassword.mapper.toDomain
 import com.zavgar.system.resetpassword.mapper.toResetPasswordResult
 import com.zavgar.system.resetpassword.model.ResetPasswordRequest
 import com.zavgar.system.resetpassword.model.ResetPasswordResult
+import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
-import kotlinx.coroutines.launch
 
 class ResetPasswordViewModel(
     private val resetPasswordUseCase: ResetPasswordUseCase,
@@ -94,10 +94,10 @@ class ResetPasswordViewModel(
 
     private fun performResetPassword(resetPasswordRequest: ResetPasswordRequest) {
 
-        viewModelScope.launch {
+        launchTry {
             setState { copy(screenState = ResetPasswordState.ScreenState.Submitting) }
 
-            val result = resetPasswordUseCase(resetPasswordRequest.toDomain()).toResetPasswordResult { it.asSnackBarMessage() }
+            val result = resetPasswordUseCase(resetPasswordRequest).toResetPasswordResult { it.asSnackBarMessage() }
 
             when (result) {
                 is ResetPasswordResult.Success -> setEvent { ResetPasswordEvent.NavigateToConfirm(resetPasswordRequest.phone) }
@@ -105,6 +105,13 @@ class ResetPasswordViewModel(
             }
 
             setState { copy(screenState = ResetPasswordState.ScreenState.Idle) }
+        } catch {
+            setState { copy(screenState = ResetPasswordState.ScreenState.Idle) }
+            setEvent {
+                ResetPasswordEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
+            }
         }
 
     }

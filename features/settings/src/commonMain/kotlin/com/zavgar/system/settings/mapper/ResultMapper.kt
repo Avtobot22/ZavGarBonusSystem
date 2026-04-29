@@ -3,8 +3,8 @@ package com.zavgar.system.settings.mapper
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.model.AppResult
-import com.zavgar.system.domain.model.error.LogoutError
+import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.settings.domain.error.LogoutError
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_network_error
 import com.zavgar.system.resources.error_server_error
@@ -19,11 +19,6 @@ fun <T, E> AppResult<T, E>.toLogoutResult(errorMapper: (E) -> SnackBarMessage) =
 }
 
 fun LogoutError.asSnackBarMessage() = when (this) {
-    is LogoutError.NotAuthorizedError -> SnackBarMessage(
-        message = UiText.Resource(Res.string.error_user_not_found),
-        type = SnackBarType.WARNING
-    )
-
     is LogoutError.TooManyRequestError -> SnackBarMessage(
         message = UiText.Resource(Res.string.error_too_many_requests),
         type = SnackBarType.WARNING

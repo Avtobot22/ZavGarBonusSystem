@@ -1,15 +1,11 @@
 package com.zavgar.system.history.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.domain.logout.LogoutHandler
-import com.zavgar.system.domain.model.onTokenExpired
-import com.zavgar.system.domain.usecase.GetOperationsUseCase
-import com.zavgar.system.history.mapper.toDomain
+import com.zavgar.system.history.domain.usecase.GetOperationsUseCase
 import com.zavgar.system.history.mapper.toPresentation
 import com.zavgar.system.history.mapper.toTransactionsResult
 import com.zavgar.system.history.model.DatePickerType
@@ -17,12 +13,11 @@ import com.zavgar.system.history.model.TransactionsRequest
 import com.zavgar.system.history.model.TransactionsResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_date_range
-import kotlinx.coroutines.launch
+import com.zavgar.system.resources.error_unknown_error
 import kotlinx.datetime.LocalDate
 
 class HistoryViewModel(
     private val getOperationsUseCase: GetOperationsUseCase,
-    private val logoutHandler: LogoutHandler,
 ) : BaseViewModel<HistoryState, HistoryIntent, HistoryEvent>(HistoryState()) {
 
     init {
@@ -103,7 +98,7 @@ class HistoryViewModel(
             )
         }
 
-        viewModelScope.launch {
+        launchTry {
 
             val state = currentState
             val request = TransactionsRequest(
@@ -114,9 +109,8 @@ class HistoryViewModel(
 
             val historyItems = if (!isFirstPage) state.history else emptyList()
 
-            val appResult = getOperationsUseCase(request.toDomain()).onTokenExpired(logoutHandler)
+            val appResult = getOperationsUseCase(request)
             setState { copy(isRefreshing = false, isLoadingNextPage = false) }
-            appResult ?: return@launch
 
             when (val result = appResult.toTransactionsResult { it.toPresentation(historyItems) }) {
                 is TransactionsResult.Success -> setState {
@@ -137,6 +131,18 @@ class HistoryViewModel(
                         setEvent { HistoryEvent.ShowSnackbar(result.message) }
                     }
                 }
+            }
+        } catch {
+            setState { copy(isRefreshing = false, isLoadingNextPage = false) }
+            if (isFirstPage && !isRefreshing && currentState.history.isEmpty()) {
+                setState { copy(screenState = HistoryState.ScreenState.Error) }
+            } else {
+                setState { copy(screenState = HistoryState.ScreenState.Content) }
+            }
+            setEvent {
+                HistoryEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
             }
         }
 

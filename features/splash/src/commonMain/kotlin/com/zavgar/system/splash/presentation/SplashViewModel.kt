@@ -1,11 +1,8 @@
 package com.zavgar.system.splash.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.domain.usecase.GetSessionUseCase
-import com.zavgar.system.splash.mapper.toPresentation
+import com.zavgar.system.domain.session.usecase.GetSessionUseCase
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private const val SPLASH_MIN_DELAY_MS = 1_000L
 
@@ -20,8 +17,8 @@ class SplashViewModel(
     override fun handleIntent(intent: SplashIntent) = Unit
 
     private fun checkSession() {
-        viewModelScope.launch {
-            val result = getSessionUseCase().toPresentation()
+        launchTry {
+            val result = getSessionUseCase()
 
             delay(SPLASH_MIN_DELAY_MS)
 
@@ -29,6 +26,8 @@ class SplashViewModel(
                 onSuccess = { setEvent { SplashEvent.NavigateToWallet } },
                 onFailure = { setEvent { SplashEvent.NavigateToLogin } }
             )
+        } catch {
+            setEvent { SplashEvent.NavigateToLogin }
         }
     }
 }

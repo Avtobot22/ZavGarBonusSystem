@@ -1,39 +1,35 @@
 package com.zavgar.system.account.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.account.mapper.toChangePasswordResult
 import com.zavgar.system.account.mapper.toDeleteResult
-import com.zavgar.system.account.mapper.toDomain
 import com.zavgar.system.account.mapper.toProfileGetResult
 import com.zavgar.system.account.mapper.toProfileUpdateResult
-import com.zavgar.system.account.model.ChangePasswordRequest
 import com.zavgar.system.account.model.ChangePasswordResult
 import com.zavgar.system.account.model.DeleteResult
 import com.zavgar.system.account.model.ProfileGetResult
-import com.zavgar.system.account.model.ProfileRequest
 import com.zavgar.system.account.model.ProfileUpdateResult
+import com.zavgar.system.account.domain.model.ChangePasswordRequest
+import com.zavgar.system.account.domain.model.ProfileRequest
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.domain.logout.LogoutHandler
-import com.zavgar.system.domain.model.onTokenExpired
-import com.zavgar.system.domain.usecase.ChangePasswordUseCase
-import com.zavgar.system.domain.usecase.DeleteProfileUseCase
-import com.zavgar.system.domain.usecase.GetProfileUseCase
-import com.zavgar.system.domain.usecase.UpdateProfileUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateBirthDateUseCase
-import com.zavgar.system.domain.usecase.validation.ValidateNameUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
+import com.zavgar.system.account.domain.usecase.ChangePasswordUseCase
+import com.zavgar.system.account.domain.usecase.DeleteProfileUseCase
+import com.zavgar.system.account.domain.usecase.GetProfileUseCase
+import com.zavgar.system.account.domain.usecase.UpdateProfileUseCase
+import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
+import com.zavgar.system.utils.validation.ValidateNameUseCase
+import com.zavgar.system.utils.validation.ValidatePasswordUseCase
 import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.password_update_success
 import com.zavgar.system.resources.profile_delete_success
 import com.zavgar.system.resources.profile_update_success
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
 class AccountViewModel(
@@ -41,7 +37,6 @@ class AccountViewModel(
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
     private val deleteProfileUseCase: DeleteProfileUseCase,
-    private val logoutHandler: LogoutHandler,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val validateNameUseCase: ValidateNameUseCase,
     private val validateBirthDateUseCase: ValidateBirthDateUseCase
@@ -73,12 +68,11 @@ class AccountViewModel(
     }
 
     private fun initProfile() {
-        viewModelScope.launch {
+        launchTry {
             setState { copy(screenState = AccountState.ScreenState.Loading, isLoading = true) }
 
-            val appResult = getProfileUseCase().onTokenExpired(logoutHandler)
+            val appResult = getProfileUseCase()
             setState { copy(isLoading = false) }
-            appResult ?: return@launch
 
             when (val result = appResult.toProfileGetResult()) {
                 is ProfileGetResult.Success ->
@@ -95,6 +89,13 @@ class AccountViewModel(
                     setState { copy(screenState = AccountState.ScreenState.Error) }
                     setEvent { AccountEvent.ShowSnackbar(result.message) }
                 }
+            }
+        } catch {
+            setState { copy(isLoading = false, screenState = AccountState.ScreenState.Error) }
+            setEvent {
+                AccountEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
             }
         }
     }
@@ -166,15 +167,14 @@ class AccountViewModel(
 
         if (passwordResult is ValidationResult.Error || repeatPasswordResult is ValidationResult.Error) return
 
-        viewModelScope.launch {
+        launchTry {
             setState { copy(isPasswordDialogLoading = true) }
 
             val appResult = changePasswordUseCase(
-                ChangePasswordRequest(state.oldPassword, state.newPassword).toDomain()
-            ).onTokenExpired(logoutHandler)
+                ChangePasswordRequest(state.oldPassword, state.newPassword)
+            )
 
             setState { copy(isPasswordDialogLoading = false) }
-            appResult ?: return@launch
 
             when (val result = appResult.toChangePasswordResult()) {
                 is ChangePasswordResult.Success -> {
@@ -193,6 +193,13 @@ class AccountViewModel(
                     AccountEvent.ShowSnackbar(result.message)
                 }
             }
+        } catch {
+            setState { copy(isPasswordDialogLoading = false) }
+            setEvent {
+                AccountEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
+            }
         }
     }
 
@@ -207,12 +214,11 @@ class AccountViewModel(
     private fun handleConfirmDeleteAccount() {
         if (currentState.isLoading) return
 
-        viewModelScope.launch {
+        launchTry {
             setState { copy(isLoading = true) }
 
-            val appResult = deleteProfileUseCase().onTokenExpired(logoutHandler)
+            val appResult = deleteProfileUseCase()
             setState { copy(isLoading = false) }
-            appResult ?: return@launch
 
             when (val result = appResult.toDeleteResult()) {
                 is DeleteResult.Success -> {
@@ -228,6 +234,13 @@ class AccountViewModel(
                 }
 
                 is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
+            }
+        } catch {
+            setState { copy(isLoading = false) }
+            setEvent {
+                AccountEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
             }
         }
     }
@@ -258,12 +271,11 @@ class AccountViewModel(
     }
 
     private fun performUpdate(profileRequest: ProfileRequest) {
-        viewModelScope.launch {
+        launchTry {
             setState { copy(isLoading = true) }
 
-            val appResult = updateProfileUseCase(profileRequest.toDomain()).onTokenExpired(logoutHandler)
+            val appResult = updateProfileUseCase(profileRequest)
             setState { copy(isLoading = false) }
-            appResult ?: return@launch
 
             when (val result = appResult.toProfileUpdateResult()) {
                 is ProfileUpdateResult.Success -> setEvent {
@@ -278,6 +290,13 @@ class AccountViewModel(
                 is ProfileUpdateResult.Error -> setEvent {
                     AccountEvent.ShowSnackbar(result.message)
                 }
+            }
+        } catch {
+            setState { copy(isLoading = false) }
+            setEvent {
+                AccountEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
             }
         }
     }

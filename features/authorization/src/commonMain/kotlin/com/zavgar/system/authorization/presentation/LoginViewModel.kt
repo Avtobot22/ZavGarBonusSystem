@@ -1,19 +1,20 @@
 package com.zavgar.system.authorization.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.authorization.mapper.asSnackBarMessage
-import com.zavgar.system.authorization.mapper.toDomain
 import com.zavgar.system.authorization.mapper.toLoginResult
-import com.zavgar.system.authorization.model.LoginRequest
 import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.domain.usecase.LoginUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePasswordUseCase
-import com.zavgar.system.domain.usecase.validation.ValidatePhoneUseCase
+import com.zavgar.system.authorization.domain.model.LoginRequest
+import com.zavgar.system.authorization.domain.usecase.LoginUseCase
+import com.zavgar.system.core.presentation.util.SnackBarMessage
+import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.utils.validation.ValidatePasswordUseCase
+import com.zavgar.system.utils.validation.ValidatePhoneUseCase
+import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
-import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val validatePhoneUseCase: ValidatePhoneUseCase,
@@ -84,10 +85,10 @@ class LoginViewModel(
     private fun handleRegister() = setEvent { LoginEvent.NavigateToRegister }
 
     private fun performLogin(loginRequest: LoginRequest) {
-        viewModelScope.launch {
+        launchTry {
             setState { copy(screenState = LoginState.ScreenState.Submitting) }
 
-            val result = loginUseCase(loginRequest.toDomain()).toLoginResult { it.asSnackBarMessage() }
+            val result = loginUseCase(loginRequest).toLoginResult { it.asSnackBarMessage() }
 
             when (result) {
                 is LoginResult.Success -> setEvent { LoginEvent.NavigateToWallet }
@@ -95,6 +96,13 @@ class LoginViewModel(
             }
 
             setState { copy(screenState = LoginState.ScreenState.Idle) }
+        } catch {
+            setState { copy(screenState = LoginState.ScreenState.Idle) }
+            setEvent {
+                LoginEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
+            }
         }
     }
 }

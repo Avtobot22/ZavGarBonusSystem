@@ -2,11 +2,10 @@ include(":app")
 
 include(":core")
 
-include(":data:repository")
 include(":data:datastore")
 include(":data:network")
 
-include(":domain")
+include(":domain:session")
 
 include(":features:authorization")
 include(":features:registration")
@@ -29,6 +28,7 @@ include(":libraries:navigation-contracts")
 
 include(":shared")
 include(":utils:validation")
+include(":utils:result")
 include(":resources")
 
 pluginManagement {

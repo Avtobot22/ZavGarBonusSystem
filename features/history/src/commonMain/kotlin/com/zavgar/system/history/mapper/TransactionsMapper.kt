@@ -2,32 +2,23 @@ package com.zavgar.system.history.mapper
 
 import com.zavgar.system.core.presentation.util.toDayMonthYearStr
 import com.zavgar.system.core.presentation.util.toHourMinuteStr
-import com.zavgar.system.domain.model.response.OperationType
-import com.zavgar.system.domain.model.response.PointsType
-import com.zavgar.system.domain.model.request.TransactionsRequest as DomainTransactionsRequest
-import com.zavgar.system.domain.model.response.TransactionsPageResponse as DomainTransactionsPageResponse
-import com.zavgar.system.history.model.History as UiHistory
-import com.zavgar.system.history.model.HistoryItem as UiHistoryItem
-import com.zavgar.system.history.model.TransactionsRequest as UiTransactionsRequest
+import com.zavgar.system.history.domain.model.OperationType
+import com.zavgar.system.history.domain.model.PointsType
+import com.zavgar.system.history.domain.model.TransactionsPageResponse
+import com.zavgar.system.history.model.History
+import com.zavgar.system.history.model.HistoryItem
 
 
-fun UiTransactionsRequest.toDomain() = DomainTransactionsRequest(
-    periodStart = periodStart,
-    periodEnd = periodEnd,
-    cursor = cursor,
-    limit = limit
-)
-
-fun DomainTransactionsPageResponse.toPresentation(
-    currentHistoryItems: List<UiHistoryItem> = emptyList()
-): UiHistory {
+fun TransactionsPageResponse.toPresentation(
+    currentHistoryItems: List<HistoryItem> = emptyList(),
+): History {
 
     val newHistoryItems = buildList {
         addAll(currentHistoryItems)
 
         var lastDateStr = currentHistoryItems
-            .lastOrNull { it is UiHistoryItem.DateHeader }
-            ?.let { (it as UiHistoryItem.DateHeader).date }
+            .lastOrNull { it is HistoryItem.DateHeader }
+            ?.let { (it as HistoryItem.DateHeader).date }
 
         this@toPresentation.transactions.forEach { transaction ->
             val dateStr = transaction.date.toDayMonthYearStr()
@@ -35,9 +26,9 @@ fun DomainTransactionsPageResponse.toPresentation(
 
             if (lastDateStr != dateStr) {
                 add(
-                    UiHistoryItem.DateHeader(
+                    HistoryItem.DateHeader(
                         id = "header_$dateStr",
-                        date = dateStr
+                        date = dateStr,
                     )
                 )
                 lastDateStr = dateStr
@@ -54,19 +45,19 @@ fun DomainTransactionsPageResponse.toPresentation(
             val amountFormatted = "$sign${transaction.amount} $pointsSymbol"
 
             add(
-                UiHistoryItem.TransactionItem(
+                HistoryItem.TransactionItem(
                     id = transaction.id,
                     time = timeStr,
                     amount = amountFormatted,
                     store = transaction.store,
-                    isIncome = isIncome
+                    isIncome = isIncome,
                 )
             )
         }
     }
-    return UiHistory(
+    return History(
         transactions = newHistoryItems,
         nextCursor = newCursor,
-        hasMore = hasMore
+        hasMore = hasMore,
     )
 }

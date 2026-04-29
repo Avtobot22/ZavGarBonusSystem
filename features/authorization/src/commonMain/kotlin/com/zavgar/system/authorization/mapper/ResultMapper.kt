@@ -4,8 +4,8 @@ import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.model.AppResult
-import com.zavgar.system.domain.model.error.AuthError
+import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.authorization.domain.error.AuthError
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_login
 import com.zavgar.system.resources.error_network_error

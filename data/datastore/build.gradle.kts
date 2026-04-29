@@ -9,7 +9,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.data.repository)
+            api(projects.utils.result)
             implementation(projects.libraries.coroutines)
 
             implementation(libs.koin.core)

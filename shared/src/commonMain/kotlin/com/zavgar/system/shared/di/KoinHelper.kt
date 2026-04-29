@@ -7,15 +7,15 @@ import com.zavgar.system.coroutines.di.coroutinesModule
 import com.zavgar.system.datastore.di.dataStoreModule
 import com.zavgar.system.events.di.eventsModule
 import com.zavgar.system.designsystem.di.designSystemModule
-import com.zavgar.system.domain.di.domainModule
+import com.zavgar.system.domain.session.di.sessionModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule
 import com.zavgar.system.network.di.networkModule
 import com.zavgar.system.registration.di.registrationModule
-import com.zavgar.system.repository.di.repositoryModule
 import com.zavgar.system.resetpassword.di.resetPasswordModule
 import com.zavgar.system.settings.di.settingsModule
 import com.zavgar.system.splash.di.splashModule
+import com.zavgar.system.utils.validation.di.validationModule
 import com.zavgar.system.wallet.di.walletModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -49,10 +49,10 @@ internal val appModules = listOf(
     // Data
     dataStoreModule,        // DataStore, SessionDataSource
     networkModule,          // HttpClient, *Service implementations
-    repositoryModule,       // Repository implementations
 
     // Domain
-    domainModule,           // Use cases, LogoutHandler
+    sessionModule,          // Session use cases, LogoutHandler
+    validationModule,       // Validation use cases
 
     // Navigation
     navigationModule,       // NavEventController

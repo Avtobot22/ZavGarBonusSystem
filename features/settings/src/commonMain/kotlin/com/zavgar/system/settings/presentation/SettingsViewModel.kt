@@ -1,12 +1,14 @@
 package com.zavgar.system.settings.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.domain.usecase.LogoutUseCase
+import com.zavgar.system.core.presentation.util.SnackBarMessage
+import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.settings.domain.usecase.LogoutUseCase
+import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.settings.mapper.asSnackBarMessage
 import com.zavgar.system.settings.mapper.toLogoutResult
 import com.zavgar.system.settings.model.LogoutResult
-import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val logoutUseCase: LogoutUseCase,
@@ -20,7 +22,7 @@ class SettingsViewModel(
     }
 
     private fun handleLogout() {
-        viewModelScope.launch {
+        launchTry {
             setState { copy(screenState = SettingsState.ScreenState.Loading) }
             val result = logoutUseCase().toLogoutResult { it.asSnackBarMessage() }
             when (result) {
@@ -29,6 +31,13 @@ class SettingsViewModel(
                     setState { copy(screenState = SettingsState.ScreenState.Content) }
                     setEvent { SettingsEvent.ShowSnackbar(result.message) }
                 }
+            }
+        } catch {
+            setState { copy(screenState = SettingsState.ScreenState.Content) }
+            setEvent {
+                SettingsEvent.ShowSnackbar(
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                )
             }
         }
     }

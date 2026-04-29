@@ -1,7 +1,7 @@
 package com.zavgar.system.datastore.di
 
 import com.zavgar.system.datastore.datasource.SessionDataSourceImpl
-import com.zavgar.system.repository.datasource.SessionDataSource
+import com.zavgar.system.datastore.datasource.SessionDataSource
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind

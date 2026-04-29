@@ -7,11 +7,11 @@ import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.domain.model.AppResult
-import com.zavgar.system.domain.model.error.ChangePasswordError
-import com.zavgar.system.domain.model.error.DeleteError
-import com.zavgar.system.domain.model.error.ProfileError
-import com.zavgar.system.domain.model.response.ProfileResponse
+import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.account.domain.error.ChangePasswordError
+import com.zavgar.system.account.domain.error.DeleteError
+import com.zavgar.system.account.domain.error.ProfileError
+import com.zavgar.system.account.domain.model.ProfileResponse
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_format
 import com.zavgar.system.resources.error_network_error
@@ -19,16 +19,10 @@ import com.zavgar.system.resources.error_server_error
 import com.zavgar.system.resources.error_too_many_requests
 import com.zavgar.system.resources.error_user_not_found
 import com.zavgar.system.resources.password_update_error
-import com.zavgar.system.account.model.ProfileResponse as UiProfileResponse
 
 fun ProfileError.asSnackBarMessage() = when (this) {
     is ProfileError.ValidationError -> SnackBarMessage(
         message = UiText.Resource(Res.string.error_invalid_format),
-        type = SnackBarType.WARNING
-    )
-
-    is ProfileError.NotAuthorizedError -> SnackBarMessage(
-        message = UiText.Resource(Res.string.error_user_not_found),
         type = SnackBarType.WARNING
     )
 
@@ -64,11 +58,6 @@ fun ChangePasswordError.asSnackBarMessage() = when (this) {
         type = SnackBarType.WARNING
     )
 
-    is ChangePasswordError.NotAuthorizedError -> SnackBarMessage(
-        message = UiText.Resource(Res.string.error_user_not_found),
-        type = SnackBarType.WARNING
-    )
-
     is ChangePasswordError.TooManyRequestError -> SnackBarMessage(
         message = UiText.Resource(Res.string.error_too_many_requests),
         type = SnackBarType.WARNING
@@ -91,11 +80,6 @@ fun ChangePasswordError.asSnackBarMessage() = when (this) {
 }
 
 fun DeleteError.asSnackBarMessage() = when (this) {
-    is DeleteError.NotAuthorizedError -> SnackBarMessage(
-        message = UiText.Resource(Res.string.error_user_not_found),
-        type = SnackBarType.WARNING
-    )
-
     is DeleteError.TooManyRequestError -> SnackBarMessage(
         message = UiText.Resource(Res.string.error_too_many_requests),
         type = SnackBarType.WARNING
@@ -133,6 +117,6 @@ fun AppResult<Unit, DeleteError>.toDeleteResult(): DeleteResult = when (this) {
 }
 
 fun AppResult<ProfileResponse, ProfileError>.toProfileGetResult(): ProfileGetResult = when (this) {
-    is AppResult.Success -> ProfileGetResult.Success(data.toPresentation())
+    is AppResult.Success -> ProfileGetResult.Success(data)
     is AppResult.Error -> ProfileGetResult.Error(error.asSnackBarMessage())
 }
