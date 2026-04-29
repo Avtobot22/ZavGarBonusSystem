@@ -171,7 +171,7 @@ internal fun RegisterContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        RegisterForm(state, onIntent, PhoneMask)
+        RegisterForm(state, onIntent)
 
         RegisterButton(focusManager, onIntent, state, errorShakingState)
 
@@ -215,8 +215,7 @@ private fun RegisterButton(
 @Composable
 private fun RegisterForm(
     state: RegisterState,
-    onIntent: (RegisterIntent) -> Unit,
-    phoneMask: MaskVisualTransformation
+    onIntent: (RegisterIntent) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically),
@@ -250,7 +249,7 @@ private fun RegisterForm(
             placeholder = stringResource(Res.string.phone_placeholder),
             isError = state.phoneError != null,
             errorMessage = state.phoneError?.asString(),
-            visualTransformation = phoneMask,
+            visualTransformation = PhoneMask,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             enabled = state.screenState is RegisterState.ScreenState.Idle
         )

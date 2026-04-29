@@ -176,7 +176,7 @@ internal fun LoginContent(
             verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
         ) {
 
-            AuthorizationForm(state, onIntent, PhoneMask)
+            AuthorizationForm(state, onIntent)
 
             ForgotPasswordButton(onIntent, state)
 
@@ -244,8 +244,7 @@ private fun ForgotPasswordButton(
 @Composable
 private fun AuthorizationForm(
     state: LoginState,
-    onIntent: (LoginIntent) -> Unit,
-    phoneMask: MaskVisualTransformation
+    onIntent: (LoginIntent) -> Unit
 ) {
     AppValidatedTextField(
         value = state.phone,
@@ -255,7 +254,7 @@ private fun AuthorizationForm(
         placeholder = stringResource(Res.string.phone_placeholder),
         isError = state.phoneError != null,
         errorMessage = state.phoneError?.asString(),
-        visualTransformation = phoneMask,
+        visualTransformation = PhoneMask,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         enabled = state.screenState is LoginState.ScreenState.Idle
     )
