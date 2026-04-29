@@ -17,7 +17,7 @@ kotlin {
         }
     }
 
-    androidLibrary {
+    android {
         namespace = "com.zavgar.system.datastore"
     }
 }

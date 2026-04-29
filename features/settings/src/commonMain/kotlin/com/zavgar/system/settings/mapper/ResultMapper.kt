@@ -3,14 +3,13 @@ package com.zavgar.system.settings.mapper
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.utils.result.AppResult
-import com.zavgar.system.settings.domain.error.LogoutError
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_network_error
 import com.zavgar.system.resources.error_server_error
 import com.zavgar.system.resources.error_too_many_requests
-import com.zavgar.system.resources.error_user_not_found
+import com.zavgar.system.settings.domain.error.LogoutError
 import com.zavgar.system.settings.model.LogoutResult
+import com.zavgar.system.utils.result.AppResult
 
 
 fun <T, E> AppResult<T, E>.toLogoutResult(errorMapper: (E) -> SnackBarMessage) = when (this) {

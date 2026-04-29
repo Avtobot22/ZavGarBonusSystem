@@ -5,9 +5,9 @@ import com.zavgar.system.authorization.di.authorizationModule
 import com.zavgar.system.confirmation.di.confirmationModule
 import com.zavgar.system.coroutines.di.coroutinesModule
 import com.zavgar.system.datastore.di.dataStoreModule
-import com.zavgar.system.events.di.eventsModule
 import com.zavgar.system.designsystem.di.designSystemModule
 import com.zavgar.system.domain.session.di.sessionModule
+import com.zavgar.system.events.di.eventsModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule
 import com.zavgar.system.network.di.networkModule
@@ -42,20 +42,20 @@ fun initKoin(appModule: Module = module { }) {
 internal val appModules = listOf(
     // Infrastructure
     sharedModule,
-    coroutinesModule,       // CoroutineDispatcherProvider, AppCoroutineScope
-    eventsModule,           // AppEventBus
-    designSystemModule,     // Theme, design system components
+    coroutinesModule,
+    eventsModule,
+    designSystemModule,
 
     // Data
-    dataStoreModule,        // DataStore, SessionDataSource
-    networkModule,          // HttpClient, *Service implementations
+    dataStoreModule,
+    networkModule,
 
     // Domain
-    sessionModule,          // Session use cases, LogoutHandler
-    validationModule,       // Validation use cases
+    sessionModule,
+    validationModule,
 
     // Navigation
-    navigationModule,       // NavEventController
+    navigationModule,
 
     // Features
     authorizationModule,
