@@ -10,8 +10,6 @@ class MaskVisualTransformation(
     private val maskChar: Char = '#'
 ) : VisualTransformation {
 
-    private val specialSymbolsIndices = mask.indices.filter { mask[it] != maskChar }
-
     override fun filter(text: AnnotatedString): TransformedText {
         val out = StringBuilder(mask.length)
         var maskIndex = 0

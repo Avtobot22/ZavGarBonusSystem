@@ -1,14 +1,14 @@
 import extension.configureTargets
 
 plugins {
-    alias(libs.plugins.escodro.multiplatform)
+    alias(libs.plugins.zavgar.multiplatform)
     id("kotlin-parcelize")
 }
 
 kotlin {
     configureTargets("parcelable")
 
-    androidLibrary {
+    android {
         namespace = "com.zavgar.system.parcelable"
     }
 }

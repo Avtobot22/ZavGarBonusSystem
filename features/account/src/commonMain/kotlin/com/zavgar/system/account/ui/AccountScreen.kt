@@ -13,6 +13,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,16 +81,17 @@ internal fun AccountLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    ObserveAsEvents(viewModel.event) { event ->
+    viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is AccountEvent.NavigateToLogin -> onNavigateToLogin()
             is AccountEvent.NavigateBack -> onNavigateBack()
             is AccountEvent.ShowSnackbar -> {
-                launch {
+                scope.launch {
                     errorShakingState.shake()
                 }
-                launch {
+                scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
                         message = event.message.message.suspendAsString(),

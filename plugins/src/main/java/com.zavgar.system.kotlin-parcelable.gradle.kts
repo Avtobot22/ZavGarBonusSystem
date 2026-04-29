@@ -1,5 +1,5 @@
 plugins {
-    id("com.escodro.multiplatform")
+    id("com.zavgar.system.multiplatform")
     id("com.android.kotlin.multiplatform.library")
     kotlin("plugin.parcelize")
 }

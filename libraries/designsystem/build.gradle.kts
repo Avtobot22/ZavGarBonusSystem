@@ -1,7 +1,7 @@
 import extension.configureTargets
 
 plugins {
-    alias(libs.plugins.escodro.multiplatform)
+    alias(libs.plugins.zavgar.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
 }

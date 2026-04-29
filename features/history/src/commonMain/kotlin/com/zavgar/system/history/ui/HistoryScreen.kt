@@ -72,8 +72,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
-const val LOAD_MORE_THRESHOLD = 5
-
 @Composable
 fun HistoryScreen(
     onNavigateToLogin: () -> Unit,
@@ -94,16 +92,17 @@ internal fun HistoryLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    ObserveAsEvents(viewModel.event) { event ->
+    viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is HistoryEvent.Logout -> onNavigateToLogin()
             is HistoryEvent.ShowSnackbar -> {
-                launch {
+                scope.launch {
                     errorShakingState.shake()
                 }
 
-                launch {
+                scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
                         message = event.message.message.suspendAsString(),

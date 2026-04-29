@@ -13,6 +13,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -80,16 +81,17 @@ internal fun ResetPasswordLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarhostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    ObserveAsEvents(viewModel.event) { event ->
+    viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is ResetPasswordEvent.NavigateToConfirm -> onNavigateToConfirm(event.phone)
             is ResetPasswordEvent.NavigateToLogin -> onNavigateToLogin()
             is ResetPasswordEvent.ShowSnackbar -> {
-                launch {
+                scope.launch {
                     errorShakingState.shake()
                 }
-                launch {
+                scope.launch {
                     snackbarhostState.showCustomSnackbar(
                         type = event.message.type,
                         message = event.message.message.suspendAsString(),
@@ -119,7 +121,7 @@ internal fun ResetPasswordScaffold(
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
         topBar = {
             AppTopBar(
@@ -157,7 +159,7 @@ internal fun ResetPasswordContent(
         verticalArrangement = Arrangement.Center
     ) {
 
-        ResetAccountForm(state, onIntent, PhoneMask)
+        ResetAccountForm(state, onIntent)
 
         ResetAccountButton(focusManager, onIntent, state, errorShakingState)
 
@@ -201,8 +203,7 @@ private fun ResetAccountButton(
 @Composable
 private fun ResetAccountForm(
     state: ResetPasswordState,
-    onIntent: (ResetPasswordIntent) -> Unit,
-    phoneMask: MaskVisualTransformation
+    onIntent: (ResetPasswordIntent) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -216,7 +217,7 @@ private fun ResetAccountForm(
             placeholder = stringResource(Res.string.phone_placeholder),
             isError = state.phoneError != null,
             errorMessage = state.phoneError?.asString(),
-            visualTransformation = phoneMask,
+            visualTransformation = PhoneMask,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             enabled = state.screenState is ResetPasswordState.ScreenState.Idle
         )

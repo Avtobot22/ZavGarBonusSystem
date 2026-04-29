@@ -18,6 +18,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -87,18 +88,19 @@ internal fun LoginLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    ObserveAsEvents(viewModel.event) { event ->
+    viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is LoginEvent.NavigateToRegister -> onNavigateToRegister()
             is LoginEvent.NavigateToForgotPassword -> onNavigateToForgotPassword()
             is LoginEvent.NavigateToWallet -> onNavigateToWallet()
 
             is LoginEvent.ShowSnackbar -> {
-                launch {
+                scope.launch {
                     errorShakingState.shake()
                 }
-                launch {
+                scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
                         message = event.message.message.suspendAsString(),

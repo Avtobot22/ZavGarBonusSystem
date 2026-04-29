@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,13 +65,14 @@ internal fun SettingsLoader(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    ObserveAsEvents(viewModel.event) { event ->
+    viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is SettingsEvent.NavigateToProfileDetail -> onNavigateToProfileDetail()
             is SettingsEvent.NavigateToLogin -> onNavigateToLogin()
             is SettingsEvent.ShowSnackbar -> {
-                launch {
+                scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
                         message = event.message.message.suspendAsString(),

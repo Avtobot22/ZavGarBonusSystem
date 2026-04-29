@@ -41,7 +41,7 @@ private fun SplashLoader(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ObserveAsEvents(viewModel.event) { event ->
+    viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is SplashEvent.NavigateToLogin -> onNavigateToLogin()
             is SplashEvent.NavigateToWallet -> onNavigateToWallet()

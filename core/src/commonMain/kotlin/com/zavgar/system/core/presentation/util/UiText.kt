@@ -9,23 +9,28 @@ sealed interface UiText {
 
     data class DynamicString(val value: String) : UiText
 
-    class Resource(
+    data class Resource(
         val res: StringResource,
-        vararg val args: Any
+        val args: List<Any> = emptyList()
     ) : UiText
 
     @Composable
     fun asString(): String {
         return when (this) {
             is DynamicString -> value
-            is Resource -> stringResource(res, *args)
+            is Resource -> stringResource(res, *args.toTypedArray())
         }
     }
 
     suspend fun suspendAsString(): String {
         return when (this) {
             is DynamicString -> value
-            is Resource -> getString(res, *args)
+            is Resource -> getString(res, *args.toTypedArray())
         }
+    }
+
+    companion object {
+
+        operator fun invoke(res: StringResource, vararg args: Any) = Resource(res, args.toList())
     }
 }
