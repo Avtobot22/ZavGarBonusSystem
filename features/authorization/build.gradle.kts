@@ -31,6 +31,7 @@ kotlin {
             implementation(libs.compose.materialIconsExtended)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.androidx.lifecycle.compose)
 
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.collections.immutable)

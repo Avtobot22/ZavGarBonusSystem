@@ -34,6 +34,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.koin.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.compose)
             implementation(libs.logging)
         }
     }
