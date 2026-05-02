@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -12,7 +11,6 @@ import androidx.compose.ui.Modifier
 import com.zavgar.system.appstate.ZavGarAppState
 import com.zavgar.system.designsystem.animation.BottomBarEnterTransition
 import com.zavgar.system.designsystem.animation.BottomBarExitTransition
-import com.zavgar.system.designsystem.background.GlowBackground
 import com.zavgar.system.navigationapi.bottombar.AppBottomBar
 import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.TopLevelDestinations
@@ -55,7 +53,6 @@ private fun HomeLoader(
     HomeScaffold(
         navItems = navItems,
         isBottomBarVisible = appState.navBackStack.isBottomBarVisible,
-        isEdgeToEdge = appState.navBackStack.isEdgeToEdge,
         lastValidSection = lastValidSection,
         setCurrentState = setCurrentState,
         content = content,
@@ -67,21 +64,14 @@ private fun HomeLoader(
 private fun HomeScaffold(
     navItems: ImmutableList<TopLevel>,
     isBottomBarVisible: Boolean,
-    isEdgeToEdge: Boolean,
     lastValidSection: TopLevel?,
     setCurrentState: (TopLevel) -> Unit,
     content: @Composable (PaddingValues) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val windowInsets = if (isEdgeToEdge) {
-        WindowInsets(0, 0, 0, 0)
-    } else {
-        WindowInsets.safeDrawing
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = windowInsets,
+        contentWindowInsets = WindowInsets(),
         bottomBar = {
             AnimatedVisibility(
                 visible = isBottomBarVisible,
@@ -98,8 +88,6 @@ private fun HomeScaffold(
             }
         },
     ) { paddingValues ->
-        GlowBackground {
-            content(paddingValues)
-        }
+        content(paddingValues)
     }
 }

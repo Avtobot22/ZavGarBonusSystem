@@ -5,21 +5,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zavgar.system.designsystem.components.text.AppTextMain
+import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.shimmerAnimation
+import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.history.model.HistoryItem
 
 @Composable
 internal fun DateHeaderItem(item: HistoryItem.DateHeader) {
-    AppTextMain(
-        text = item.date,
-        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+    val colors = LocalZavGarColors.current
+    Text(
+        text = item.date.uppercase(),
+        color = colors.foregroundSecondary,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 0.7.sp,
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 6.dp),
     )
 }
 
@@ -27,10 +33,10 @@ internal fun DateHeaderItem(item: HistoryItem.DateHeader) {
 internal fun LoadingDateHeaderItem(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
-            .width(140.dp)
-            .height(18.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 6.dp)
+            .width(120.dp)
+            .height(14.dp)
             .clip(MaterialTheme.shapes.small)
-            .shimmerAnimation()
+            .shimmerAnimation(),
     )
 }

@@ -2,41 +2,41 @@ package com.zavgar.system.registration.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.compose.MaskVisualTransformation
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
-import com.zavgar.system.designsystem.components.button.AppTextButton
+import com.zavgar.system.designsystem.components.button.ZavGarBackButton
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
+import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
 import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
-import com.zavgar.system.designsystem.components.topbar.AppTopBar
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
+import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.registration.presentation.RegisterEvent
 import com.zavgar.system.registration.presentation.RegisterIntent
@@ -50,8 +50,6 @@ import com.zavgar.system.resources.password_placeholder
 import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
 import com.zavgar.system.resources.register_button_text
-import com.zavgar.system.resources.register_button_text_has_account
-import com.zavgar.system.resources.register_button_text_login
 import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
 import com.zavgar.system.resources.register_top_title
@@ -59,8 +57,6 @@ import com.zavgar.system.resources.repeat_password_label
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-
-private val PhoneMask = MaskVisualTransformation("+7 (###) ### ##-##")
 
 @Composable
 fun RegisterScreen(
@@ -92,9 +88,7 @@ internal fun RegisterLoader(
             is RegisterEvent.NavigateToLogin -> onNavigateToLogin()
             is RegisterEvent.NavigateToConfirm -> onNavigateToConfirm(event.phone)
             is RegisterEvent.ShowSnackbar -> {
-                scope.launch {
-                    errorShakingState.shake()
-                }
+                scope.launch { errorShakingState.shake() }
                 scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
@@ -123,38 +117,8 @@ internal fun RegisterScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
-        topBar = {
-            AppTopBar(
-                title = stringResource(Res.string.register_top_title),
-                modifier = Modifier.padding(top = 24.dp)
-            )
-        },
-    ) { paddingValues ->
-        RegisterContent(
-            state = state,
-            onIntent = onIntent,
-            errorShakingState = errorShakingState,
-            modifier = Modifier
-                .padding(paddingValues)
-
-        )
-
-    }
-}
-
-@Composable
-internal fun RegisterContent(
-    state: RegisterState,
-    onIntent: (RegisterIntent) -> Unit,
-    errorShakingState: ShakingState,
-    modifier: Modifier = Modifier,
-) {
     val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
+    val colors = LocalZavGarColors.current
 
     AppDatePicker(
         initialDate = state.birthDate,
@@ -163,53 +127,40 @@ internal fun RegisterContent(
         onConfirm = { onIntent(RegisterIntent.CloseDatePicker(it)) }
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    ZavGarAuthScaffold(
+        modifier = modifier,
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        headerBottomPadding = 36.dp,
+        sheetContentPadding = PaddingValues(horizontal = 28.dp, vertical = 22.dp),
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(bottom = 18.dp),
+        ) {
+            ZavGarBackButton(onClick = { onIntent(RegisterIntent.ClickLogin) })
+            Text(
+                text = stringResource(Res.string.register_top_title),
+                color = colors.foreground,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
         RegisterForm(state, onIntent)
 
-        RegisterButton(focusManager, onIntent, state, errorShakingState)
-
-        HasAccountTextButton(onIntent, state)
+        AppPrimaryButton(
+            text = stringResource(Res.string.register_button_text),
+            onClick = {
+                focusManager.clearFocus()
+                onIntent(RegisterIntent.Submit)
+            },
+            enabled = state.isRegisterButtonEnabled,
+            isLoading = state.screenState is RegisterState.ScreenState.Submitting,
+            modifier = Modifier.padding(top = 22.dp),
+            shakingState = errorShakingState
+        )
     }
-}
-
-@Composable
-private fun HasAccountTextButton(
-    onIntent: (RegisterIntent) -> Unit,
-    state: RegisterState
-) {
-    AppTextButton(
-        textGray = stringResource(Res.string.register_button_text_has_account),
-        textOrange = stringResource(Res.string.register_button_text_login),
-        onClick = { onIntent(RegisterIntent.ClickLogin) },
-        enabled = state.screenState is RegisterState.ScreenState.Idle
-    )
-}
-
-@Composable
-private fun RegisterButton(
-    focusManager: FocusManager,
-    onIntent: (RegisterIntent) -> Unit,
-    state: RegisterState,
-    errorShakingState: ShakingState
-) {
-    AppPrimaryButton(
-        text = stringResource(Res.string.register_button_text),
-        onClick = {
-            focusManager.clearFocus()
-            onIntent(RegisterIntent.Submit)
-        },
-        enabled = state.isRegisterButtonEnabled,
-        isLoading = state.screenState is RegisterState.ScreenState.Submitting,
-        modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
-        shakingState = errorShakingState
-    )
 }
 
 @Composable
@@ -218,8 +169,7 @@ private fun RegisterForm(
     onIntent: (RegisterIntent) -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         AppTextField(
             value = state.name,
@@ -249,7 +199,7 @@ private fun RegisterForm(
             placeholder = stringResource(Res.string.phone_placeholder),
             isError = state.phoneError != null,
             errorMessage = state.phoneError?.asString(),
-            visualTransformation = PhoneMask,
+            visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             enabled = state.screenState is RegisterState.ScreenState.Idle
         )
@@ -299,43 +249,10 @@ private fun RegisterScreenPreview() {
         birthDateError = null,
         isDatePickerOpen = false,
     )
-
     val snackbarHostState = remember { SnackbarHostState() }
-
     ZavGarThemePreview {
         RegisterScaffold(
             state = previewState,
-            snackbarHostState = snackbarHostState,
-            onIntent = {},
-            errorShakingState = rememberShakingState()
-        )
-    }
-}
-
-@Preview(name = "Loading State - Full Screen", showBackground = true)
-@Composable
-private fun RegisterScreenLoadingPreview() {
-    val loadingState = RegisterState(
-        name = "Иван Петров",
-        nameError = null,
-        phone = "9991234567",
-        isPhoneValid = true,
-        phoneError = null,
-        password = "password123",
-        passwordError = null,
-        repeatPassword = "password123",
-        repeatPasswordError = null,
-        birthDate = null,
-        birthDateError = null,
-        isDatePickerOpen = false,
-        screenState = RegisterState.ScreenState.Submitting
-    )
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    ZavGarThemePreview {
-        RegisterScaffold(
-            state = loadingState,
             snackbarHostState = snackbarHostState,
             onIntent = {},
             errorShakingState = rememberShakingState()
@@ -360,9 +277,7 @@ private fun RegisterScreenErrorPreview() {
         birthDateError = UiText.DynamicString("Выберите дату рождения"),
         isDatePickerOpen = false,
     )
-
     val snackbarHostState = remember { SnackbarHostState() }
-
     ZavGarThemePreview {
         RegisterScaffold(
             state = errorState,

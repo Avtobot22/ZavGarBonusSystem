@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 val ZavGarLightColorScheme = lightColorScheme(
@@ -73,30 +74,21 @@ fun ZavGarTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        isDarkTheme -> ZavGarDarkColorScheme
-        else -> ZavGarLightColorScheme
-    }
+    val colorScheme = if (isDarkTheme) ZavGarDarkColorScheme else ZavGarLightColorScheme
+    val zavgarColors = if (isDarkTheme) ZavGarDarkColors else ZavGarLightColors
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = zavGarTypography(),
-        shapes = ZavGarShapes,
-        content = content,
-    )
+    CompositionLocalProvider(LocalZavGarColors provides zavgarColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = zavGarTypography(),
+            shapes = ZavGarShapes,
+            content = content,
+        )
+    }
 }
 
 @Composable
 fun ZavGarThemePreview(
     isDarkTheme: Boolean = false,
     content: @Composable () -> Unit
-) {
-    val colorScheme = if (isDarkTheme) ZavGarDarkColorScheme else ZavGarLightColorScheme
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = zavGarTypography(),
-        shapes = ZavGarShapes,
-        content = content,
-    )
-}
+) = ZavGarTheme(isDarkTheme = isDarkTheme, content = content)

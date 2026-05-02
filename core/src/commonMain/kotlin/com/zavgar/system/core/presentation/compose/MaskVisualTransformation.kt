@@ -57,4 +57,8 @@ class MaskVisualTransformation(
             return textIndex
         }
     }
+
+    companion object {
+        val DEFAULT_PHONE_MASK = MaskVisualTransformation("+7 (###) ### ##-##")
+    }
 }

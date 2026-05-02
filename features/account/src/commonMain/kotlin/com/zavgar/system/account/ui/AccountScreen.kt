@@ -1,48 +1,64 @@
 package com.zavgar.system.account.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.account.presentation.AccountEvent
 import com.zavgar.system.account.presentation.AccountIntent
 import com.zavgar.system.account.presentation.AccountState
 import com.zavgar.system.account.presentation.AccountViewModel
-import com.zavgar.system.account.ui.components.ChangePasswordDialog
+import com.zavgar.system.account.ui.components.ChangePasswordBottomSheet
 import com.zavgar.system.account.ui.components.DeleteAccountDialog
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.designsystem.components.button.AppOutlinedButton
+import com.zavgar.system.designsystem.components.button.AppPrimaryButton
+import com.zavgar.system.designsystem.components.button.ZavGarBackButton
 import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.content.AppProgressIndicator
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
+import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppClickablePasswordField
 import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
-import com.zavgar.system.designsystem.components.topbar.AppProfilTopBar
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
+import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.account_confirm
@@ -88,9 +104,7 @@ internal fun AccountLoader(
             is AccountEvent.NavigateToLogin -> onNavigateToLogin()
             is AccountEvent.NavigateBack -> onNavigateBack()
             is AccountEvent.ShowSnackbar -> {
-                scope.launch {
-                    errorShakingState.shake()
-                }
+                scope.launch { errorShakingState.shake() }
                 scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
@@ -119,19 +133,9 @@ internal fun AccountScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        containerColor = Color.Transparent,
+    ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
-        topBar = {
-            AppProfilTopBar(
-                title = stringResource(Res.string.account_top_title),
-                onBackClick = { onIntent(AccountIntent.ClickBack) },
-                onActionClick = { onIntent(AccountIntent.ClickDelete) },
-                modifier = Modifier.padding(top = 24.dp)
-            )
-        },
     ) { paddingValues ->
         AnimatedState(targetState = state) { state ->
             when (state.screenState) {
@@ -149,8 +153,7 @@ internal fun AccountScaffold(
                 AccountState.ScreenState.Content -> AccountContent(
                     state = state,
                     onIntent = onIntent,
-                    modifier = Modifier
-                        .padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues)
                 )
             }
         }
@@ -162,20 +165,30 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
-    ChangePasswordDialog(state = state, onIntent = onIntent)
+    ChangePasswordBottomSheet(state = state, onIntent = onIntent)
     DeleteAccountDialog(state = state, onIntent = onIntent)
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
+            .padding(horizontal = 24.dp)
+            .padding(top = 8.dp, bottom = 24.dp),
     ) {
-        AccountForm(state, onIntent)
+        AccountHeader(
+            onBack = { onIntent(AccountIntent.ClickBack) },
+            onDelete = { onIntent(AccountIntent.ClickDelete) },
+        )
 
-        AppOutlinedButton(
+        Spacer(Modifier.height(22.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            AccountForm(state, onIntent)
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        AppPrimaryButton(
             text = stringResource(Res.string.account_confirm),
             onClick = {
                 focusManager.clearFocus()
@@ -183,7 +196,48 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
             },
             enabled = !state.isLoading,
             isLoading = state.isLoading,
-            modifier = Modifier.padding(top = 60.dp)
+        )
+    }
+}
+
+@Composable
+private fun AccountHeader(onBack: () -> Unit, onDelete: () -> Unit) {
+    val colors = LocalZavGarColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        ZavGarBackButton(onClick = onBack)
+        Text(
+            text = stringResource(Res.string.account_top_title),
+            color = colors.foreground,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+        )
+        DeleteIconButton(onClick = onDelete)
+    }
+}
+
+@Composable
+private fun DeleteIconButton(onClick: () -> Unit) {
+    val colors = LocalZavGarColors.current
+    val shape = RoundedCornerShape(13.dp)
+    Box(
+        modifier = Modifier
+            .size(42.dp)
+            .shadow(elevation = 2.dp, shape = shape, clip = false)
+            .clip(shape)
+            .background(colors.dangerContainer)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.DeleteOutline,
+            contentDescription = "Удалить аккаунт",
+            tint = colors.danger,
+            modifier = Modifier.size(20.dp),
         )
     }
 }
@@ -249,32 +303,6 @@ fun AccountScreenPreview() {
         nameError = null,
         birthDateError = null,
         isLoading = false,
-        isDatePickerOpen = false
-    )
-    ZavGarThemePreview {
-        Screen {
-            AccountScaffold(
-                state = mockState,
-                snackbarHostState = remember { SnackbarHostState() },
-                onIntent = {},
-                modifier = Modifier,
-                errorShakingState = rememberShakingState()
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun AccountScreenLoadingPreview() {
-    val mockState = AccountState(
-        screenState = AccountState.ScreenState.Loading,
-        name = "Иван Петров",
-        birthDate = LocalDate(1990, 5, 15),
-        birthDateText = "15.05.1990",
-        nameError = null,
-        birthDateError = null,
-        isLoading = true,
         isDatePickerOpen = false
     )
     ZavGarThemePreview {

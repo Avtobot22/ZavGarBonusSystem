@@ -2,16 +2,13 @@ package com.zavgar.system.confirmation.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +18,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.confirmation.presentation.ConfirmationEvent
 import com.zavgar.system.confirmation.presentation.ConfirmationIntent
@@ -32,13 +34,14 @@ import com.zavgar.system.confirmation.presentation.ConfirmationViewModel
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
+import com.zavgar.system.designsystem.components.button.ZavGarBackButton
+import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
-import com.zavgar.system.designsystem.components.text.AppTextSecondary
 import com.zavgar.system.designsystem.components.textfield.OtpTextField
-import com.zavgar.system.designsystem.components.topbar.AppTopBar
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
+import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_button_text
@@ -87,9 +90,7 @@ internal fun ConfirmationLoader(
         when (event) {
             is ConfirmationEvent.NavigateToLogin -> onNavigateToLogin()
             is ConfirmationEvent.ShowSnackbar -> {
-                scope.launch {
-                    errorShakingState.shake()
-                }
+                scope.launch { errorShakingState.shake() }
                 scope.launch {
                     snackbarHostState.showCustomSnackbar(
                         type = event.message.type,
@@ -106,6 +107,7 @@ internal fun ConfirmationLoader(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
+        onBackClick = onNavigateToLogin,
         modifier = modifier
     )
 }
@@ -116,123 +118,133 @@ internal fun ConfirmationScaffold(
     snackbarHostState: SnackbarHostState,
     onIntent: (ConfirmationIntent) -> Unit,
     errorShakingState: ShakingState,
+    onBackClick: () -> Unit,
     modifier: Modifier
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    val colors = LocalZavGarColors.current
+
+    ZavGarAuthScaffold(
+        modifier = modifier,
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
-        topBar = {
-            AppTopBar(
-                title = stringResource(Res.string.confirmation_top_title),
-                modifier = Modifier.padding(top = 24.dp)
+        headerBottomPadding = 36.dp,
+        sheetContentPadding = PaddingValues(horizontal = 28.dp, vertical = 22.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
+        ) {
+            ZavGarBackButton(onClick = onBackClick)
+            Text(
+                text = stringResource(Res.string.confirmation_top_title),
+                color = colors.foreground,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
             )
         }
-    ) { paddingValues ->
-        ConfirmationContent(
-            state = state,
-            onIntent = onIntent,
-            errorShakingState = errorShakingState,
-            modifier = Modifier
-                .padding(paddingValues)
-                .consumeWindowInsets(paddingValues)
+
+        ConfirmDescriptionText(phone = state.phone)
+
+        Spacer(Modifier.height(28.dp))
+
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            OtpTextField(
+                value = state.code,
+                onValueChange = { onIntent(ConfirmationIntent.EnterCode(it)) },
+                length = 6,
+                isError = state.codeError != null,
+                errorMessage = state.codeError?.asString(),
+                enabled = state.screenState is ConfirmationState.ScreenState.Idle,
+            )
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        AppPrimaryButton(
+            text = stringResource(Res.string.confirmation_button_text),
+            onClick = { onIntent(ConfirmationIntent.Submit) },
+            enabled = state.isConfirmButtonEnabled,
+            isLoading = state.screenState is ConfirmationState.ScreenState.Submitting,
+            shakingState = errorShakingState
         )
+
+        Spacer(Modifier.height(20.dp))
+
+        ResendConfirmationCodeRow(onIntent = onIntent, state = state)
     }
 }
 
 @Composable
-internal fun ConfirmationContent(
-    state: ConfirmationState,
-    onIntent: (ConfirmationIntent) -> Unit,
-    errorShakingState: ShakingState,
-    modifier: Modifier
-) {
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        ConfirmDescriptionText()
-
-        OtpTextField(
-            value = state.code,
-            onValueChange = { onIntent(ConfirmationIntent.EnterCode(it)) },
-            length = 6,
-            isError = state.codeError != null,
-            errorMessage = state.codeError?.asString(),
-            modifier = Modifier.padding(vertical = 44.dp),
-            enabled = state.screenState is ConfirmationState.ScreenState.Idle,
-        )
-
-        ResendConfirmationCodeButton(onIntent, state)
-
-        ConfirmButton(onIntent, state, errorShakingState)
+private fun ConfirmDescriptionText(phone: String) {
+    val colors = LocalZavGarColors.current
+    val description = stringResource(Res.string.confirmation_text)
+    val annotated: AnnotatedString = buildAnnotatedString {
+        append(description)
+        if (phone.isNotBlank()) {
+            append(' ')
+            withStyle(SpanStyle(color = colors.accent, fontWeight = FontWeight.Bold)) {
+                append(formatPhoneNomer(phone))
+            }
+        }
     }
-}
-
-@Composable
-private fun ConfirmDescriptionText() {
-    AppTextSecondary(
-        text = stringResource(Res.string.confirmation_text),
-        style = MaterialTheme.typography.bodyLarge,
+    Text(
+        text = annotated,
+        color = colors.foregroundSecondary,
+        fontSize = 15.sp,
     )
 }
 
 @Composable
-private fun ConfirmButton(
-    onIntent: (ConfirmationIntent) -> Unit,
-    state: ConfirmationState,
-    errorShakingState: ShakingState
-) {
-    AppPrimaryButton(
-        text = stringResource(Res.string.confirmation_button_text),
-        onClick = { onIntent(ConfirmationIntent.Submit) },
-        modifier = Modifier.padding(top = 35.dp),
-        enabled = state.isConfirmButtonEnabled,
-        isLoading = state.screenState is ConfirmationState.ScreenState.Submitting,
-        shakingState = errorShakingState
-    )
-}
-
-@Composable
-private fun ResendConfirmationCodeButton(
+private fun ResendConfirmationCodeRow(
     onIntent: (ConfirmationIntent) -> Unit,
     state: ConfirmationState
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.clickable { onIntent(ConfirmationIntent.ClickResend) }
-    ) {
-        if (state.timerSeconds > 0 || state.screenState is ConfirmationState.ScreenState.Submitting) {
+    val colors = LocalZavGarColors.current
+    val canResend = state.timerSeconds <= 0 &&
+            state.screenState !is ConfirmationState.ScreenState.Submitting
+
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.clickable(enabled = canResend) {
+                onIntent(ConfirmationIntent.ClickResend)
+            }
+        ) {
             Text(
                 text = stringResource(Res.string.confirmation_resend_code),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (canResend) colors.accent else colors.foregroundSecondary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
             )
-            Text(
-                text = state.timerSeconds.toString().padStart(2, '0'),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        } else {
-            Text(
-                text = stringResource(Res.string.confirmation_resend_code),
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = stringResource(Res.string.confirmation_default_time),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (state.timerSeconds > 0 ||
+                state.screenState is ConfirmationState.ScreenState.Submitting
+            ) {
+                Text(
+                    text = "00:" + state.timerSeconds.toString().padStart(2, '0'),
+                    color = colors.foregroundSecondary,
+                    fontSize = 14.sp,
+                )
+            } else {
+                Text(
+                    text = "00:" + stringResource(Res.string.confirmation_default_time),
+                    color = colors.foregroundSecondary,
+                    fontSize = 14.sp,
+                )
+            }
         }
+    }
+}
+
+private fun formatPhoneNomer(phone: String): String {
+    val digits = phone.filter { it.isDigit() }
+    return if (digits.length == 10) {
+        digits.replace(
+            regex = Regex("(\\d{3})(\\d{3})(\\d{2})(\\d{2})"),
+            replacement = "+7 ($1) $2 $3-$4"
+        )
+    } else {
+        phone
     }
 }
 
@@ -250,7 +262,8 @@ fun ConfirmationScreenNormalPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
             modifier = Modifier,
-            errorShakingState = rememberShakingState()
+            errorShakingState = rememberShakingState(),
+            onBackClick = { },
         )
     }
 }
@@ -270,27 +283,8 @@ fun ConfirmationScreenErrorPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
             modifier = Modifier,
-            errorShakingState = rememberShakingState()
-        )
-    }
-}
-
-@Preview(name = "Loading State", showBackground = true)
-@Composable
-fun ConfirmationScreenLoadingPreview() {
-    ZavGarThemePreview {
-        ConfirmationScaffold(
-            state = ConfirmationState(
-                phone = "+7 999 123 45 67",
-                isRegistration = true,
-                code = "123456",
-                screenState = ConfirmationState.ScreenState.Submitting,
-                timerSeconds = 30
-            ),
-            snackbarHostState = remember { SnackbarHostState() },
-            onIntent = { },
-            modifier = Modifier,
-            errorShakingState = rememberShakingState()
+            errorShakingState = rememberShakingState(),
+            onBackClick = { },
         )
     }
 }

@@ -1,5 +1,7 @@
 package com.zavgar.system.designsystem.components.button
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -9,9 +11,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.modifiers.shakable
@@ -24,7 +29,8 @@ fun AppPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isLoading: Boolean = false,
-    shakingState: ShakingState
+    shakingState: ShakingState = rememberShakingState(),
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     Button(
         onClick = onClick,
@@ -33,7 +39,7 @@ fun AppPrimaryButton(
             .fillMaxWidth()
             .shakable(shakingState),
         enabled = enabled && !isLoading,
-        shape = MaterialTheme.shapes.small,
+        shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -48,10 +54,19 @@ fun AppPrimaryButton(
                 strokeWidth = 2.dp,
             )
         } else {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                leadingIcon?.invoke()
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                    ),
+                )
+            }
         }
     }
 }

@@ -1,9 +1,7 @@
 package com.zavgar.system.wallet.ui
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -11,28 +9,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.designsystem.components.content.AnimatedState
+import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
-import com.zavgar.system.designsystem.components.topbar.AppTopBar
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
-import com.zavgar.system.resources.Res
-import com.zavgar.system.resources.home_top_title_wallet
 import com.zavgar.system.wallet.presentation.WalletEvent
 import com.zavgar.system.wallet.presentation.WalletIntent
 import com.zavgar.system.wallet.presentation.WalletState
 import com.zavgar.system.wallet.presentation.WalletViewModel
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -93,17 +86,9 @@ internal fun WalletScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier
 ) {
-    Scaffold(
-        containerColor = Color.Transparent,
+    ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
-        topBar = {
-            AppTopBar(
-                title = stringResource(Res.string.home_top_title_wallet),
-                modifier = Modifier.padding(top = 24.dp)
-            )
-        }
     ) { paddingValues ->
         AnimatedState(targetState = state) { state ->
             when (val screenState = state.screenState) {
@@ -141,7 +126,7 @@ internal fun WalletScaffold(
                     ) {
                         WalletOfflineContent(
                             phone = state.phone,
-                            modifier = Modifier
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }

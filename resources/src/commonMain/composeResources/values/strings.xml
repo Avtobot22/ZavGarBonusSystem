@@ -3,6 +3,7 @@
 
     <string name="logo_title">ZavGar</string>
     <string name="logo_subtitle">магазин-сервис</string>
+    <string name="zavgar_header_title">БОНУСНАЯ ПРОГРАММА</string>
 
     <!--    Label Placeholder-->
     <string name="phone_label">Номер телефона</string>
@@ -26,7 +27,7 @@
     <string name="error_invalid_date_range">Начальная дата не может быть позже конечной</string>
 
     <!--    Login-->
-    <string name="login_top_title">Авторизация</string>
+    <string name="login_top_title">Войти в аккаунт</string>
     <string name="login_password_label">Пароль</string>
     <string name="login_password_placeholder">Введите пароль</string>
     <string name="login_forgot_password">Забыли пароль?</string>
@@ -35,7 +36,7 @@
     <string name="login_button_text_register">Зарегистрироваться</string>
 
     <!--    Register-->
-    <string name="register_top_title">Регистрация</string>
+    <string name="register_top_title">Создать аккаунт</string>
     <string name="register_name_label">Имя</string>
     <string name="register_name_placeholder">Введите ваше имя</string>
     <string name="check_box_static_text">Даю согласие на обработку персональных данных</string>
@@ -45,17 +46,16 @@
     <string name="register_button_text_login">Войти</string>
 
     <!--    Confirmation-->
-    <string name="confirmation_top_title">Введите код подтверждения</string>
+    <string name="confirmation_top_title">Подтверждение</string>
     <string name="confirmation_text">Мы отправили SMS с кодом подверждения на ваш телефон</string>
-    <string name="confirmation_resend_code">Отправить код повторно</string>
+    <string name="confirmation_resend_code">Отправить код заново</string>
     <string name="confirmation_button_text">Подтвердить</string>
     <string name="confirmation_default_time">60</string>
 
     <!--    Reset-->
-    <string name="reset_top_title">Востановление пароля</string>
-    <string name="reset_password_button_text">Подтвердить</string>
-    <string name="reset_password_button_text_return">Вернуться ко</string>
-    <string name="reset_password_button_text_login">входу</string>
+    <string name="reset_top_title">Восстановление</string>
+    <string name="reset_password_description">Введите номер телефона и придумайте новый пароль.</string>
+    <string name="reset_password_button_text">Отправить код</string>
 
     <!--    Wallet-->
     <string name="home_top_title_wallet">Бонусная система</string>

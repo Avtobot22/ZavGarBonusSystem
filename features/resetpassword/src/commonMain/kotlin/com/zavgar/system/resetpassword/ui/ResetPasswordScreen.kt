@@ -2,38 +2,38 @@ package com.zavgar.system.resetpassword.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.compose.MaskVisualTransformation
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
-import com.zavgar.system.designsystem.components.button.AppTextButton
+import com.zavgar.system.designsystem.components.button.ZavGarBackButton
+import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
-import com.zavgar.system.designsystem.components.topbar.AppTopBar
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
+import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resetpassword.presentation.ResetPasswordEvent
 import com.zavgar.system.resetpassword.presentation.ResetPasswordIntent
@@ -49,14 +49,11 @@ import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
 import com.zavgar.system.resources.repeat_password_label
 import com.zavgar.system.resources.reset_password_button_text
-import com.zavgar.system.resources.reset_password_button_text_login
-import com.zavgar.system.resources.reset_password_button_text_return
+import com.zavgar.system.resources.reset_password_description
 import com.zavgar.system.resources.reset_top_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-
-private val PhoneMask = MaskVisualTransformation("+7 (###) ### ##-##")
 
 @Composable
 fun ResetPasswordScreen(
@@ -88,9 +85,7 @@ internal fun ResetPasswordLoader(
             is ResetPasswordEvent.NavigateToConfirm -> onNavigateToConfirm(event.phone)
             is ResetPasswordEvent.NavigateToLogin -> onNavigateToLogin()
             is ResetPasswordEvent.ShowSnackbar -> {
-                scope.launch {
-                    errorShakingState.shake()
-                }
+                scope.launch { errorShakingState.shake() }
                 scope.launch {
                     snackbarhostState.showCustomSnackbar(
                         type = event.message.type,
@@ -119,85 +114,50 @@ internal fun ResetPasswordScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(),
-        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
-        topBar = {
-            AppTopBar(
-                title = stringResource(Res.string.reset_top_title),
-                modifier = Modifier.padding(top = 24.dp)
-            )
-        },
-    ) { paddingValues ->
-        ResetPasswordContent(
-            state = state,
-            onIntent = onIntent,
-            errorShakingState = errorShakingState,
-            modifier = Modifier
-                .padding(paddingValues)
-        )
-    }
-}
-
-@Composable
-internal fun ResetPasswordContent(
-    state: ResetPasswordState,
-    onIntent: (ResetPasswordIntent) -> Unit,
-    errorShakingState: ShakingState,
-    modifier: Modifier = Modifier
-) {
     val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
+    val colors = LocalZavGarColors.current
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    ZavGarAuthScaffold(
+        modifier = modifier,
+        snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        headerBottomPadding = 36.dp,
+        sheetContentPadding = PaddingValues(horizontal = 28.dp, vertical = 22.dp),
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
+        ) {
+            ZavGarBackButton(onClick = { onIntent(ResetPasswordIntent.ClickLogin) })
+            Text(
+                text = stringResource(Res.string.reset_top_title),
+                color = colors.foreground,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Text(
+            text = stringResource(Res.string.reset_password_description),
+            color = colors.foregroundSecondary,
+            fontSize = 15.sp,
+            modifier = Modifier.padding(bottom = 22.dp),
+        )
 
         ResetAccountForm(state, onIntent)
 
-        ResetAccountButton(focusManager, onIntent, state, errorShakingState)
-
-        ReturnToLoginTextButton(onIntent, state)
+        AppPrimaryButton(
+            text = stringResource(Res.string.reset_password_button_text),
+            onClick = {
+                focusManager.clearFocus()
+                onIntent(ResetPasswordIntent.Submit)
+            },
+            enabled = state.isResetPasswordButtonEnabled,
+            isLoading = state.screenState is ResetPasswordState.ScreenState.Submitting,
+            modifier = Modifier.padding(top = 22.dp),
+            shakingState = errorShakingState
+        )
     }
-}
-
-@Composable
-private fun ReturnToLoginTextButton(
-    onIntent: (ResetPasswordIntent) -> Unit,
-    state: ResetPasswordState
-) {
-    AppTextButton(
-        textGray = stringResource(Res.string.reset_password_button_text_return),
-        textOrange = stringResource(Res.string.reset_password_button_text_login),
-        onClick = { onIntent(ResetPasswordIntent.ClickLogin) },
-        enabled = state.screenState is ResetPasswordState.ScreenState.Idle
-    )
-}
-
-@Composable
-private fun ResetAccountButton(
-    focusManager: FocusManager,
-    onIntent: (ResetPasswordIntent) -> Unit,
-    state: ResetPasswordState,
-    errorShakingState: ShakingState
-) {
-    AppPrimaryButton(
-        text = stringResource(Res.string.reset_password_button_text),
-        onClick = {
-            focusManager.clearFocus()
-            onIntent(ResetPasswordIntent.Submit)
-        },
-        enabled = state.isResetPasswordButtonEnabled,
-        isLoading = state.screenState is ResetPasswordState.ScreenState.Submitting,
-        modifier = Modifier.padding(top = 36.dp, bottom = 11.dp),
-        shakingState = errorShakingState
-    )
 }
 
 @Composable
@@ -206,8 +166,7 @@ private fun ResetAccountForm(
     onIntent: (ResetPasswordIntent) -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         AppValidatedTextField(
             value = state.phone,
@@ -217,7 +176,7 @@ private fun ResetAccountForm(
             placeholder = stringResource(Res.string.phone_placeholder),
             isError = state.phoneError != null,
             errorMessage = state.phoneError?.asString(),
-            visualTransformation = PhoneMask,
+            visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             enabled = state.screenState is ResetPasswordState.ScreenState.Idle
         )
@@ -254,28 +213,6 @@ private fun ResetPasswordScaffoldPreview() {
                 password = "",
                 repeatPassword = "",
                 isPhoneValid = false,
-                phoneError = null,
-                passwordError = null,
-                repeatPasswordError = null
-            ),
-            snackbarHostState = remember { SnackbarHostState() },
-            onIntent = { },
-            errorShakingState = rememberShakingState()
-        )
-    }
-}
-
-@Preview(name = "Loading State")
-@Composable
-private fun ResetPasswordScaffoldLoadingPreview() {
-    ZavGarThemePreview {
-        ResetPasswordScaffold(
-            state = ResetPasswordState(
-                phone = "9831082464",
-                password = "password123",
-                repeatPassword = "password123",
-                screenState = ResetPasswordState.ScreenState.Submitting,
-                isPhoneValid = true,
                 phoneError = null,
                 passwordError = null,
                 repeatPasswordError = null

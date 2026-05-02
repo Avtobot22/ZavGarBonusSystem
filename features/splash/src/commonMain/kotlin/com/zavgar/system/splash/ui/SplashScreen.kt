@@ -1,18 +1,24 @@
 package com.zavgar.system.splash.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.designsystem.components.logo.AppLogo
+import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.splash.presentation.SplashEvent
 import com.zavgar.system.splash.presentation.SplashState
@@ -59,25 +65,35 @@ private fun SplashScaffold(
     state: SplashState,
     modifier: Modifier
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        containerColor = MaterialTheme.colorScheme.primary
-    ) { _ ->
-        SplashContent(
-            state = state,
-            modifier = Modifier
-        )
-    }
+    SplashContent(
+        state = state,
+        modifier = modifier
+    )
 }
 
 @Composable
 private fun SplashContent(state: SplashState, modifier: Modifier) {
+    val colors = LocalZavGarColors.current
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .background(colors.accent),
         contentAlignment = Alignment.Center
     ) {
-        AppLogo()
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            AppLogo()
+
+            Spacer(Modifier.height(52.dp))
+
+            CircularProgressIndicator(
+                modifier = Modifier.size(36.dp),
+                color = colors.onAccent,
+                strokeWidth = 3.dp,
+            )
+        }
     }
 }
 

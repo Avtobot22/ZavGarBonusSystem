@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.marker.BottomBarVisible
-import com.zavgar.system.navigationapi.marker.EdgeToEdge
 
 
 /**
@@ -105,9 +104,6 @@ class NavBackStack<T : Destination>(startDestination: T) {
     }
 
     var isBottomBarVisible: Boolean by mutableStateOf(false)
-        private set
-
-    var isEdgeToEdge: Boolean by mutableStateOf(true)
         private set
 
     private fun updateBackStack() {
@@ -210,6 +206,5 @@ class NavBackStack<T : Destination>(startDestination: T) {
 
     private fun updateBottomAppBarVisibility(destination: T) {
         isBottomBarVisible = destination is BottomBarVisible
-        isEdgeToEdge = destination is EdgeToEdge
     }
 }

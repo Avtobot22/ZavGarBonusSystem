@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.zavgar.system.designsystem.components.text.AppTextMain
 import com.zavgar.system.designsystem.components.text.AppTextSecondary
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.icon_check
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun AppTextField(
@@ -181,9 +183,9 @@ fun AppValidatedTextField(
         trailingIcon = if (isValid && !isError) {
             {
                 Icon(
-                    imageVector = Icons.Rounded.CheckCircle,
+                    imageVector = vectorResource(Res.drawable.icon_check),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
             }
         } else null
