@@ -27,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -227,7 +226,6 @@ private fun DeleteIconButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(42.dp)
-            .shadow(elevation = 2.dp, shape = shape, clip = false)
             .clip(shape)
             .background(colors.dangerContainer)
             .clickable(role = Role.Button, onClick = onClick),

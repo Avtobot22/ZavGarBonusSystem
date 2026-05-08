@@ -151,7 +151,7 @@ internal fun ConfirmationScaffold(
             OtpTextField(
                 value = state.code,
                 onValueChange = { onIntent(ConfirmationIntent.EnterCode(it)) },
-                length = 6,
+                length = 4,
                 isError = state.codeError != null,
                 errorMessage = state.codeError?.asString(),
                 enabled = state.screenState is ConfirmationState.ScreenState.Idle,

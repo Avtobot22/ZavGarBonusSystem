@@ -33,7 +33,7 @@ import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 fun OtpTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    length: Int = 6,
+    length: Int = 4,
     isError: Boolean = false,
     errorMessage: String? = null,
     modifier: Modifier = Modifier,
@@ -155,14 +155,14 @@ fun OtpTextFieldPreview() {
             OtpTextField(
                 value = otpValue,
                 onValueChange = { otpValue = it },
-                length = 6
+                length = 4
             )
 
             // Состояние с ошибкой
             OtpTextField(
                 value = "1234",
                 onValueChange = { },
-                length = 6,
+                length = 4,
                 isError = true,
                 errorMessage = "Поле не может быть пустым",
                 modifier = Modifier
