@@ -46,7 +46,7 @@ fun TransactionsPageResponse.toPresentation(
 
             add(
                 HistoryItem.TransactionItem(
-                    id = transaction.id,
+                    id = transaction.id.toString(),
                     time = timeStr,
                     amount = amountFormatted,
                     store = transaction.store,

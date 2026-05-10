@@ -3,7 +3,7 @@ package com.zavgar.system.history.domain.model
 import kotlinx.datetime.LocalDateTime
 
 data class Transaction(
-    val id: String,
+    val id: Int,
     val operationType: OperationType,
     val date: LocalDateTime,
     val store: String,

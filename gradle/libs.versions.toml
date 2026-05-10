@@ -47,6 +47,11 @@ ktor = "3.4.3"
 
 #Qr-kit
 qrKit = "3.1.3"
+kotlinStdlib = "2.3.21"
+kotlinTest = "2.3.21"
+runner = "1.7.0"
+core = "1.7.0"
+junit = "1.3.0"
 
 [libraries]
 # Project
@@ -103,6 +108,11 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 qrKit = { module = "network.chaintech:qr-kit", version.ref = "qrKit" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlinTest" }
+runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
+core = { group = "androidx.test", name = "core", version.ref = "core" }
+junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
 
 [plugins]
 android_kmp_plugin = { id = "com.android.kotlin.multiplatform.library", version.ref = "android_gradle_plugin" }
@@ -113,3 +123,4 @@ compose_compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 zavgar-multiplatform = { id = "com.zavgar.system.multiplatform" }
 zavgar-parcelable = { id = "com.zavgar.system.kotlin-parcelable" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-lint = { id = "com.android.lint", version.ref = "android_gradle_plugin" }

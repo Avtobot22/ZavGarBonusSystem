@@ -7,6 +7,7 @@ import com.zavgar.system.coroutines.di.coroutinesModule
 import com.zavgar.system.datastore.di.dataStoreModule
 import com.zavgar.system.designsystem.di.designSystemModule
 import com.zavgar.system.domain.session.di.sessionModule
+import com.zavgar.system.domain.userinfo.di.userInfoDomainModule
 import com.zavgar.system.events.di.eventsModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule
@@ -52,6 +53,7 @@ internal val appModules = listOf(
 
     // Domain
     sessionModule,
+    userInfoDomainModule,
     validationModule,
 
     // Navigation

@@ -40,8 +40,8 @@ import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.login_button_text
 import com.zavgar.system.resources.login_button_text_not_account
@@ -122,7 +122,7 @@ internal fun LoginScaffold(
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val idle = state.screenState is LoginState.ScreenState.Idle
 
     ZavGarAuthScaffold(
@@ -177,7 +177,7 @@ internal fun LoginScaffold(
 
 @Composable
 private fun HasNotAccountRow(idle: Boolean, onClick: () -> Unit) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

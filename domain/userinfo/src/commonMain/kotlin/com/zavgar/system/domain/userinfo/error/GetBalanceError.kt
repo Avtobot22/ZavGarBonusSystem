@@ -1,4 +1,4 @@
-package com.zavgar.system.wallet.domain.error
+package com.zavgar.system.domain.userinfo.error
 
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError

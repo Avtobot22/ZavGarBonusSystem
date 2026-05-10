@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.zavgar.system.appstate.ZavGarAppState
 import com.zavgar.system.appstate.rememberZavGarAppState
+import com.zavgar.system.datastore.datasource.ThemeDataSource
 import com.zavgar.system.designsystem.theme.ZavGarTheme
 import com.zavgar.system.events.AppEvent
 import com.zavgar.system.events.AppEventBus
@@ -23,7 +26,10 @@ fun ZavGarMultiplatformApp(
     appState: ZavGarAppState = rememberZavGarAppState(),
     appEventBus: AppEventBus = koinInject(),
     navEventController: NavEventController = koinInject(),
+    themeDataSource: ThemeDataSource = koinInject(),
 ) {
+    val isDarkTheme by themeDataSource.isDarkTheme.collectAsState(false)
+
     LaunchedEffect(appEventBus) {
         appEventBus.events.collect { event ->
             when (event) {
@@ -32,7 +38,7 @@ fun ZavGarMultiplatformApp(
         }
     }
 
-    ZavGarTheme {
+    ZavGarTheme(isDarkTheme = isDarkTheme) {
         Home(
             appState = appState,
             modifier = modifier,

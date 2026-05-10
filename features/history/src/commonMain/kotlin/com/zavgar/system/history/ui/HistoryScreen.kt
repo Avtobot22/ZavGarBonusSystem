@@ -63,8 +63,8 @@ import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.history.model.DatePickerType
 import com.zavgar.system.history.model.HistoryItem
 import com.zavgar.system.history.presentation.HistoryEvent
@@ -137,7 +137,7 @@ internal fun HistoryScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -178,7 +178,7 @@ internal fun HistoryScaffold(
             }
         }
     ) { paddingValues ->
-        AnimatedState(targetState = state) { state ->
+        AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (state.screenState) {
                 HistoryState.ScreenState.Error -> ErrorScreen(
                     onRetry = { onIntent(HistoryIntent.Retry) },
@@ -252,7 +252,7 @@ private fun HistoryHeader(
     state: HistoryState,
     onIntent: (HistoryIntent) -> Unit,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,7 +308,7 @@ private fun DatePill(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(14.dp)
     Row(
         modifier = modifier
@@ -342,7 +342,7 @@ private fun HistoryListCard(
     scrollState: ScrollState,
     listState: LazyListState,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     Box(
         modifier = Modifier

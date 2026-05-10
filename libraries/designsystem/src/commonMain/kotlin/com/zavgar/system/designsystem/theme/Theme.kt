@@ -5,7 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 val ZavGarLightColorScheme = lightColorScheme(
@@ -22,8 +21,8 @@ val ZavGarLightColorScheme = lightColorScheme(
     tertiaryContainer = md_theme_light_tertiaryContainer,
     onTertiaryContainer = md_theme_light_onTertiaryContainer,
     error = md_theme_light_error,
-    errorContainer = md_theme_light_errorContainer,
     onError = md_theme_light_onError,
+    errorContainer = md_theme_light_errorContainer,
     onErrorContainer = md_theme_light_onErrorContainer,
     background = md_theme_light_background,
     onBackground = md_theme_light_onBackground,
@@ -31,7 +30,9 @@ val ZavGarLightColorScheme = lightColorScheme(
     onSurface = md_theme_light_onSurface,
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,
+    surfaceContainer = md_theme_light_surfaceContainer,
     outline = md_theme_light_outline,
+    outlineVariant = md_theme_light_outlineVariant,
     inverseOnSurface = md_theme_light_inverseOnSurface,
     inverseSurface = md_theme_light_inverseSurface,
     surfaceTint = Color.Transparent,
@@ -51,8 +52,8 @@ val ZavGarDarkColorScheme = darkColorScheme(
     tertiaryContainer = md_theme_dark_tertiaryContainer,
     onTertiaryContainer = md_theme_dark_onTertiaryContainer,
     error = md_theme_dark_error,
-    errorContainer = md_theme_dark_errorContainer,
     onError = md_theme_dark_onError,
+    errorContainer = md_theme_dark_errorContainer,
     onErrorContainer = md_theme_dark_onErrorContainer,
     background = md_theme_dark_background,
     onBackground = md_theme_dark_onBackground,
@@ -60,35 +61,29 @@ val ZavGarDarkColorScheme = darkColorScheme(
     onSurface = md_theme_dark_onSurface,
     surfaceVariant = md_theme_dark_surfaceVariant,
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
+    surfaceContainer = md_theme_dark_surfaceContainer,
     outline = md_theme_dark_outline,
+    outlineVariant = md_theme_dark_outlineVariant,
     inverseOnSurface = md_theme_dark_inverseOnSurface,
     inverseSurface = md_theme_dark_inverseSurface,
     surfaceTint = Color.Transparent,
 )
 
-/**
- * ZavGar main theme.
- */
 @Composable
 fun ZavGarTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (isDarkTheme) ZavGarDarkColorScheme else ZavGarLightColorScheme
-    val zavgarColors = if (isDarkTheme) ZavGarDarkColors else ZavGarLightColors
-
-    CompositionLocalProvider(LocalZavGarColors provides zavgarColors) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = zavGarTypography(),
-            shapes = ZavGarShapes,
-            content = content,
-        )
-    }
+    MaterialTheme(
+        colorScheme = if (isDarkTheme) ZavGarDarkColorScheme else ZavGarLightColorScheme,
+        typography = zavGarTypography(),
+        shapes = ZavGarShapes,
+        content = content,
+    )
 }
 
 @Composable
 fun ZavGarThemePreview(
     isDarkTheme: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) = ZavGarTheme(isDarkTheme = isDarkTheme, content = content)

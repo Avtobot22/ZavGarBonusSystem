@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,8 +27,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.components.qrcode.ZavGarQrImage
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import com.zavgar.system.designsystem.theme.border
+import com.zavgar.system.designsystem.theme.card
+import com.zavgar.system.designsystem.theme.danger
+import com.zavgar.system.designsystem.theme.dangerContainer
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundSecondary
 import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.home_top_title_wallet
 import com.zavgar.system.resources.info_offline_mode
 import org.jetbrains.compose.resources.stringResource
 
@@ -36,7 +43,7 @@ internal fun WalletOfflineContent(
     phone: String,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
 
     Column(
@@ -50,7 +57,7 @@ internal fun WalletOfflineContent(
         Spacer(Modifier.height(10.dp))
 
         Text(
-            text = "Бонусная\nсистема",
+            text = stringResource(Res.string.home_top_title_wallet),
             color = colors.foreground,
             fontSize = 38.sp,
             fontWeight = FontWeight.Bold,

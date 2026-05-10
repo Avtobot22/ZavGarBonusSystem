@@ -27,8 +27,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarBottomNavShape
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 
 enum class ZavGarTab { Home, History, Settings }
 
@@ -41,7 +41,7 @@ fun ZavGarBottomNavBar(
     historyLabel: String = "История",
     settingsLabel: String = "Настройки",
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -66,7 +66,7 @@ private fun Item(
     active: Boolean,
     onClick: () -> Unit,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val tint = if (active) colors.accent else colors.foregroundSecondary
     Box(
         modifier = Modifier

@@ -1,15 +1,18 @@
 package com.zavgar.system.designsystem.components.scaffold
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.zavgar.system.designsystem.background.GlowBackground
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 
 /**
  * Унифицированный каркас для экранов main-флоу (Wallet / History / Settings / Account).
@@ -22,14 +25,16 @@ fun ZavGarBaseScaffold(
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding(),
         contentWindowInsets = WindowInsets(),
         containerColor = colors.background,
-        snackbarHost = snackbarHost,
+        snackbarHost = {
+            Box(Modifier.navigationBarsPadding()) { snackbarHost() }
+        },
         floatingActionButton = floatingActionButton,
         floatingActionButtonPosition = floatingActionButtonPosition,
     ) { padding ->

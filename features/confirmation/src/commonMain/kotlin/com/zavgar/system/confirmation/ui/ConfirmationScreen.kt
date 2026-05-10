@@ -41,8 +41,8 @@ import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.OtpTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_button_text
 import com.zavgar.system.resources.confirmation_default_time
@@ -121,7 +121,7 @@ internal fun ConfirmationScaffold(
     onBackClick: () -> Unit,
     modifier: Modifier
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
 
     ZavGarAuthScaffold(
         modifier = modifier,
@@ -176,7 +176,7 @@ internal fun ConfirmationScaffold(
 
 @Composable
 private fun ConfirmDescriptionText(phone: String) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val description = stringResource(Res.string.confirmation_text)
     val annotated: AnnotatedString = buildAnnotatedString {
         append(description)
@@ -199,7 +199,7 @@ private fun ResendConfirmationCodeRow(
     onIntent: (ConfirmationIntent) -> Unit,
     state: ConfirmationState
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val canResend = state.timerSeconds <= 0 &&
             state.screenState !is ConfirmationState.ScreenState.Submitting
 

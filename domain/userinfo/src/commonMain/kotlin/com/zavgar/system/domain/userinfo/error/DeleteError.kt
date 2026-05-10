@@ -1,4 +1,4 @@
-package com.zavgar.system.account.domain.error
+package com.zavgar.system.domain.userinfo.error
 
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError

@@ -22,8 +22,8 @@ import com.zavgar.system.account.presentation.AccountState
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.textfield.AppPasswordField
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.account_change_confirm
 import com.zavgar.system.resources.account_change_password
@@ -40,7 +40,7 @@ fun ChangePasswordBottomSheet(
     modifier: Modifier = Modifier,
 ) {
     if (!state.isPasswordDialogOpen) return
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(

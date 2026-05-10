@@ -36,8 +36,8 @@ import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.registration.presentation.RegisterEvent
 import com.zavgar.system.registration.presentation.RegisterIntent
 import com.zavgar.system.registration.presentation.RegisterState
@@ -118,7 +118,7 @@ internal fun RegisterScaffold(
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
 
     AppDatePicker(
         initialDate = state.birthDate,

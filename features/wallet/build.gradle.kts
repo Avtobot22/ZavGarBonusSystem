@@ -18,6 +18,7 @@ kotlin {
 
             implementation(projects.data.network)
             implementation(projects.domain.session)
+            implementation(projects.domain.userinfo)
             implementation(projects.utils.result)
             implementation(projects.resources)
             implementation(projects.libraries.navigationContracts)

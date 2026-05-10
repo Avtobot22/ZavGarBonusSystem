@@ -1,22 +1,22 @@
-package com.zavgar.system.account.domain.usecase
+package com.zavgar.system.domain.userinfo.usecase
 
-import com.zavgar.system.account.domain.error.ProfileError
-import com.zavgar.system.account.domain.error.toProfileError
-import com.zavgar.system.account.domain.model.ProfileResponse
 import com.zavgar.system.coroutines.CoroutineDispatcherProvider
+import com.zavgar.system.domain.userinfo.error.ProfileError
+import com.zavgar.system.domain.userinfo.error.toProfileError
+import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.network.remote.UserProfileService
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.result.toAppResult
 import kotlinx.coroutines.withContext
 
-class GetProfileUseCase(
+class GetUserProfileUseCase(
     private val userProfileService: UserProfileService,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) {
-    suspend operator fun invoke(): AppResult<ProfileResponse, ProfileError> =
+    suspend operator fun invoke(): AppResult<UserProfile, ProfileError> =
         withContext(dispatcherProvider.io) {
             userProfileService.getProfile()
-                .map { ProfileResponse(name = it.name, birthDate = it.birthDate) }
+                .map { UserProfile(name = it.name, phone = it.phone, birthDate = it.birthDate) }
                 .toAppResult(Throwable::toProfileError)
         }
 }

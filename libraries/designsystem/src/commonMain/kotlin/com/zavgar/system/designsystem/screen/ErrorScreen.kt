@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.unknown_error_description
@@ -42,7 +42,7 @@ fun ErrorScreen(
     modifier: Modifier = Modifier,
     shakingState: ShakingState,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier
             .fillMaxSize()

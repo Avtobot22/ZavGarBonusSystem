@@ -6,7 +6,8 @@ import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.domain.session.LogoutHandler
 import com.zavgar.system.domain.session.usecase.GetSessionUseCase
-import com.zavgar.system.wallet.domain.usecase.GetUserBalanceUseCase
+import com.zavgar.system.domain.userinfo.usecase.GetMonthlyAccrualsUseCase
+import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode
@@ -17,10 +18,12 @@ import kotlinx.coroutines.delay
 
 class WalletViewModel(
     private val getUserBalanceUseCase: GetUserBalanceUseCase,
+    private val getMonthlyAccrualsUseCase: GetMonthlyAccrualsUseCase,
     private val getSessionUseCase: GetSessionUseCase,
     private val logoutHandler: LogoutHandler,
 ) : BaseViewModel<WalletState, WalletIntent, WalletEvent>(WalletState()) {
 
+    private var fetchJob: Job? = null
     private var cooldownJob: Job? = null
 
     companion object {
@@ -59,7 +62,8 @@ class WalletViewModel(
     }
 
     private fun fetchBalance(isInitial: Boolean) {
-        launchTry {
+        fetchJob?.cancel()
+        fetchJob = launchTry {
             if (isInitial) {
                 setState { copy(screenState = WalletState.ScreenState.Loading) }
             } else {
@@ -154,14 +158,26 @@ class WalletViewModel(
             getSessionUseCase().fold(onSuccess = { session ->
                 setState { copy(phone = session.phone) }
                 fetchBalance(isInitial = true)
+                fetchMonthlyAccruals()
             }, onFailure = { logoutHandler.logout() })
         } catch {
             logoutHandler.logout()
         }
     }
 
+    private fun fetchMonthlyAccruals() {
+        launchTry {
+            getMonthlyAccrualsUseCase().onSuccess { sum ->
+                setState { copy(monthlyEarned = sum) }
+            }
+        } catch {
+            // non-critical — wallet stays functional without monthly sum
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
+        fetchJob?.cancel()
         cooldownJob?.cancel()
     }
 }

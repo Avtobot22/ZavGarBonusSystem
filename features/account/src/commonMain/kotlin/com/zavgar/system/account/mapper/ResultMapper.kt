@@ -1,5 +1,7 @@
 package com.zavgar.system.account.mapper
 
+import com.zavgar.system.account.domain.error.ChangePasswordError
+import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.account.model.ChangePasswordResult
 import com.zavgar.system.account.model.DeleteResult
 import com.zavgar.system.account.model.ProfileGetResult
@@ -7,11 +9,8 @@ import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.utils.result.AppResult
-import com.zavgar.system.account.domain.error.ChangePasswordError
-import com.zavgar.system.account.domain.error.DeleteError
-import com.zavgar.system.account.domain.error.ProfileError
-import com.zavgar.system.account.domain.model.ProfileResponse
+import com.zavgar.system.domain.userinfo.error.ProfileError
+import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_format
 import com.zavgar.system.resources.error_network_error
@@ -19,6 +18,7 @@ import com.zavgar.system.resources.error_server_error
 import com.zavgar.system.resources.error_too_many_requests
 import com.zavgar.system.resources.error_user_not_found
 import com.zavgar.system.resources.password_update_error
+import com.zavgar.system.utils.result.AppResult
 
 fun ProfileError.asSnackBarMessage() = when (this) {
     is ProfileError.ValidationError -> SnackBarMessage(
@@ -101,6 +101,11 @@ fun DeleteError.asSnackBarMessage() = when (this) {
     )
 }
 
+fun AppResult<UserProfile, ProfileError>.toProfileGetResult(): ProfileGetResult = when (this) {
+    is AppResult.Success -> ProfileGetResult.Success(data)
+    is AppResult.Error -> ProfileGetResult.Error(error.asSnackBarMessage())
+}
+
 fun AppResult<Unit, ProfileError>.toProfileUpdateResult(): ProfileUpdateResult = when (this) {
     is AppResult.Success -> ProfileUpdateResult.Success
     is AppResult.Error -> ProfileUpdateResult.Error(error.asSnackBarMessage())
@@ -114,9 +119,4 @@ fun AppResult<Unit, ChangePasswordError>.toChangePasswordResult(): ChangePasswor
 fun AppResult<Unit, DeleteError>.toDeleteResult(): DeleteResult = when (this) {
     is AppResult.Success -> DeleteResult.Success
     is AppResult.Error -> DeleteResult.Error(error.asSnackBarMessage())
-}
-
-fun AppResult<ProfileResponse, ProfileError>.toProfileGetResult(): ProfileGetResult = when (this) {
-    is AppResult.Success -> ProfileGetResult.Success(data)
-    is AppResult.Error -> ProfileGetResult.Error(error.asSnackBarMessage())
 }

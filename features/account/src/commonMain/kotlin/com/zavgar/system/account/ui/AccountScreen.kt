@@ -57,8 +57,8 @@ import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.account_confirm
 import com.zavgar.system.resources.account_password_label
@@ -136,7 +136,7 @@ internal fun AccountScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
     ) { paddingValues ->
-        AnimatedState(targetState = state) { state ->
+        AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (state.screenState) {
                 AccountState.ScreenState.Error -> ErrorScreen(
                     onRetry = { onIntent(AccountIntent.Retry) },
@@ -201,7 +201,7 @@ internal fun AccountContent(state: AccountState, onIntent: (AccountIntent) -> Un
 
 @Composable
 private fun AccountHeader(onBack: () -> Unit, onDelete: () -> Unit) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -221,7 +221,7 @@ private fun AccountHeader(onBack: () -> Unit, onDelete: () -> Unit) {
 
 @Composable
 private fun DeleteIconButton(onClick: () -> Unit) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(13.dp)
     Box(
         modifier = Modifier

@@ -14,6 +14,7 @@ fun <S : Any> AnimatedState(
     transitionSpec: AnimatedContentTransitionScope<S>.() -> ContentTransform = { FadeTransition },
     label: String = "AnimatedState",
     skipAnimation: (S) -> Boolean = { false },
+    contentKey: (S) -> Any? = { it },
     content: @Composable (S) -> Unit
 ) {
     if (skipAnimation(targetState)) {
@@ -24,7 +25,7 @@ fun <S : Any> AnimatedState(
             modifier = modifier,
             label = label,
             transitionSpec = transitionSpec,
-            contentKey = { it }
+            contentKey = contentKey
         ) { state ->
             content(state)
         }

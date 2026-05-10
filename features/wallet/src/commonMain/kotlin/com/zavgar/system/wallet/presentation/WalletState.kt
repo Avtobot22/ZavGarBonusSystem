@@ -3,6 +3,7 @@ package com.zavgar.system.wallet.presentation
 data class WalletState(
     val screenState: ScreenState = ScreenState.Initial,
     val phone: String = "",
+    val monthlyEarned: Int? = null,
 ) {
 
     sealed interface ScreenState {

@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.designsystem.components.logo.AppLogo
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.splash.presentation.SplashEvent
 import com.zavgar.system.splash.presentation.SplashState
 import com.zavgar.system.splash.presentation.SplashViewModel
@@ -73,7 +73,7 @@ private fun SplashScaffold(
 
 @Composable
 private fun SplashContent(state: SplashState, modifier: Modifier) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Box(
         modifier = modifier
             .fillMaxSize()

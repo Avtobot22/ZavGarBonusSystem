@@ -13,7 +13,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.zavgar_header_title
 import com.zavgar.system.resources.zavgar_logo
@@ -22,7 +23,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AppLogo(modifier: Modifier = Modifier) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally

@@ -1,9 +1,6 @@
 package com.zavgar.system.account.di
 
 import com.zavgar.system.account.domain.usecase.ChangePasswordUseCase
-import com.zavgar.system.account.domain.usecase.DeleteProfileUseCase
-import com.zavgar.system.account.domain.usecase.GetProfileUseCase
-import com.zavgar.system.account.domain.usecase.UpdateProfileUseCase
 import com.zavgar.system.account.navigation.AccountNavGraph
 import com.zavgar.system.account.presentation.AccountViewModel
 import com.zavgar.system.navigationapi.provider.NavGraph
@@ -14,10 +11,7 @@ import org.koin.dsl.module
 
 val accountModule = module {
 
-    factoryOf(::GetProfileUseCase)
-    factoryOf(::UpdateProfileUseCase)
     factoryOf(::ChangePasswordUseCase)
-    factoryOf(::DeleteProfileUseCase)
 
     viewModelOf(::AccountViewModel)
 

@@ -90,7 +90,7 @@ internal fun WalletScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
     ) { paddingValues ->
-        AnimatedState(targetState = state) { state ->
+        AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (val screenState = state.screenState) {
                 WalletState.ScreenState.Initial,
                 WalletState.ScreenState.Loading -> WalletLoading(

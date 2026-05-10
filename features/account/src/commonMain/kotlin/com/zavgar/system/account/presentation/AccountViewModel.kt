@@ -9,16 +9,16 @@ import com.zavgar.system.account.model.DeleteResult
 import com.zavgar.system.account.model.ProfileGetResult
 import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.account.domain.model.ChangePasswordRequest
-import com.zavgar.system.account.domain.model.ProfileRequest
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.account.domain.usecase.ChangePasswordUseCase
-import com.zavgar.system.account.domain.usecase.DeleteProfileUseCase
-import com.zavgar.system.account.domain.usecase.GetProfileUseCase
-import com.zavgar.system.account.domain.usecase.UpdateProfileUseCase
+import com.zavgar.system.domain.userinfo.model.UpdateProfileRequest
+import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
+import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
+import com.zavgar.system.domain.userinfo.usecase.UpdateUserProfileUseCase
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidatePasswordUseCase
@@ -33,10 +33,10 @@ import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.datetime.LocalDate
 
 class AccountViewModel(
-    private val getProfileUseCase: GetProfileUseCase,
-    private val updateProfileUseCase: UpdateProfileUseCase,
+    private val getProfileUseCase: GetUserProfileUseCase,
+    private val updateProfileUseCase: UpdateUserProfileUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
-    private val deleteProfileUseCase: DeleteProfileUseCase,
+    private val deleteProfileUseCase: DeleteUserProfileUseCase,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val validateNameUseCase: ValidateNameUseCase,
     private val validateBirthDateUseCase: ValidateBirthDateUseCase
@@ -79,9 +79,9 @@ class AccountViewModel(
                     setState {
                         copy(
                             screenState = AccountState.ScreenState.Content,
-                            name = result.profileResponse.name,
-                            birthDate = result.profileResponse.birthDate,
-                            birthDateText = result.profileResponse.birthDate.toDisplayString()
+                            name = result.profile.name,
+                            birthDate = result.profile.birthDate,
+                            birthDateText = result.profile.birthDate.toDisplayString()
                         )
                     }
 
@@ -262,7 +262,7 @@ class AccountViewModel(
         if (!isFormValid) return
 
         performUpdate(
-            ProfileRequest(
+            UpdateProfileRequest(
                 name = state.name,
                 birthDate = requireNotNull(state.birthDate)
             )
@@ -270,7 +270,7 @@ class AccountViewModel(
 
     }
 
-    private fun performUpdate(profileRequest: ProfileRequest) {
+    private fun performUpdate(profileRequest: UpdateProfileRequest) {
         launchTry {
             setState { copy(isLoading = true) }
 

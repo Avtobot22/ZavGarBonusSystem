@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,11 +24,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.shimmerAnimation
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import com.zavgar.system.designsystem.theme.border
+import com.zavgar.system.designsystem.theme.card
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.home_top_title_wallet
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun WalletLoading(modifier: Modifier) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -38,7 +44,7 @@ internal fun WalletLoading(modifier: Modifier) {
         Spacer(Modifier.height(10.dp))
 
         Text(
-            text = "Бонусная\nсистема",
+            text = stringResource(Res.string.home_top_title_wallet),
             color = colors.foreground,
             fontSize = 38.sp,
             fontWeight = FontWeight.Bold,

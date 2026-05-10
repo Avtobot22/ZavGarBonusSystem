@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.qrcode.ZavGarQrImage
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.home_top_title_wallet
 import com.zavgar.system.resources.refresh_points
 import com.zavgar.system.wallet.presentation.WalletIntent
 import com.zavgar.system.wallet.presentation.WalletState
@@ -44,7 +46,7 @@ internal fun WalletContent(
     onIntent: (WalletIntent) -> Unit,
     modifier: Modifier
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
 
     Column(
@@ -58,7 +60,7 @@ internal fun WalletContent(
         Spacer(Modifier.height(10.dp))
 
         Text(
-            text = "Бонусная\nсистема",
+            text = stringResource(Res.string.home_top_title_wallet),
             color = colors.foreground,
             fontSize = 38.sp,
             fontWeight = FontWeight.Bold,
@@ -87,14 +89,13 @@ internal fun WalletContent(
 
         Spacer(Modifier.height(20.dp))
 
-        // Заглушка: «Заработано за месяц». Реального запроса пока нет, значение зашито.
-        MonthlyEarnedStub()
+        MonthlyEarned(earned = state.monthlyEarned)
     }
 }
 
 @Composable
 private fun QrCard(card: String, balance: Int) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,10 +138,8 @@ private fun QrCard(card: String, balance: Int) {
 }
 
 @Composable
-private fun MonthlyEarnedStub() {
-    val colors = LocalZavGarColors.current
-    // TODO: подключить реальный запрос «Заработано за месяц», когда будет API.
-    val earnedStub = 535
+private fun MonthlyEarned(earned: Int?) {
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,7 +173,7 @@ private fun MonthlyEarnedStub() {
             )
             Spacer(Modifier.height(3.dp))
             Text(
-                text = "+$earnedStub баллов",
+                text = if (earned != null) "+$earned баллов" else "—",
                 color = colors.success,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,

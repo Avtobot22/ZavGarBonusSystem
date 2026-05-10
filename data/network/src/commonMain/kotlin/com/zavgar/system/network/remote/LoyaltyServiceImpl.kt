@@ -1,6 +1,8 @@
 package com.zavgar.system.network.remote
 
 import com.zavgar.system.coroutines.runSuspendCatching
+import com.zavgar.system.network.model.AccrualsSumRequest
+import com.zavgar.system.network.model.AccrualsSumResponse
 import com.zavgar.system.network.model.BalanceResponse
 import com.zavgar.system.network.model.TransactionsPageResponse
 import com.zavgar.system.network.model.TransactionsRequest
@@ -29,5 +31,14 @@ class LoyaltyServiceImpl(
                 setBody(transactionsRequest)
             }
             response.body<TransactionsPageResponse>()
+        }
+
+    override suspend fun getAccrualsSum(request: AccrualsSumRequest): Result<AccrualsSumResponse> =
+        runSuspendCatching {
+            val response = client.post {
+                url { path("users/me/accruals/sum") }
+                setBody(request)
+            }
+            response.body<AccrualsSumResponse>()
         }
 }

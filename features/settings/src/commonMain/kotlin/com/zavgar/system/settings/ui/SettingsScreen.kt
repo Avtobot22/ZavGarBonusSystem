@@ -24,17 +24,15 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,12 +46,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
+import com.zavgar.system.designsystem.modifiers.ShakingState
+import com.zavgar.system.designsystem.modifiers.rememberShakingState
+import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.accentSoft
+import com.zavgar.system.designsystem.theme.border
+import com.zavgar.system.designsystem.theme.card
+import com.zavgar.system.designsystem.theme.danger
+import com.zavgar.system.designsystem.theme.dangerContainer
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundDisabled
+import com.zavgar.system.designsystem.theme.foregroundSecondary
+import com.zavgar.system.designsystem.theme.onAccent
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.home_title_setting
 import com.zavgar.system.resources.settings_about_app_button
@@ -90,6 +101,7 @@ internal fun SettingsLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val errorShakingState = rememberShakingState()
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
@@ -111,6 +123,7 @@ internal fun SettingsLoader(
         state = state,
         onIntent = viewModel::handleIntent,
         snackbarHostState = snackbarHostState,
+        errorShakingState = errorShakingState,
         modifier = modifier
     )
 }
@@ -120,33 +133,43 @@ internal fun SettingsScaffold(
     state: SettingsState,
     onIntent: (SettingsIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
     ) { paddingValues ->
-        when (state.screenState) {
-            is SettingsState.ScreenState.Content -> SettingsContent(
-                onIntent = onIntent,
-                modifier = Modifier.padding(paddingValues)
-            )
+        AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
+            when (state.screenState) {
+                is SettingsState.ScreenState.Content -> SettingsContent(
+                    content = state.screenState,
+                    onIntent = onIntent,
+                    modifier = Modifier.padding(paddingValues)
+                )
 
-            is SettingsState.ScreenState.Loading -> SettingsLoading(
-                modifier = Modifier.padding(paddingValues)
-            )
+                is SettingsState.ScreenState.Loading -> SettingsLoading(
+                    modifier = Modifier.padding(paddingValues)
+                )
+
+                is SettingsState.ScreenState.Error -> ErrorScreen(
+                    modifier = Modifier.padding(paddingValues),
+                    onRetry = { onIntent(SettingsIntent.Retry) },
+                    shakingState = errorShakingState
+                )
+            }
         }
     }
 }
 
 @Composable
 internal fun SettingsContent(
+    content: SettingsState.ScreenState.Content,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
-    var darkMode by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -164,7 +187,7 @@ internal fun SettingsContent(
             modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
         )
 
-        ProfileCard(name = "Михаил Иванов", phone = "+7 (999) 123-45-67", balance = 1500)
+        ProfileCard(name = content.name, phone = content.phone, balance = content.balance)
 
         Spacer(Modifier.height(14.dp))
 
@@ -180,8 +203,8 @@ internal fun SettingsContent(
                 onClick = { /* TODO: about screen */ },
             )
             DarkModeRow(
-                checked = darkMode,
-                onCheckedChange = { darkMode = it },
+                checked = content.isDarkTheme,
+                onCheckedChange = { onIntent(SettingsIntent.ToggleDarkMode(it)) },
             )
             SettingRow(
                 icon = Icons.AutoMirrored.Filled.ExitToApp,
@@ -196,7 +219,7 @@ internal fun SettingsContent(
 
 @Composable
 private fun ProfileCard(name: String, phone: String, balance: Int) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(20.dp)
     Row(
         modifier = Modifier
@@ -231,7 +254,7 @@ private fun ProfileCard(name: String, phone: String, balance: Int) {
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = phone,
+                text = formatPhoneNomer(phone),
                 color = colors.foregroundSecondary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
@@ -261,7 +284,7 @@ private fun SettingRow(
     destructive: Boolean = false,
     showChevron: Boolean = true,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(18.dp)
     val tint = if (destructive) colors.danger else colors.accent
     val iconBg = if (destructive) colors.dangerContainer else colors.accentSoft
@@ -311,7 +334,7 @@ private fun SettingRow(
 
 @Composable
 private fun DarkModeRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(18.dp)
     Row(
         modifier = Modifier
@@ -369,15 +392,34 @@ internal fun SettingsLoading(modifier: Modifier = Modifier) {
     }
 }
 
+private fun formatPhoneNomer(phone: String): String {
+    val digits = phone.filter { it.isDigit() }.drop(1)
+    return if (digits.length == 10) {
+        digits.replace(
+            regex = Regex("(\\d{3})(\\d{3})(\\d{2})(\\d{2})"),
+            replacement = "+7 ($1) $2 $3-$4"
+        )
+    } else {
+        phone
+    }
+}
+
 @Preview
 @Composable
 private fun SettingsScaffoldPreview() {
     ZavGarThemePreview {
         Screen {
             SettingsScaffold(
-                state = SettingsState(),
+                state = SettingsState(
+                    screenState = SettingsState.ScreenState.Content(
+                        name = "Михаил Иванов",
+                        phone = "+7 (999) 123-45-67",
+                        balance = 1500,
+                    )
+                ),
                 onIntent = { },
                 snackbarHostState = remember { SnackbarHostState() },
+                errorShakingState = rememberShakingState(),
             )
         }
     }
@@ -392,6 +434,7 @@ private fun SettingsScaffoldLoadingPreview() {
                 state = SettingsState(screenState = SettingsState.ScreenState.Loading),
                 onIntent = { },
                 snackbarHostState = remember { SnackbarHostState() },
+                errorShakingState = rememberShakingState(),
             )
         }
     }

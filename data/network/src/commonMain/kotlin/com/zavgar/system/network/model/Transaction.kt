@@ -8,6 +8,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Transaction(
+    @SerialName("id")
+    val id: Int,
     @SerialName("operationType")
     @Serializable(with = OperationTypeSerializer::class)
     val operationType: OperationType,

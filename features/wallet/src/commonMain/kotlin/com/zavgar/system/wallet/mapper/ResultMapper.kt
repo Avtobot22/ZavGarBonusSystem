@@ -3,13 +3,13 @@ package com.zavgar.system.wallet.mapper
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.utils.result.AppResult
-import com.zavgar.system.wallet.domain.error.GetBalanceError
-import com.zavgar.system.wallet.domain.model.Balance
+import com.zavgar.system.domain.userinfo.error.GetBalanceError
+import com.zavgar.system.domain.userinfo.model.Balance
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_network_error
 import com.zavgar.system.resources.error_server_error
 import com.zavgar.system.resources.error_too_many_requests
+import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.wallet.model.BalanceResult
 
 fun Balance.toPresentation() = this.balance

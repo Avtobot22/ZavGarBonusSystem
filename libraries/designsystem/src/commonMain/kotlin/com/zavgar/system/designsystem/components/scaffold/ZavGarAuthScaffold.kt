@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zavgar.system.designsystem.components.header.ZavGarOrangeHeader
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarTopSheetShape
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 
 /**
  * Унифицированный каркас для экранов auth-флоу (Login / Register / ResetPassword / Confirmation).
@@ -39,12 +39,14 @@ fun ZavGarAuthScaffold(
     sheetContentPadding: PaddingValues = PaddingValues(horizontal = 28.dp, vertical = 28.dp),
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(),
         containerColor = colors.accent,
-        snackbarHost = snackbarHost,
+        snackbarHost = {
+            Box(Modifier.navigationBarsPadding()) { snackbarHost() }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -78,7 +80,7 @@ private fun ColumnScope.AuthSheet(
     sheetContentPadding: PaddingValues,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val density = LocalDensity.current
     val overlapPx = with(density) { overlap.roundToPx() }
 

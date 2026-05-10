@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,59 +27,65 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.shimmerAnimation
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.history.model.HistoryItem
 
 @Composable
 internal fun TransactionItem(item: HistoryItem.TransactionItem) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val color = if (item.isIncome) colors.success else colors.danger
     val iconBg = if (item.isIncome) colors.successContainer else colors.dangerContainer
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 13.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Box(
+    Column {
+        Row(
             modifier = Modifier
-                .size(38.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(iconBg),
-            contentAlignment = Alignment.Center,
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Icon(
-                imageVector = if (item.isIncome) Icons.Default.Add else Icons.Default.Remove,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(18.dp),
-            )
-        }
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(iconBg),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = if (item.isIncome) Icons.Default.Add else Icons.Default.Remove,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
 
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = item.store,
+                    color = colors.foreground,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = item.time,
+                    color = colors.foregroundSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+
             Text(
-                text = item.store,
-                color = colors.foreground,
-                fontSize = 14.sp,
+                text = item.amount,
+                color = color,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Text(
-                text = item.time,
-                color = colors.foregroundSecondary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-            )
         }
-
-        Text(
-            text = item.amount,
-            color = color,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
+        HorizontalDivider(
+            color = colors.border,
+            thickness = 0.5.dp,
         )
     }
 }

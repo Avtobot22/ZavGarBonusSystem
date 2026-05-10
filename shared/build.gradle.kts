@@ -17,6 +17,7 @@ kotlin {
             implementation(projects.data.network)
 
             implementation(projects.domain.session)
+            implementation(projects.domain.userinfo)
             implementation(projects.utils.result)
             implementation(projects.utils.validation)
 

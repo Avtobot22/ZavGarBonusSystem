@@ -13,7 +13,6 @@ import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.result.toAppResult
 import kotlinx.coroutines.withContext
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import com.zavgar.system.network.model.OperationType as NetworkOperationType
 import com.zavgar.system.network.model.PointsType as NetworkPointsType
 import com.zavgar.system.network.model.Transaction as NetworkTransaction
@@ -47,7 +46,7 @@ class GetOperationsUseCase(
 
     @OptIn(ExperimentalUuidApi::class)
     private fun NetworkTransaction.toDomain() = Transaction(
-        id = Uuid.random().toString(),
+        id = id,
         operationType = when (operationType) {
             NetworkOperationType.CREDITING -> OperationType.CREDITING
             NetworkOperationType.DEBITING -> OperationType.DEBITING

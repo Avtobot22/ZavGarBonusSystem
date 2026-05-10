@@ -33,8 +33,8 @@ import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
-import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resetpassword.presentation.ResetPasswordEvent
 import com.zavgar.system.resetpassword.presentation.ResetPasswordIntent
 import com.zavgar.system.resetpassword.presentation.ResetPasswordState
@@ -115,7 +115,7 @@ internal fun ResetPasswordScaffold(
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
 
     ZavGarAuthScaffold(
         modifier = modifier,

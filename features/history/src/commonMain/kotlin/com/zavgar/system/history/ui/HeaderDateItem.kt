@@ -13,12 +13,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.shimmerAnimation
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.history.model.HistoryItem
 
 @Composable
 internal fun DateHeaderItem(item: HistoryItem.DateHeader) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     Text(
         text = item.date.uppercase(),
         color = colors.foregroundSecondary,

@@ -15,7 +15,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 
 /**
  * Кнопка "назад" из прототипа: квадрат 42×42dp с card-фоном, скруглением 13dp и лёгкой тенью.
@@ -26,7 +27,7 @@ fun ZavGarBackButton(
     modifier: Modifier = Modifier,
     contentDescription: String? = "Назад",
 ) {
-    val colors = LocalZavGarColors.current
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(13.dp)
     Box(
         modifier = modifier

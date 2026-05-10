@@ -14,7 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zavgar.system.designsystem.theme.LocalZavGarColors
+import androidx.compose.material3.MaterialTheme
+import com.zavgar.system.designsystem.theme.*
 import qrgenerator.qrkitpainter.QrKitBallShape
 import qrgenerator.qrkitpainter.QrKitBrush
 import qrgenerator.qrkitpainter.QrKitCodeShape
@@ -31,7 +32,7 @@ fun ZavGarQrImage(
     card: String,
     modifier: Modifier = Modifier,
 ) {
-    val colorScheme = LocalZavGarColors.current
+    val colorScheme = MaterialTheme.colorScheme
 
     val painter = rememberQrKitPainter(data = card) {
 

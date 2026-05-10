@@ -6,6 +6,7 @@ include(":data:datastore")
 include(":data:network")
 
 include(":domain:session")
+include(":domain:userinfo")
 
 include(":features:authorization")
 include(":features:registration")
