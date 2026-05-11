@@ -22,6 +22,7 @@ kotlinx_datetime = "0.7.1"
 activity = "1.13.0"
 appcompat = "1.7.1"
 datastore = "1.2.1"
+security_crypto = "1.1.0-alpha06"
 lifecycle_viewmodel = "2.10.0"
 lifecycle_runtime = "2.10.0"
 
@@ -73,6 +74,7 @@ androidx_activity = { module = "androidx.activity:activity", version.ref = "acti
 androidx_activity_compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx_datastore = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
+androidx_security_crypto = { module = "androidx.security:security-crypto", version.ref = "security_crypto" }
 androidx_lifecycle_viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle_viewmodel" }
 androidx_lifecycle_runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle_runtime" }
 androidx_lifecycle_compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_runtime" }

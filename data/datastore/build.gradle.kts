@@ -14,6 +14,11 @@ kotlin {
 
             implementation(libs.koin.core)
             implementation(libs.androidx.datastore)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.security.crypto)
         }
     }
 

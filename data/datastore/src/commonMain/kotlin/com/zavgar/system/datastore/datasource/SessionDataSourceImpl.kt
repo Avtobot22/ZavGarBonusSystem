@@ -11,21 +11,18 @@ import kotlinx.coroutines.flow.first
 
 internal class SessionDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
+    private val secureTokenStorage: SecureTokenStorage,
 ) : SessionDataSource {
 
     private companion object {
-        val APP_ACCESS_TOKEN = stringPreferencesKey("app_access_token")
-
-        val APP_REFRESH_TOKEN = stringPreferencesKey("app_refresh_token")
-
         val APP_PHONE = stringPreferencesKey("app_phone")
     }
 
     override suspend fun saveSession(session: Session): Result<Unit> {
         return runSuspendCatching {
+            secureTokenStorage.saveAccessToken(session.accessToken)
+            secureTokenStorage.saveRefreshToken(session.refreshToken)
             dataStore.edit { settings ->
-                settings[APP_ACCESS_TOKEN] = session.accessToken
-                settings[APP_REFRESH_TOKEN] = session.refreshToken
                 settings[APP_PHONE] = session.phone
             }
         }
@@ -33,20 +30,16 @@ internal class SessionDataSourceImpl(
 
     override suspend fun saveTokens(accessToken: String, refreshToken: String): Result<Unit> {
         return runSuspendCatching {
-            dataStore.edit { settings ->
-                settings[APP_ACCESS_TOKEN] = accessToken
-                settings[APP_REFRESH_TOKEN] = refreshToken
-            }
+            secureTokenStorage.saveAccessToken(accessToken)
+            secureTokenStorage.saveRefreshToken(refreshToken)
         }
     }
 
     override suspend fun getSession(): Result<Session> {
         return runSuspendCatching {
-            val preferences = dataStore.data.first()
-
-            val accessToken = preferences[APP_ACCESS_TOKEN]
-            val refreshToken = preferences[APP_REFRESH_TOKEN]
-            val phone = preferences[APP_PHONE]
+            val accessToken = secureTokenStorage.getAccessToken()
+            val refreshToken = secureTokenStorage.getRefreshToken()
+            val phone = dataStore.data.first()[APP_PHONE]
 
             if (!accessToken.isNullOrBlank() && !phone.isNullOrBlank() && !refreshToken.isNullOrBlank()) {
                 Session(accessToken = accessToken, phone = phone, refreshToken = refreshToken)
@@ -58,10 +51,7 @@ internal class SessionDataSourceImpl(
 
     override suspend fun getAccessToken(): Result<String> {
         return runSuspendCatching {
-            val preferences = dataStore.data.first()
-
-            val accessToken = preferences[APP_ACCESS_TOKEN]
-
+            val accessToken = secureTokenStorage.getAccessToken()
             if (!accessToken.isNullOrBlank()) {
                 accessToken
             } else {
@@ -72,10 +62,7 @@ internal class SessionDataSourceImpl(
 
     override suspend fun getRefreshToken(): Result<String> {
         return runSuspendCatching {
-            val preferences = dataStore.data.first()
-
-            val refreshToken = preferences[APP_REFRESH_TOKEN]
-
+            val refreshToken = secureTokenStorage.getRefreshToken()
             if (!refreshToken.isNullOrBlank()) {
                 refreshToken
             } else {
@@ -86,6 +73,7 @@ internal class SessionDataSourceImpl(
 
     override suspend fun deleteSession(): Result<Unit> {
         return runSuspendCatching {
+            secureTokenStorage.clear()
             dataStore.edit { settings ->
                 settings.clear()
             }

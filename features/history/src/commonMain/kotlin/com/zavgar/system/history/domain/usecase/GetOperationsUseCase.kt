@@ -12,7 +12,6 @@ import com.zavgar.system.network.remote.LoyaltyService
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.result.toAppResult
 import kotlinx.coroutines.withContext
-import kotlin.uuid.ExperimentalUuidApi
 import com.zavgar.system.network.model.OperationType as NetworkOperationType
 import com.zavgar.system.network.model.PointsType as NetworkPointsType
 import com.zavgar.system.network.model.Transaction as NetworkTransaction
@@ -44,7 +43,6 @@ class GetOperationsUseCase(
         hasMore = hasMore,
     )
 
-    @OptIn(ExperimentalUuidApi::class)
     private fun NetworkTransaction.toDomain() = Transaction(
         id = id,
         operationType = when (operationType) {

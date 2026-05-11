@@ -19,3 +19,5 @@ captures
 node_modules/
 # Keystore files and signing properties
 /config/signing/
+# Claude code reviews (local only)
+.claude/review/

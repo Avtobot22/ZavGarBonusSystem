@@ -1,6 +1,5 @@
 package com.zavgar.system.navigationapi.bottombar
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.zavgar.system.navigationapi.marker.TopLevel
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 
 @Composable
 fun AppBottomBar(
@@ -42,15 +42,13 @@ fun AppBottomBar(
                     onClick = { setCurrentSection(item) },
                     icon = {
                         Icon(
-                            imageVector = item.icon,
+                            imageVector = vectorResource(item.icon),
                             contentDescription = stringResource(title),
-                            modifier = Modifier.size(42.dp)
                         )
                     },
                     label = {
                         Text(
-                            text = stringResource(title),
-                            style = MaterialTheme.typography.bodyMedium
+                            text = stringResource(title)
                         )
                     },
                     alwaysShowLabel = true,

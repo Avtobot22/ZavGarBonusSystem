@@ -1,6 +1,7 @@
 package com.zavgar.system.core.serializer
 
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.number
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -15,7 +16,7 @@ object LocalDateTimeDDMMYYYYHHMMSSSerializer : KSerializer<LocalDateTime> {
     override fun serialize(encoder: Encoder, value: LocalDateTime) {
 
         val day = value.day.toString().padStart(2, '0')
-        val month = value.month.toString().padStart(2, '0')
+        val month = value.month.number.toString().padStart(2, '0')
         val year = value.year.toString()
         val hour = value.hour.toString().padStart(2, '0')
         val minute = value.minute.toString().padStart(2, '0')

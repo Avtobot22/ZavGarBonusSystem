@@ -14,6 +14,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -26,8 +27,8 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
@@ -64,11 +65,8 @@ val networkModule = module {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val accessResult = sessionDataSource.getAccessToken()
-                        val refreshResult = sessionDataSource.getRefreshToken()
-
-                        val access = accessResult.getOrNull()
-                        val refresh = refreshResult.getOrNull()
+                        val access = sessionDataSource.getAccessToken().getOrNull()
+                        val refresh = sessionDataSource.getRefreshToken().getOrNull()
 
                         if (access != null && refresh != null) {
                             BearerTokens(accessToken = access, refreshToken = refresh)
@@ -77,39 +75,38 @@ val networkModule = module {
                         }
                     }
 
-                    refreshTokens {
+                    sendWithoutRequest { true }
 
-                        val oldRefreshToken =
-                            sessionDataSource.getRefreshToken().getOrNull()
-                                ?: return@refreshTokens triggerLogout(koinScope.get())
+                    refreshTokens {
+                        val oldRefreshToken = oldTokens?.refreshToken
+                            ?: sessionDataSource.getRefreshToken().getOrNull()
+                            ?: return@refreshTokens null
 
                         try {
-                            val response = publicClient.post("auth/refresh/token") {
+                            val newTokens: LoginResponse = publicClient.post("auth/refresh/token") {
+                                markAsRefreshTokenRequest()
                                 headers {
                                     append(HttpHeaders.Authorization, "Bearer $oldRefreshToken")
                                 }
-                            }
+                            }.body()
 
-                            if (response.status.isSuccess()) {
-                                val newTokens: LoginResponse = response.body()
+                            sessionDataSource.saveTokens(
+                                accessToken = newTokens.accessToken,
+                                refreshToken = newTokens.refreshToken
+                            )
 
-                                val saveResult = sessionDataSource.saveTokens(
-                                    accessToken = newTokens.accessToken,
-                                    refreshToken = newTokens.refreshToken
-                                )
-                                if (saveResult.isFailure) {
-                                    return@refreshTokens triggerLogout(koinScope.get())
-                                }
-
-                                BearerTokens(
-                                    accessToken = newTokens.accessToken,
-                                    refreshToken = newTokens.refreshToken
-                                )
-                            } else {
+                            BearerTokens(
+                                accessToken = newTokens.accessToken,
+                                refreshToken = newTokens.refreshToken
+                            )
+                        } catch (cause: ResponseException) {
+                            if (cause.response.status.isAuthFailure()) {
                                 triggerLogout(koinScope.get())
+                            } else {
+                                null
                             }
                         } catch (_: Exception) {
-                            triggerLogout(koinScope.get())
+                            null
                         }
                     }
                 }
@@ -134,6 +131,9 @@ private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
     logoutHandler.logout()
     return null
 }
+
+private fun HttpStatusCode.isAuthFailure(): Boolean =
+    this == HttpStatusCode.Unauthorized || this == HttpStatusCode.Forbidden
 
 private fun HttpClientConfig<*>.configureCommon(json: Json, baseUrl: String) {
     expectSuccess = true

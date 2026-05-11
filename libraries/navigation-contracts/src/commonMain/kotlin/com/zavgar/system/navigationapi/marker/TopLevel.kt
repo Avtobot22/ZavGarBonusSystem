@@ -1,7 +1,7 @@
 package com.zavgar.system.navigationapi.marker
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.zavgar.system.parcelable.CommonParcelable
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
 /**
@@ -12,7 +12,7 @@ interface TopLevel : BottomBarVisible, CommonParcelable {
     /**
      * Icon of the destination to be used in the top app bar and bottom bar/navigation rail.
      */
-    val icon: ImageVector
+    val icon: DrawableResource
 
     /**
      * Title of the destination to be used in the bottom bar/navigation rail.
