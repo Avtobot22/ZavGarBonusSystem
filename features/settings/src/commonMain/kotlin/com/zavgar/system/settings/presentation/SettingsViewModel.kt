@@ -8,7 +8,7 @@ import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
-import com.zavgar.system.settings.domain.usecase.LogoutUseCase
+import com.zavgar.system.domain.userinfo.usecase.LogoutUseCase
 import com.zavgar.system.settings.mapper.asSnackBarMessage
 import com.zavgar.system.settings.mapper.toLogoutResult
 import com.zavgar.system.settings.model.LogoutResult

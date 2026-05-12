@@ -5,11 +5,11 @@ import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.history.domain.usecase.GetOperationsUseCase
+import com.zavgar.system.domain.operations.usecase.GetOperationsUseCase
 import com.zavgar.system.history.mapper.toPresentation
 import com.zavgar.system.history.mapper.toTransactionsResult
 import com.zavgar.system.history.model.DatePickerType
-import com.zavgar.system.history.model.TransactionsRequest
+import com.zavgar.system.domain.operations.model.TransactionsRequest
 import com.zavgar.system.history.model.TransactionsResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_date_range

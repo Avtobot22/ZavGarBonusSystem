@@ -6,14 +6,14 @@ import com.zavgar.system.confirmation.mapper.toConfirmationResult
 import com.zavgar.system.confirmation.mapper.toResendConfirmationResult
 import com.zavgar.system.confirmation.model.ConfirmationResult
 import com.zavgar.system.confirmation.model.ResendConfirmationResult
-import com.zavgar.system.confirmation.domain.model.ConfirmationRequest
-import com.zavgar.system.confirmation.domain.model.ResendRequest
+import com.zavgar.system.domain.auth.model.ConfirmationRequest
+import com.zavgar.system.domain.auth.model.ResendRequest
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.confirmation.domain.usecase.ConfirmationUseCase
-import com.zavgar.system.confirmation.domain.usecase.ResendCodeUseCase
+import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
+import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
 import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_resend_success
@@ -141,5 +141,10 @@ class ConfirmationViewModel(
         } catch {
             // ignore — timer never produces real errors
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        timerJob?.cancel()
     }
 }

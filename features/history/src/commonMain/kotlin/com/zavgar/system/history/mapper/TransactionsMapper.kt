@@ -2,9 +2,9 @@ package com.zavgar.system.history.mapper
 
 import com.zavgar.system.core.presentation.util.toDayMonthYearStr
 import com.zavgar.system.core.presentation.util.toHourMinuteStr
-import com.zavgar.system.history.domain.model.OperationType
-import com.zavgar.system.history.domain.model.PointsType
-import com.zavgar.system.history.domain.model.TransactionsPageResponse
+import com.zavgar.system.domain.operations.model.OperationType
+import com.zavgar.system.domain.operations.model.PointsType
+import com.zavgar.system.domain.operations.model.TransactionsPageResponse
 import com.zavgar.system.history.model.History
 import com.zavgar.system.history.model.HistoryItem
 

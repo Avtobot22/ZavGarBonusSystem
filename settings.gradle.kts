@@ -4,9 +4,12 @@ include(":core")
 
 include(":data:datastore")
 include(":data:network")
+include(":data:repository")
 
 include(":domain:session")
 include(":domain:userinfo")
+include(":domain:auth")
+include(":domain:operations")
 
 include(":features:authorization")
 include(":features:registration")

@@ -10,11 +10,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.utils.result)
-            implementation(projects.data.network)
             implementation(projects.libraries.coroutines)
 
             implementation(libs.kotlinx.datetime)
-
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
         }

@@ -1,5 +1,8 @@
 package com.zavgar.system.navigationapi.bottombar
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +35,11 @@ fun AppBottomBar(
         shadowElevation = 8.dp,
     ) {
         NavigationBar(
-            containerColor = Color.Transparent
+            modifier = Modifier
+                .navigationBarsPadding()
+                .height(60.dp),
+            containerColor = Color.Transparent,
+            windowInsets = WindowInsets()
         ) {
             items.forEach { item ->
                 val selected = item == currentSection

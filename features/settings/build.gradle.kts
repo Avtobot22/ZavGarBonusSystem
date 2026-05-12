@@ -16,7 +16,6 @@ kotlin {
 
             implementation(projects.core)
 
-            implementation(projects.data.network)
             implementation(projects.data.datastore)
             implementation(projects.domain.userinfo)
             implementation(projects.utils.result)

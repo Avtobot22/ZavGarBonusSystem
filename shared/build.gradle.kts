@@ -15,7 +15,10 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.data.datastore)
             implementation(projects.data.network)
+            implementation(projects.data.repository)
 
+            implementation(projects.domain.auth)
+            implementation(projects.domain.operations)
             implementation(projects.domain.session)
             implementation(projects.domain.userinfo)
             implementation(projects.utils.result)

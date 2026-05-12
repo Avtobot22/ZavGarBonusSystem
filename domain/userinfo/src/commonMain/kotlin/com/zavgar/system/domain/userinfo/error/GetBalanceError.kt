@@ -1,21 +1,10 @@
 package com.zavgar.system.domain.userinfo.error
 
-import com.zavgar.system.network.mapper.NetworkErrorKind
-import com.zavgar.system.network.mapper.classifyNetworkError
+import com.zavgar.system.utils.result.AppError
 
 sealed interface GetBalanceError {
-    data object TooManyRequestError : GetBalanceError
-    data object ServerError : GetBalanceError
-    data object NetworkError : GetBalanceError
-    data class UnknownError(val message: String) : GetBalanceError
-}
-
-fun Throwable.toGetBalanceError(): GetBalanceError = when (val kind = classifyNetworkError()) {
-    is NetworkErrorKind.Client -> when (kind.statusCode) {
-        429 -> GetBalanceError.TooManyRequestError
-        else -> GetBalanceError.UnknownError(kind.message)
-    }
-    is NetworkErrorKind.Server -> GetBalanceError.ServerError
-    is NetworkErrorKind.Network -> GetBalanceError.NetworkError
-    is NetworkErrorKind.Unknown -> GetBalanceError.UnknownError(kind.message)
+    data object TooManyRequestError : GetBalanceError, AppError.TooManyRequest
+    data object ServerError : GetBalanceError, AppError.Server
+    data object NetworkError : GetBalanceError, AppError.Network
+    data class UnknownError(override val message: String) : GetBalanceError, AppError.Unknown
 }

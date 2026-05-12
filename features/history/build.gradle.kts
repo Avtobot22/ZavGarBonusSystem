@@ -16,7 +16,7 @@ kotlin {
 
             implementation(projects.core)
 
-            implementation(projects.data.network)
+            implementation(projects.domain.operations)
             implementation(projects.utils.result)
             implementation(projects.resources)
             implementation(projects.libraries.navigationContracts)

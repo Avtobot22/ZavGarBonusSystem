@@ -4,8 +4,8 @@ import com.zavgar.system.authorization.mapper.asSnackBarMessage
 import com.zavgar.system.authorization.mapper.toLoginResult
 import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.authorization.domain.model.LoginRequest
-import com.zavgar.system.authorization.domain.usecase.LoginUseCase
+import com.zavgar.system.domain.auth.model.LoginRequest
+import com.zavgar.system.domain.auth.usecase.LoginUseCase
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.utils.validation.ValidatePasswordUseCase

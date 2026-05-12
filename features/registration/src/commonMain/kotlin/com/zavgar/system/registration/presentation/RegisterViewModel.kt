@@ -4,13 +4,13 @@ import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.registration.domain.usecase.RegisterUseCase
+import com.zavgar.system.domain.auth.usecase.RegisterUseCase
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidatePasswordUseCase
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
 import com.zavgar.system.utils.validation.ValidateRepeatedPasswordUseCase
-import com.zavgar.system.registration.domain.model.RegisterRequest
+import com.zavgar.system.domain.auth.model.RegisterRequest
 import com.zavgar.system.registration.mapper.asSnackBarMessage
 import com.zavgar.system.registration.mapper.toRegisterResult
 import com.zavgar.system.registration.model.RegisterResult

@@ -8,13 +8,13 @@ import com.zavgar.system.account.model.ChangePasswordResult
 import com.zavgar.system.account.model.DeleteResult
 import com.zavgar.system.account.model.ProfileGetResult
 import com.zavgar.system.account.model.ProfileUpdateResult
-import com.zavgar.system.account.domain.model.ChangePasswordRequest
+import com.zavgar.system.domain.userinfo.model.ChangePasswordRequest
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
-import com.zavgar.system.account.domain.usecase.ChangePasswordUseCase
+import com.zavgar.system.domain.userinfo.usecase.ChangePasswordUseCase
 import com.zavgar.system.domain.userinfo.model.UpdateProfileRequest
 import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase

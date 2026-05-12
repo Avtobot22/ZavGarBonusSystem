@@ -1,17 +1,17 @@
 package com.zavgar.system.domain.userinfo.usecase
 
 import com.zavgar.system.coroutines.CoroutineDispatcherProvider
-import com.zavgar.system.network.model.AccrualsSumRequest
-import com.zavgar.system.network.remote.LoyaltyService
+import com.zavgar.system.domain.userinfo.error.MonthlyAccrualsError
+import com.zavgar.system.domain.userinfo.repository.ProfileRepository
+import com.zavgar.system.utils.result.AppResult
 import kotlinx.coroutines.withContext
 
 class GetMonthlyAccrualsUseCase(
-    private val loyaltyService: LoyaltyService,
+    private val profileRepository: ProfileRepository,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) {
-    suspend operator fun invoke(): Result<Int> =
+    suspend operator fun invoke(): AppResult<Int, MonthlyAccrualsError> =
         withContext(dispatcherProvider.io) {
-            loyaltyService.getAccrualsSum(AccrualsSumRequest())
-                .map { it.sum }
+            profileRepository.getMonthlyAccruals()
         }
 }

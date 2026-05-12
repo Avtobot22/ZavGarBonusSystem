@@ -16,8 +16,7 @@ kotlin {
 
             implementation(projects.core)
 
-            implementation(projects.data.network)
-            implementation(projects.data.datastore)
+            implementation(projects.domain.auth)
             implementation(projects.utils.result)
             implementation(projects.resources)
             implementation(projects.utils.validation)

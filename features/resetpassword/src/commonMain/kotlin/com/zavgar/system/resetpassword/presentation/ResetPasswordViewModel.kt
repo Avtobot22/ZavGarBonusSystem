@@ -3,13 +3,13 @@ package com.zavgar.system.resetpassword.presentation
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.resetpassword.domain.usecase.ResetPasswordUseCase
+import com.zavgar.system.domain.auth.usecase.ResetPasswordUseCase
 import com.zavgar.system.utils.validation.ValidatePasswordUseCase
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
 import com.zavgar.system.utils.validation.ValidateRepeatedPasswordUseCase
 import com.zavgar.system.resetpassword.mapper.asSnackBarMessage
 import com.zavgar.system.resetpassword.mapper.toResetPasswordResult
-import com.zavgar.system.resetpassword.model.ResetPasswordRequest
+import com.zavgar.system.domain.auth.model.ResetPasswordRequest
 import com.zavgar.system.resetpassword.model.ResetPasswordResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error

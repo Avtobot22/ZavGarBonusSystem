@@ -12,6 +12,7 @@ import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode
 import com.zavgar.system.wallet.mapper.toBalanceResult
+import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.wallet.model.BalanceResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -155,11 +156,14 @@ class WalletViewModel(
 
     private fun initializeData() {
         launchTry {
-            getSessionUseCase().fold(onSuccess = { session ->
-                setState { copy(phone = session.phone) }
-                fetchBalance(isInitial = true)
-                fetchMonthlyAccruals()
-            }, onFailure = { logoutHandler.logout() })
+            when (val result = getSessionUseCase()) {
+                is AppResult.Success -> {
+                    setState { copy(phone = result.data.phone) }
+                    fetchBalance(isInitial = true)
+                    fetchMonthlyAccruals()
+                }
+                is AppResult.Error -> logoutHandler.logout()
+            }
         } catch {
             logoutHandler.logout()
         }
@@ -167,8 +171,9 @@ class WalletViewModel(
 
     private fun fetchMonthlyAccruals() {
         launchTry {
-            getMonthlyAccrualsUseCase().onSuccess { sum ->
-                setState { copy(monthlyEarned = sum) }
+            when (val result = getMonthlyAccrualsUseCase()) {
+                is AppResult.Success -> setState { copy(monthlyEarned = result.data) }
+                is AppResult.Error -> Unit
             }
         } catch {
             // non-critical — wallet stays functional without monthly sum
