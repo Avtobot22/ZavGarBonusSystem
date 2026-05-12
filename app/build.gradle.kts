@@ -38,6 +38,12 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
         }
+
+        getByName("debug") {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-DEV"
+            isMinifyEnabled = false
+        }
     }
 
     compileOptions {
