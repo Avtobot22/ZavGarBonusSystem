@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 internal class AndroidSecureTokenStorage(
     context: Context,
@@ -25,25 +23,25 @@ internal class AndroidSecureTokenStorage(
         )
     }
 
-    override suspend fun saveAccessToken(token: String) = withContext(Dispatchers.IO) {
+    override suspend fun saveAccessToken(token: String) =
         prefs.edit().putString(KEY_ACCESS, token).apply()
-    }
 
-    override suspend fun saveRefreshToken(token: String) = withContext(Dispatchers.IO) {
+
+    override suspend fun saveRefreshToken(token: String) =
         prefs.edit().putString(KEY_REFRESH, token).apply()
-    }
 
-    override suspend fun getAccessToken(): String? = withContext(Dispatchers.IO) {
+
+    override suspend fun getAccessToken(): String? =
         prefs.getString(KEY_ACCESS, null)
-    }
 
-    override suspend fun getRefreshToken(): String? = withContext(Dispatchers.IO) {
+
+    override suspend fun getRefreshToken(): String? =
         prefs.getString(KEY_REFRESH, null)
-    }
 
-    override suspend fun clear() = withContext(Dispatchers.IO) {
+
+    override suspend fun clear() =
         prefs.edit().clear().apply()
-    }
+
 
     private companion object {
         const val PREFS_FILE = "zavgar_secure_tokens"

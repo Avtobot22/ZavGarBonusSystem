@@ -11,9 +11,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.utils.result)
             implementation(libs.kotlinx.datetime)
-            implementation(projects.libraries.coroutines)
             implementation(libs.koin.core)
-            implementation(libs.kotlinx.coroutines.core)
         }
     }
 

@@ -12,11 +12,14 @@ kotlin {
             implementation(projects.data.network)
             implementation(projects.data.datastore)
             implementation(projects.domain.auth)
+            implementation(projects.domain.session)
             implementation(projects.domain.operations)
             implementation(projects.domain.userinfo)
             implementation(projects.utils.result)
+            implementation(projects.libraries.coroutines)
 
             implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
         }
     }

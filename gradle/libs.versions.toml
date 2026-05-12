@@ -22,7 +22,7 @@ kotlinx_datetime = "0.7.1"
 activity = "1.13.0"
 appcompat = "1.7.1"
 datastore = "1.2.1"
-security_crypto = "1.1.0-alpha06"
+security_crypto = "1.1.0"
 lifecycle_viewmodel = "2.10.0"
 lifecycle_runtime = "2.10.0"
 

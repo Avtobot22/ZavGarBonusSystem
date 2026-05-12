@@ -9,7 +9,7 @@ class LogoutHandler(
     private val appEventBus: AppEventBus,
 ) {
     suspend fun logout() {
-        deleteSessionUseCase() // session may already be gone
+        deleteSessionUseCase()
         appEventBus.emit(AppEvent.Logout)
     }
 }

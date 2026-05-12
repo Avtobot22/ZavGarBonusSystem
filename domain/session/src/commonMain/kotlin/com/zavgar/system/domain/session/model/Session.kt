@@ -1,4 +1,4 @@
-package com.zavgar.system.domain.session
+package com.zavgar.system.domain.session.model
 
 data class Session(
     val phone: String,

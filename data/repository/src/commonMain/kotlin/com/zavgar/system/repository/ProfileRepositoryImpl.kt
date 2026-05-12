@@ -1,5 +1,6 @@
 package com.zavgar.system.repository
 
+import com.zavgar.system.coroutines.CoroutineDispatcherProvider
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.domain.userinfo.error.ChangePasswordError
 import com.zavgar.system.domain.userinfo.error.DeleteError
@@ -17,57 +18,70 @@ import com.zavgar.system.network.model.ProfileRequest
 import com.zavgar.system.network.remote.LoyaltyService
 import com.zavgar.system.network.remote.UserProfileService
 import com.zavgar.system.utils.result.AppResult
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
 internal class ProfileRepositoryImpl(
     private val userProfileService: UserProfileService,
     private val loyaltyService: LoyaltyService,
     private val sessionDataSource: SessionDataSource,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : ProfileRepository {
 
-    override suspend fun getProfile(): AppResult<UserProfile, ProfileError> =
+    override suspend fun getProfile(): AppResult<UserProfile, ProfileError> = withContext(dispatcherProvider.io) {
         userProfileService.getProfile().fold(
             onSuccess = { AppResult.Success(UserProfile(name = it.name, phone = it.phone, birthDate = it.birthDate)) },
             onFailure = { AppResult.Error(it.toProfileError()) },
         )
+    }
 
     override suspend fun updateProfile(name: String, birthDate: LocalDate): AppResult<Unit, ProfileError> =
-        userProfileService.updateProfile(ProfileRequest(name = name, birthDate = birthDate)).fold(
-            onSuccess = { AppResult.Success(Unit) },
-            onFailure = { AppResult.Error(it.toProfileError()) },
-        )
+        withContext(dispatcherProvider.io) {
+            userProfileService.updateProfile(ProfileRequest(name = name, birthDate = birthDate)).fold(
+                onSuccess = { AppResult.Success(Unit) },
+                onFailure = { AppResult.Error(it.toProfileError()) },
+            )
+        }
 
-    override suspend fun delete(): AppResult<Unit, DeleteError> =
+    override suspend fun delete(): AppResult<Unit, DeleteError> = withContext(dispatcherProvider.io) {
         userProfileService.delete().fold(
             onSuccess = { AppResult.Success(Unit) },
             onFailure = { AppResult.Error(it.toDeleteError()) },
         )
+    }
 
-    override suspend fun getBalance(): AppResult<Balance, GetBalanceError> =
+    override suspend fun getBalance(): AppResult<Balance, GetBalanceError> = withContext(dispatcherProvider.io) {
         loyaltyService.getBalance().fold(
             onSuccess = { AppResult.Success(Balance(balance = it.balance)) },
             onFailure = { AppResult.Error(it.toGetBalanceError()) },
         )
+    }
 
     override suspend fun getMonthlyAccruals(): AppResult<Int, MonthlyAccrualsError> =
-        loyaltyService.getAccrualsSum().fold(
-            onSuccess = { AppResult.Success(it.sum) },
-            onFailure = { AppResult.Error(it.toMonthlyAccrualsError()) },
-        )
+        withContext(dispatcherProvider.io) {
+            loyaltyService.getAccrualsSum().fold(
+                onSuccess = { AppResult.Success(it.sum) },
+                onFailure = { AppResult.Error(it.toMonthlyAccrualsError()) },
+            )
+        }
 
-    override suspend fun changePassword(oldPassword: String, newPassword: String): AppResult<Unit, ChangePasswordError> =
+    override suspend fun changePassword(
+        oldPassword: String,
+        newPassword: String
+    ): AppResult<Unit, ChangePasswordError> = withContext(dispatcherProvider.io) {
         userProfileService.changePassword(
             ChangePasswordRequest(oldPassword = oldPassword, newPassword = newPassword)
         ).fold(
             onSuccess = { AppResult.Success(Unit) },
             onFailure = { AppResult.Error(it.toChangePasswordError()) },
         )
+    }
 
-    override suspend fun logout(): AppResult<Unit, LogoutError> {
+    override suspend fun logout(): AppResult<Unit, LogoutError> = withContext(dispatcherProvider.io) {
         sessionDataSource.deleteSession().onFailure { exception ->
-            return AppResult.Error(LogoutError.UnknownError(exception.message ?: "Storage Error"))
+            AppResult.Error(LogoutError.UnknownError(exception.message ?: "Storage Error"))
         }
-        return userProfileService.logout().fold(
+        userProfileService.logout().fold(
             onSuccess = { AppResult.Success(Unit) },
             onFailure = { AppResult.Error(it.toLogoutError()) },
         )
@@ -80,6 +94,7 @@ internal class ProfileRepositoryImpl(
             429 -> ProfileError.TooManyRequestError
             else -> ProfileError.UnknownError(kind.message)
         }
+
         is NetworkErrorKind.Server -> ProfileError.ServerError
         is NetworkErrorKind.Network -> ProfileError.NetworkError
         is NetworkErrorKind.Unknown -> ProfileError.UnknownError(kind.message)
@@ -90,6 +105,7 @@ internal class ProfileRepositoryImpl(
             429 -> DeleteError.TooManyRequestError
             else -> DeleteError.UnknownError(kind.message)
         }
+
         is NetworkErrorKind.Server -> DeleteError.ServerError
         is NetworkErrorKind.Network -> DeleteError.NetworkError
         is NetworkErrorKind.Unknown -> DeleteError.UnknownError(kind.message)
@@ -100,6 +116,7 @@ internal class ProfileRepositoryImpl(
             429 -> GetBalanceError.TooManyRequestError
             else -> GetBalanceError.UnknownError(kind.message)
         }
+
         is NetworkErrorKind.Server -> GetBalanceError.ServerError
         is NetworkErrorKind.Network -> GetBalanceError.NetworkError
         is NetworkErrorKind.Unknown -> GetBalanceError.UnknownError(kind.message)
@@ -111,6 +128,7 @@ internal class ProfileRepositoryImpl(
             429 -> ChangePasswordError.TooManyRequestError
             else -> ChangePasswordError.UnknownError(kind.message)
         }
+
         is NetworkErrorKind.Server -> ChangePasswordError.ServerError
         is NetworkErrorKind.Network -> ChangePasswordError.NetworkError
         is NetworkErrorKind.Unknown -> ChangePasswordError.UnknownError(kind.message)
@@ -128,6 +146,7 @@ internal class ProfileRepositoryImpl(
             429 -> LogoutError.TooManyRequestError
             else -> LogoutError.UnknownError(kind.message)
         }
+
         is NetworkErrorKind.Server -> LogoutError.ServerError
         is NetworkErrorKind.Network -> LogoutError.NetworkError
         is NetworkErrorKind.Unknown -> LogoutError.UnknownError(kind.message)

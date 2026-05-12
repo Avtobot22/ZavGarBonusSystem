@@ -1,5 +1,6 @@
 package com.zavgar.system.repository
 
+import com.zavgar.system.coroutines.CoroutineDispatcherProvider
 import com.zavgar.system.domain.operations.OperationsRepository
 import com.zavgar.system.domain.operations.error.OperationsError
 import com.zavgar.system.domain.operations.model.OperationType
@@ -9,30 +10,34 @@ import com.zavgar.system.domain.operations.model.TransactionsPageResponse
 import com.zavgar.system.domain.operations.model.TransactionsRequest
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError
+import com.zavgar.system.network.remote.LoyaltyService
+import com.zavgar.system.utils.result.AppResult
+import kotlinx.coroutines.withContext
 import com.zavgar.system.network.model.OperationType as NetworkOperationType
 import com.zavgar.system.network.model.PointsType as NetworkPointsType
 import com.zavgar.system.network.model.Transaction as NetworkTransaction
 import com.zavgar.system.network.model.TransactionsPageResponse as NetworkTransactionsPageResponse
 import com.zavgar.system.network.model.TransactionsRequest as NetworkTransactionsRequest
-import com.zavgar.system.network.remote.LoyaltyService
-import com.zavgar.system.utils.result.AppResult
 
 internal class OperationsRepositoryImpl(
     private val loyaltyService: LoyaltyService,
+    private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : OperationsRepository {
 
     override suspend fun getOperations(request: TransactionsRequest): AppResult<TransactionsPageResponse, OperationsError> =
-        loyaltyService.getOperations(
-            NetworkTransactionsRequest(
-                periodStart = request.periodStart,
-                periodEnd = request.periodEnd,
-                cursor = request.cursor,
-                limit = request.limit,
+        withContext(dispatcherProvider.io) {
+            loyaltyService.getOperations(
+                NetworkTransactionsRequest(
+                    periodStart = request.periodStart,
+                    periodEnd = request.periodEnd,
+                    cursor = request.cursor,
+                    limit = request.limit,
+                )
+            ).fold(
+                onSuccess = { AppResult.Success(it.toDomain()) },
+                onFailure = { AppResult.Error(it.toOperationsError()) },
             )
-        ).fold(
-            onSuccess = { AppResult.Success(it.toDomain()) },
-            onFailure = { AppResult.Error(it.toOperationsError()) },
-        )
+        }
 
     private fun NetworkTransactionsPageResponse.toDomain() = TransactionsPageResponse(
         transactions = items.map { it.toDomain() },
@@ -62,6 +67,7 @@ internal class OperationsRepositoryImpl(
             429 -> OperationsError.TooManyRequestError
             else -> OperationsError.UnknownError(kind.message)
         }
+
         is NetworkErrorKind.Server -> OperationsError.ServerError
         is NetworkErrorKind.Network -> OperationsError.NetworkError
         is NetworkErrorKind.Unknown -> OperationsError.UnknownError(kind.message)
