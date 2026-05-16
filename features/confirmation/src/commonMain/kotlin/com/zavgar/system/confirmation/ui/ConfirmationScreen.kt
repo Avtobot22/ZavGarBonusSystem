@@ -38,7 +38,8 @@ import com.zavgar.system.designsystem.components.button.ZavGarBackButton
 import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
-import com.zavgar.system.designsystem.components.textfield.OtpTextField
+import com.zavgar.system.confirmation.ui.components.OtpTextField
+import com.zavgar.system.utils.validation.CODE_LENGTH
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import androidx.compose.material3.MaterialTheme
@@ -58,12 +59,14 @@ fun ConfirmationScreen(
     phone: String,
     isRegistration: Boolean,
     onNavigateToLogin: () -> Unit,
+    onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ConfirmationLoader(
         phone = phone,
         isRegistration = isRegistration,
         onNavigateToLogin = onNavigateToLogin,
+        onNavigateToWallet = onNavigateToWallet,
         modifier = modifier
     )
 }
@@ -73,6 +76,7 @@ internal fun ConfirmationLoader(
     phone: String,
     isRegistration: Boolean,
     onNavigateToLogin: () -> Unit,
+    onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ConfirmationViewModel = koinInject()
 ) {
@@ -89,6 +93,7 @@ internal fun ConfirmationLoader(
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is ConfirmationEvent.NavigateToLogin -> onNavigateToLogin()
+            is ConfirmationEvent.NavigateToWallet -> onNavigateToWallet()
             is ConfirmationEvent.ShowSnackbar -> {
                 scope.launch { errorShakingState.shake() }
                 scope.launch {
@@ -151,7 +156,7 @@ internal fun ConfirmationScaffold(
             OtpTextField(
                 value = state.code,
                 onValueChange = { onIntent(ConfirmationIntent.EnterCode(it)) },
-                length = 4,
+                length = CODE_LENGTH,
                 isError = state.codeError != null,
                 errorMessage = state.codeError?.asString(),
                 enabled = state.screenState is ConfirmationState.ScreenState.Idle,

@@ -29,11 +29,13 @@ import org.koin.compose.koinInject
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToWallet: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     SplashLoader(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToWallet = onNavigateToWallet,
+        onNavigateToOnboarding = onNavigateToOnboarding,
         modifier = modifier
     )
 }
@@ -42,6 +44,7 @@ fun SplashScreen(
 private fun SplashLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToWallet: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
     modifier: Modifier,
     viewModel: SplashViewModel = koinInject()
 ) {
@@ -51,6 +54,7 @@ private fun SplashLoader(
         when (event) {
             is SplashEvent.NavigateToLogin -> onNavigateToLogin()
             is SplashEvent.NavigateToWallet -> onNavigateToWallet()
+            is SplashEvent.NavigateToOnboarding -> onNavigateToOnboarding()
         }
     }
 

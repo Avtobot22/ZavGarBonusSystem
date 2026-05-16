@@ -9,15 +9,10 @@ data class RegisterState(
     val birthDate: LocalDate? = null,
     val birthDateText: String = "",
     val phone: String = "",
-    val password: String = "",
-    val repeatPassword: String = "",
-    val isTermsAccepted: Boolean = false,
 
     val nameError: UiText? = null,
     val birthDateError: UiText? = null,
     val phoneError: UiText? = null,
-    val passwordError: UiText? = null,
-    val repeatPasswordError: UiText? = null,
 
     val isPhoneValid: Boolean = false,
 
@@ -33,10 +28,7 @@ data class RegisterState(
     val isFormFilled: Boolean
         get() = name.isNotBlank() &&
                 birthDate != null &&
-                phone.isNotBlank() &&
-                password.isNotBlank() &&
-                repeatPassword.isNotBlank() &&
-                isTermsAccepted
+                phone.isNotBlank()
 
     val isRegisterButtonEnabled: Boolean
         get() = isFormFilled && screenState is ScreenState.Idle

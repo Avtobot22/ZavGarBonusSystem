@@ -65,71 +65,79 @@ class WalletViewModel(
     private fun fetchBalance(isInitial: Boolean) {
         fetchJob?.cancel()
         fetchJob = launchTry {
-            if (isInitial) {
-                setState { copy(screenState = WalletState.ScreenState.Loading) }
-            } else {
-                val current = currentState.screenState
-                if (current is WalletState.ScreenState.Content) {
-                    setState { copy(screenState = current.copy(isRefreshing = true)) }
-                } else {
-                    setState {
-                        copy(screenState = WalletState.ScreenState.Content(isRefreshing = true))
-                    }
-                }
-            }
-
+            applyFetchStartState(isInitial)
             when (val result = getUserBalanceUseCase().toBalanceResult()) {
-                is BalanceResult.Success -> {
-                    val current = currentState.screenState
-                    val content = if (current is WalletState.ScreenState.Content) {
-                        current.copy(balance = result.balance, isRefreshing = false)
-                    } else {
-                        WalletState.ScreenState.Content(balance = result.balance)
-                    }
-                    setState { copy(screenState = content) }
-                    if (!isInitial) startCooldownTimer()
-                }
-
-                is BalanceResult.Error -> {
-                    if (isInitial) {
-                        if (currentState.phone.isNotBlank()) {
-                            setState { copy(screenState = WalletState.ScreenState.Offline) }
-                            setEvent {
-                                WalletEvent.ShowSnackbar(
-                                    SnackBarMessage(
-                                        message = UiText.Resource(Res.string.info_offline_mode),
-                                        type = SnackBarType.INFO
-                                    )
-                                )
-                            }
-                        } else {
-                            setState { copy(screenState = WalletState.ScreenState.Error) }
-                            setEvent { WalletEvent.ShowSnackbar(result.message) }
-                        }
-                    } else {
-                        val current = currentState.screenState
-                        if (current is WalletState.ScreenState.Content) {
-                            setState { copy(screenState = current.copy(isRefreshing = false)) }
-                        }
-                        setEvent { WalletEvent.ShowSnackbar(result.message) }
-                    }
-                }
+                is BalanceResult.Success -> handleBalanceSuccess(result, isInitial)
+                is BalanceResult.Error -> handleBalanceError(result, isInitial)
             }
         } catch {
+            handleBalanceException(isInitial)
+        }
+    }
+
+    private fun applyFetchStartState(isInitial: Boolean) {
+        if (isInitial) {
+            setState { copy(screenState = WalletState.ScreenState.Loading) }
+            return
+        }
+        val current = currentState.screenState
+        if (current is WalletState.ScreenState.Content) {
+            setState { copy(screenState = current.copy(isRefreshing = true)) }
+        } else {
+            setState { copy(screenState = WalletState.ScreenState.Content(isRefreshing = true)) }
+        }
+    }
+
+    private fun handleBalanceSuccess(result: BalanceResult.Success, isInitial: Boolean) {
+        val current = currentState.screenState
+        val content = if (current is WalletState.ScreenState.Content) {
+            current.copy(balance = result.balance, isRefreshing = false)
+        } else {
+            WalletState.ScreenState.Content(balance = result.balance)
+        }
+        setState { copy(screenState = content) }
+        if (!isInitial) startCooldownTimer()
+    }
+
+    private fun handleBalanceError(result: BalanceResult.Error, isInitial: Boolean) {
+        if (!isInitial) {
             val current = currentState.screenState
             if (current is WalletState.ScreenState.Content) {
                 setState { copy(screenState = current.copy(isRefreshing = false)) }
-            } else if (isInitial) {
-                setState { copy(screenState = WalletState.ScreenState.Error) }
             }
+            setEvent { WalletEvent.ShowSnackbar(result.message) }
+            return
+        }
+        if (currentState.phone.isNotBlank()) {
+            setState { copy(screenState = WalletState.ScreenState.Offline) }
             setEvent {
                 WalletEvent.ShowSnackbar(
                     SnackBarMessage(
-                        message = UiText.Resource(Res.string.error_unknown_error),
-                        type = SnackBarType.ERROR
+                        message = UiText.Resource(Res.string.info_offline_mode),
+                        type = SnackBarType.INFO
                     )
                 )
             }
+        } else {
+            setState { copy(screenState = WalletState.ScreenState.Error) }
+            setEvent { WalletEvent.ShowSnackbar(result.message) }
+        }
+    }
+
+    private fun handleBalanceException(isInitial: Boolean) {
+        val current = currentState.screenState
+        if (current is WalletState.ScreenState.Content) {
+            setState { copy(screenState = current.copy(isRefreshing = false)) }
+        } else if (isInitial) {
+            setState { copy(screenState = WalletState.ScreenState.Error) }
+        }
+        setEvent {
+            WalletEvent.ShowSnackbar(
+                SnackBarMessage(
+                    message = UiText.Resource(Res.string.error_unknown_error),
+                    type = SnackBarType.ERROR
+                )
+            )
         }
     }
 

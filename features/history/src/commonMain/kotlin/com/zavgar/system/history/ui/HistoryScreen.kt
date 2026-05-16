@@ -66,6 +66,7 @@ import com.zavgar.system.designsystem.screen.Screen
 import androidx.compose.material3.MaterialTheme
 import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.history.model.DatePickerType
+import com.zavgar.system.history.model.History
 import com.zavgar.system.history.model.HistoryItem
 import com.zavgar.system.history.presentation.HistoryEvent
 import com.zavgar.system.history.presentation.HistoryIntent
@@ -141,7 +142,7 @@ internal fun HistoryScaffold(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val historyNotEmpty = state.history.isNotEmpty()
+    val historyNotEmpty = state.history.transactions.isNotEmpty()
     val isLoadingFirstPage = state.screenState is HistoryState.ScreenState.Loading
             || state.screenState is HistoryState.ScreenState.Initial
             || state.screenState is HistoryState.ScreenState.Reloading
@@ -222,7 +223,7 @@ internal fun HistoryContent(
 ) {
     val scrollState = rememberScrollState()
 
-    Pagination(itemsCount = state.history.size, lazyListState = listState) {
+    Pagination(itemsCount = state.history.transactions.size, lazyListState = listState) {
         onIntent(HistoryIntent.LoadNextPage)
     }
 
@@ -354,7 +355,7 @@ private fun HistoryListCard(
     ) {
         if (state.screenState is HistoryState.ScreenState.Reloading) {
             LoadingHistoryList()
-        } else if (state.history.isEmpty()) {
+        } else if (state.history.transactions.isEmpty()) {
             EmptyHistoryContent(
                 Modifier.verticalScroll(scrollState),
             )
@@ -366,7 +367,7 @@ private fun HistoryListCard(
                     .padding(top = 4.dp, bottom = 12.dp),
             ) {
                 items(
-                    items = state.history,
+                    items = state.history.transactions,
                     key = { item -> item.id }
                 ) { item ->
                     when (item) {
@@ -416,7 +417,11 @@ private fun HistoryScaffoldPreview() {
 
     val previewState = HistoryState(
         screenState = HistoryState.ScreenState.Content,
-        history = sampleHistoryItems,
+        history = History(
+            transactions = sampleHistoryItems,
+            nextCursor = null,
+            hasMore = false,
+        ),
         periodStartText = "10.11.2025",
         periodEndText = "24.04.2026",
         isRefreshing = false,

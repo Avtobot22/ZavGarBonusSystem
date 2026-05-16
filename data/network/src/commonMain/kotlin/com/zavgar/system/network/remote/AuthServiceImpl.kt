@@ -6,7 +6,6 @@ import com.zavgar.system.network.model.LoginRequest
 import com.zavgar.system.network.model.LoginResponse
 import com.zavgar.system.network.model.RegisterRequest
 import com.zavgar.system.network.model.ResendRequest
-import com.zavgar.system.network.model.ResetPasswordRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -21,7 +20,7 @@ class AuthServiceImpl(
             url { path("auth/login") }
             setBody(loginRequest.copy(phone = withCountryCode(loginRequest.phone)))
         }
-        response.body<LoginResponse>()
+        response.body<Unit>()
     }
 
     override suspend fun registerRequest(registerRequest: RegisterRequest) = runSuspendCatching {
@@ -32,17 +31,17 @@ class AuthServiceImpl(
         response.body<Unit>()
     }
 
+    override suspend fun confirmLogin(confirmationRequest: ConfirmationRequest) = runSuspendCatching {
+        val response = client.post {
+            url { path("auth/confirm/login") }
+            setBody(confirmationRequest.copy(phone = withCountryCode(confirmationRequest.phone)))
+        }
+        response.body<LoginResponse>()
+    }
+
     override suspend fun confirmRegistration(confirmationRequest: ConfirmationRequest) = runSuspendCatching {
         val response = client.post {
             url { path("auth/confirm/register") }
-            setBody(confirmationRequest.copy(phone = withCountryCode(confirmationRequest.phone)))
-        }
-        response.body<Unit>()
-    }
-
-    override suspend fun confirmReset(confirmationRequest: ConfirmationRequest) = runSuspendCatching {
-        val response = client.post {
-            url { path("auth/confirm/reset") }
             setBody(confirmationRequest.copy(phone = withCountryCode(confirmationRequest.phone)))
         }
         response.body<Unit>()
@@ -52,14 +51,6 @@ class AuthServiceImpl(
         val response = client.post {
             url { path("auth/refresh/code") }
             setBody(resendRequest.copy(phone = withCountryCode(resendRequest.phone)))
-        }
-        response.body<Unit>()
-    }
-
-    override suspend fun resetPassword(resetPasswordRequest: ResetPasswordRequest) = runSuspendCatching {
-        val response = client.post {
-            url { path("auth/reset") }
-            setBody(resetPasswordRequest.copy(phone = withCountryCode(resetPasswordRequest.phone)))
         }
         response.body<Unit>()
     }

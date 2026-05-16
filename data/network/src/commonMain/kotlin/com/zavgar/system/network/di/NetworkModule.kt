@@ -13,6 +13,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.auth.Auth
@@ -36,6 +37,8 @@ import org.koin.dsl.module
 
 expect val BASE_URL: String
 
+const val IS_DEBUG_BUILD: String = "isDebugBuild"
+
 val networkModule = module {
 
     single {
@@ -49,18 +52,21 @@ val networkModule = module {
     }
 
     single(named("publicClient")) {
+        val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
+
         HttpClient {
-            configureCommon(get(), BASE_URL)
+            configureCommon(get(), BASE_URL, isDebugBuild)
         }
     }
 
     single(named("authClient")) {
         val sessionDataSource = get<SessionDataSource>()
         val publicClient = get<HttpClient>(named("publicClient"))
+        val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
         val koinScope = this
 
         HttpClient {
-            configureCommon(get(), BASE_URL)
+            configureCommon(get(), BASE_URL, isDebugBuild)
 
             install(Auth) {
                 bearer {
@@ -135,7 +141,11 @@ private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
 private fun HttpStatusCode.isAuthFailure(): Boolean =
     this == HttpStatusCode.Unauthorized || this == HttpStatusCode.Forbidden
 
-private fun HttpClientConfig<*>.configureCommon(json: Json, baseUrl: String) {
+private fun HttpClientConfig<*>.configureCommon(
+    json: Json,
+    baseUrl: String,
+    isDebugBuild: Boolean,
+) {
     expectSuccess = true
 
     install(ContentNegotiation) {
@@ -149,7 +159,7 @@ private fun HttpClientConfig<*>.configureCommon(json: Json, baseUrl: String) {
 
     install(Logging) {
         logger = Logger.SIMPLE
-        level = LogLevel.ALL
+        level = if (isDebugBuild) LogLevel.ALL else LogLevel.NONE
         sanitizeHeader { header -> header == HttpHeaders.Authorization }
     }
 
@@ -157,5 +167,11 @@ private fun HttpClientConfig<*>.configureCommon(json: Json, baseUrl: String) {
         requestTimeoutMillis = 15_000
         connectTimeoutMillis = 10_000
         socketTimeoutMillis = 10_000
+    }
+
+    install(HttpRequestRetry) {
+        retryOnServerErrors(maxRetries = 3)
+        retryOnException(maxRetries = 3, retryOnTimeout = false)
+        exponentialDelay()
     }
 }

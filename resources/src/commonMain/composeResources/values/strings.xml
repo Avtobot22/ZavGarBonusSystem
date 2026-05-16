@@ -26,12 +26,19 @@
     <string name="history_empty_description">За выбранный период операций нет</string>
     <string name="error_invalid_date_range">Начальная дата не может быть позже конечной</string>
 
+    <!--    Onboarding-->
+    <string name="onboarding_slide_1_title">Копите баллы за каждую покупку</string>
+    <string name="onboarding_slide_1_description">Каждая покупка приносит баллы на ваш счёт. Накапливайте их и обменивайте на скидки.</string>
+    <string name="onboarding_slide_2_title">Предъявите QR на кассе</string>
+    <string name="onboarding_slide_2_description">Покажите QR-код кассиру при каждой оплате — баллы начислятся автоматически.</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_start">Начать</string>
+    <string name="onboarding_skip">Пропустить</string>
+
     <!--    Login-->
     <string name="login_top_title">Войти в аккаунт</string>
-    <string name="login_password_label">Пароль</string>
-    <string name="login_password_placeholder">Введите пароль</string>
-    <string name="login_forgot_password">Забыли пароль?</string>
-    <string name="login_button_text">Войти</string>
+    <string name="login_button_text">Получить код</string>
+    <string name="login_sms_hint">Код придёт в SMS</string>
     <string name="login_button_text_not_account">Нет аккаунта?</string>
     <string name="login_button_text_register">Зарегистрироваться</string>
 
@@ -75,22 +82,15 @@
 
     <!--    Account-->
     <string name="account_top_title">Аккаунт</string>
+    <string name="account_personal_data">Личные данные</string>
+    <string name="account_profile_confirmed">Профиль подтверждён</string>
     <string name="profile_update_success">Данные успешно сохранены</string>
-    <string name="password_update_success">Пароль успешно обновлен</string>
-    <string name="password_update_error">Неверный пароль</string>
     <string name="profile_delete_success">Профиль успешно удален</string>
     <string name="account_confirm">Сохранить изменения</string>
-    <string name="account_password_pattern">***********</string>
-    <string name="account_password_label">Пароль</string>
     <string name="account_delete_title">Удалить аккаунт</string>
     <string name="account_delete_description">Вы уверены, что хотите удалить аккаунт востановление будет не возможно?</string>
     <string name="account_delete_confirm">Удалить</string>
     <string name="account_delete_cancel">Отмена</string>
-    <string name="account_change_password">Изменение пароля</string>
-    <string name="account_change_confirm">Изменить</string>
-    <string name="account_change_cancel">Отмена</string>
-    <string name="account_old_password_label">Старый пароль</string>
-    <string name="account_new_password_label">Новый пароль</string>
 
     <!--   Error/Empty Screen-->
     <string name="update_button">Обновить</string>

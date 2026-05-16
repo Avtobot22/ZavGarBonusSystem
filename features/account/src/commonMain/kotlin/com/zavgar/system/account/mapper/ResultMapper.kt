@@ -5,27 +5,19 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.mapAppError
 import com.zavgar.system.utils.result.AppError
 import com.zavgar.system.utils.result.AppResult
-import com.zavgar.system.domain.userinfo.error.ChangePasswordError
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.ProfileError
 import com.zavgar.system.domain.userinfo.model.UserProfile
-import com.zavgar.system.account.model.ChangePasswordResult
 import com.zavgar.system.account.model.DeleteResult
 import com.zavgar.system.account.model.ProfileGetResult
 import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_format
 import com.zavgar.system.resources.error_user_not_found
-import com.zavgar.system.resources.password_update_error
 
 fun ProfileError.asSnackBarMessage(): SnackBarMessage = when (this) {
     is ProfileError.ValidationError -> SnackBarMessage.warning(UiText.Resource(Res.string.error_invalid_format))
     is ProfileError.UserNotFound -> SnackBarMessage.warning(UiText.Resource(Res.string.error_user_not_found))
-    is AppError -> mapAppError(this)
-}
-
-fun ChangePasswordError.asSnackBarMessage(): SnackBarMessage = when (this) {
-    is ChangePasswordError.ValidationError -> SnackBarMessage.warning(UiText.Resource(Res.string.password_update_error))
     is AppError -> mapAppError(this)
 }
 
@@ -41,11 +33,6 @@ fun AppResult<UserProfile, ProfileError>.toProfileGetResult(): ProfileGetResult 
 fun AppResult<Unit, ProfileError>.toProfileUpdateResult(): ProfileUpdateResult = when (this) {
     is AppResult.Success -> ProfileUpdateResult.Success
     is AppResult.Error -> ProfileUpdateResult.Error(error.asSnackBarMessage())
-}
-
-fun AppResult<Unit, ChangePasswordError>.toChangePasswordResult(): ChangePasswordResult = when (this) {
-    is AppResult.Success -> ChangePasswordResult.Success
-    is AppResult.Error -> ChangePasswordResult.Error(error.asSnackBarMessage())
 }
 
 fun AppResult<Unit, DeleteError>.toDeleteResult(): DeleteResult = when (this) {

@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		117396572FB89773008B21C9 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 117396562FB89773008B21C9 /* FirebaseAnalytics */; };
+		117396592FB89773008B21C9 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 117396582FB89773008B21C9 /* FirebaseAnalyticsCore */; };
+		1173965B2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 1173965A2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport */; };
+		1173965D2FB89773008B21C9 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1173965C2FB89773008B21C9 /* FirebaseCrashlytics */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BAAADD6ADADDBF2D827AF569 /* ZavGarApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZavGarApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -37,6 +44,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				117396572FB89773008B21C9 /* FirebaseAnalytics in Frameworks */,
+				1173965D2FB89773008B21C9 /* FirebaseCrashlytics in Frameworks */,
+				117396592FB89773008B21C9 /* FirebaseAnalyticsCore in Frameworks */,
+				1173965B2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +81,9 @@
 				70A693E0CC1913D91C828D4E /* Compile Kotlin Framework */,
 				31436FFCCC3BB399F0EB91F4 /* Sources */,
 				515E458D0769E34D44B9069D /* Frameworks */,
+				117396492FB83B0E008B21C9 /* ShellScript */,
 				5857144774A64457700AEA4B /* Resources */,
+				1173965E2FB89788008B21C9 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -81,6 +94,10 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				117396562FB89773008B21C9 /* FirebaseAnalytics */,
+				117396582FB89773008B21C9 /* FirebaseAnalyticsCore */,
+				1173965A2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport */,
+				1173965C2FB89773008B21C9 /* FirebaseCrashlytics */,
 			);
 			productName = iosApp;
 			productReference = BAAADD6ADADDBF2D827AF569 /* ZavGarApp.app */;
@@ -111,6 +128,9 @@
 			);
 			mainGroup = 434AF4F5E64A3AC927C3958E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F2A8A212DE3586C2B3BF4378 /* Products */;
 			projectDirPath = "";
@@ -132,6 +152,42 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		117396492FB83B0E008B21C9 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ENVIRONMENT=\"Release\"\nif [[ \"${CONFIGURATION}\" == \"Debug\" ]]; then\n  ENVIRONMENT=\"Debug\"\nfi\nPLIST_PATH=\"${PROJECT_DIR}/Firebase/${ENVIRONMENT}/GoogleService-Info.plist\"\nDESTINATION=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\ncp \"${PLIST_PATH}\" \"${DESTINATION}\"\n";
+		};
+		1173965E2FB89788008B21C9 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%Build/*}SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
 		70A693E0CC1913D91C828D4E /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -295,7 +351,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.zavgar.system.bonusapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zavgar.system.bonusapp.dev;
 				PRODUCT_NAME = ZavGarApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -391,6 +447,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.13.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		117396562FB89773008B21C9 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		117396582FB89773008B21C9 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		1173965A2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		1173965C2FB89773008B21C9 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9A1AE91EF1B2C00E3732D505 /* Project object */;
 }

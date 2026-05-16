@@ -1,6 +1,5 @@
 package com.zavgar.system.domain.userinfo.repository
 
-import com.zavgar.system.domain.userinfo.error.ChangePasswordError
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.GetBalanceError
 import com.zavgar.system.domain.userinfo.error.LogoutError
@@ -17,6 +16,5 @@ interface ProfileRepository {
     suspend fun delete(): AppResult<Unit, DeleteError>
     suspend fun getBalance(): AppResult<Balance, GetBalanceError>
     suspend fun getMonthlyAccruals(): AppResult<Int, MonthlyAccrualsError>
-    suspend fun changePassword(oldPassword: String, newPassword: String): AppResult<Unit, ChangePasswordError>
     suspend fun logout(): AppResult<Unit, LogoutError>
 }

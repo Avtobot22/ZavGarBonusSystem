@@ -3,6 +3,7 @@ package com.zavgar.system.navigationapi.event
 import com.zavgar.system.navigationapi.destination.AuthDestination
 import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.destination.HomeDestination
+import com.zavgar.system.navigationapi.destination.OnboardingDestination
 
 /**
  * Events for Splash screen navigation decisions.
@@ -15,6 +16,14 @@ object SplashEvent {
      */
     data object NavigateToLogin : Event, ReplaceNavigation {
         override fun nextDestination(): Destination = AuthDestination.Login
+    }
+
+    /**
+     * Navigate to Onboarding screen on first launch when user is not authenticated.
+     * Replaces Splash with Onboarding.
+     */
+    data object NavigateToOnboarding : Event, ReplaceNavigation {
+        override fun nextDestination(): Destination = OnboardingDestination
     }
 
     /**

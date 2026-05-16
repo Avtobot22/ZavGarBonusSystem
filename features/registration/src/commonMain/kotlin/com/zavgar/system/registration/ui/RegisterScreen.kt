@@ -1,11 +1,22 @@
 package com.zavgar.system.registration.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sms
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,12 +42,10 @@ import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
-import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import androidx.compose.material3.MaterialTheme
 import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.registration.presentation.RegisterEvent
 import com.zavgar.system.registration.presentation.RegisterIntent
@@ -45,15 +54,15 @@ import com.zavgar.system.registration.presentation.RegisterViewModel
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.birth_date_label
 import com.zavgar.system.resources.birth_date_placeholder
-import com.zavgar.system.resources.password_label
-import com.zavgar.system.resources.password_placeholder
+import com.zavgar.system.resources.login_button_text
+import com.zavgar.system.resources.login_sms_hint
 import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
-import com.zavgar.system.resources.register_button_text
+import com.zavgar.system.resources.register_button_text_has_account
+import com.zavgar.system.resources.register_button_text_login
 import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
 import com.zavgar.system.resources.register_top_title
-import com.zavgar.system.resources.repeat_password_label
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -149,16 +158,27 @@ internal fun RegisterScaffold(
 
         RegisterForm(state, onIntent)
 
+        Spacer(Modifier.height(16.dp))
+
+        SmsHintDivider()
+
         AppPrimaryButton(
-            text = stringResource(Res.string.register_button_text),
+            text = stringResource(Res.string.login_button_text),
             onClick = {
                 focusManager.clearFocus()
                 onIntent(RegisterIntent.Submit)
             },
             enabled = state.isRegisterButtonEnabled,
             isLoading = state.screenState is RegisterState.ScreenState.Submitting,
-            modifier = Modifier.padding(top = 22.dp),
+            modifier = Modifier.padding(top = 16.dp),
             shakingState = errorShakingState
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        HasAccountRow(
+            idle = state.screenState is RegisterState.ScreenState.Idle,
+            onClick = { onIntent(RegisterIntent.ClickLogin) }
         )
     }
 }
@@ -203,56 +223,72 @@ private fun RegisterForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             enabled = state.screenState is RegisterState.ScreenState.Idle
         )
-
-        AppPasswordField(
-            value = state.password,
-            onValueChange = { onIntent(RegisterIntent.EnterPassword(it)) },
-            isError = state.passwordError != null,
-            errorMessage = state.passwordError?.asString(),
-            enabled = state.screenState is RegisterState.ScreenState.Idle,
-            label = stringResource(Res.string.password_label),
-            placeholder = stringResource(Res.string.password_placeholder)
-        )
-
-        AppPasswordField(
-            value = state.repeatPassword,
-            onValueChange = { onIntent(RegisterIntent.EnterRepeatPassword(it)) },
-            isError = state.repeatPasswordError != null,
-            errorMessage = state.repeatPasswordError?.asString(),
-            enabled = state.screenState is RegisterState.ScreenState.Idle,
-            label = stringResource(Res.string.repeat_password_label),
-            placeholder = stringResource(Res.string.password_placeholder)
-        )
-
-        RegisterCheckBox(
-            checked = state.isTermsAccepted,
-            onCheckedChange = { onIntent(RegisterIntent.AcceptTerms(it)) },
-        )
     }
 }
 
-// --- ПРЕВЬЮ ---
-@Preview(name = "Light Mode - Full Screen", showBackground = true)
+@Composable
+private fun SmsHintDivider() {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f), color = colors.outline)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Sms,
+                contentDescription = null,
+                tint = colors.accent,
+                modifier = Modifier.size(14.dp),
+            )
+            Text(
+                text = stringResource(Res.string.login_sms_hint),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.foregroundSecondary,
+            )
+        }
+        HorizontalDivider(modifier = Modifier.weight(1f), color = colors.outline)
+    }
+}
+
+@Composable
+private fun HasAccountRow(idle: Boolean, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.register_button_text_has_account),
+                color = colors.foregroundSecondary,
+                fontSize = 14.sp,
+            )
+            Text(
+                text = stringResource(Res.string.register_button_text_login),
+                color = colors.accent,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .clickable(enabled = idle, onClick = onClick)
+                    .padding(vertical = 4.dp),
+            )
+        }
+    }
+}
+
+@Preview(name = "Light Mode", showBackground = true)
 @Composable
 private fun RegisterScreenPreview() {
-    val previewState = RegisterState(
-        name = "Иван",
-        nameError = null,
-        phone = "9991234567",
-        isPhoneValid = true,
-        phoneError = null,
-        password = "",
-        passwordError = null,
-        repeatPassword = "",
-        repeatPasswordError = null,
-        birthDate = null,
-        birthDateError = null,
-        isDatePickerOpen = false,
-    )
     val snackbarHostState = remember { SnackbarHostState() }
     ZavGarThemePreview {
         RegisterScaffold(
-            state = previewState,
+            state = RegisterState(name = "Иван", phone = "9991234567", isPhoneValid = true),
             snackbarHostState = snackbarHostState,
             onIntent = {},
             errorShakingState = rememberShakingState()
@@ -260,27 +296,17 @@ private fun RegisterScreenPreview() {
     }
 }
 
-@Preview(name = "Error State - Full Screen", showBackground = true)
+@Preview(name = "Error State", showBackground = true)
 @Composable
 private fun RegisterScreenErrorPreview() {
-    val errorState = RegisterState(
-        name = "",
-        nameError = UiText.DynamicString("Имя не может быть пустым"),
-        phone = "123",
-        isPhoneValid = false,
-        phoneError = UiText.DynamicString("Неверный формат телефона"),
-        password = "123",
-        passwordError = UiText.DynamicString("Слишком короткий пароль"),
-        repeatPassword = "456",
-        repeatPasswordError = UiText.DynamicString("Пароли не совпадают"),
-        birthDate = null,
-        birthDateError = UiText.DynamicString("Выберите дату рождения"),
-        isDatePickerOpen = false,
-    )
     val snackbarHostState = remember { SnackbarHostState() }
     ZavGarThemePreview {
         RegisterScaffold(
-            state = errorState,
+            state = RegisterState(
+                nameError = UiText.DynamicString("Имя не может быть пустым"),
+                phoneError = UiText.DynamicString("Неверный формат телефона"),
+                birthDateError = UiText.DynamicString("Выберите дату рождения"),
+            ),
             snackbarHostState = snackbarHostState,
             onIntent = {},
             errorShakingState = rememberShakingState()

@@ -1,6 +1,6 @@
 package com.zavgar.system.utils.validation
 
 sealed interface ValidationResult<out E> {
-    data object Success : ValidationResult<Nothing>
-    data class Error<E>(val error: E) : ValidationResult<E>
+    data object Valid : ValidationResult<Nothing>
+    data class Invalid<E>(val error: E) : ValidationResult<E>
 }

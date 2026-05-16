@@ -15,6 +15,7 @@ class ZavGarApp : Application() {
         AndroidLogcatLogger.installOnDebuggableApp(this, minPriority = LogPriority.VERBOSE)
 
         initKoin(
+            isDebugBuild = BuildConfig.DEBUG,
             appModule = module {
                 single<Context> { this@ZavGarApp }
             }

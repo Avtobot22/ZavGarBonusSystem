@@ -2,7 +2,7 @@ package com.zavgar.system.history.presentation
 
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.history.model.DatePickerType
-import com.zavgar.system.history.model.HistoryItem
+import com.zavgar.system.history.model.History
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -16,13 +16,10 @@ data class HistoryState(
     val periodEnd: LocalDate = defaultEndDate,
     val periodEndText: String = defaultEndDate.toDisplayString(),
 
-    val history: List<HistoryItem> = emptyList(),
+    val history: History = History.EMPTY,
 
     val isLoadingNextPage: Boolean = false,
     val isRefreshing: Boolean = false,
-
-    val nextCursor: String? = null,
-    val hasMore: Boolean = true,
 
     val datePickerOpen: DatePickerType? = null
 

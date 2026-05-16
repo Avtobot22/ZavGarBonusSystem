@@ -24,6 +24,9 @@ class SplashNavGraph : NavGraph {
                 },
                 onNavigateToWallet = {
                     navController.sendEvent(SplashEvent.NavigateToWallet)
+                },
+                onNavigateToOnboarding = {
+                    navController.sendEvent(SplashEvent.NavigateToOnboarding)
                 }
             )
         }

@@ -4,11 +4,8 @@ import kotlinx.datetime.LocalDate
 
 class ValidateBirthDateUseCase {
 
-    operator fun invoke(birthDate: LocalDate?): ValidationResult<BirthDateValidationError> {
-        if (birthDate == null) {
-            return ValidationResult.Error(BirthDateValidationError.Blank)
+    operator fun invoke(birthDate: LocalDate?): ValidationResult<BirthDateValidationError> =
+        validate {
+            check(BirthDateValidationError.BLANK) { birthDate != null }
         }
-
-        return ValidationResult.Success
-    }
 }

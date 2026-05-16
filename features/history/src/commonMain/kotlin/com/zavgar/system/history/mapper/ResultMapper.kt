@@ -7,7 +7,6 @@ import com.zavgar.system.utils.result.AppError
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.domain.operations.error.OperationsError
 import com.zavgar.system.domain.operations.model.TransactionsPageResponse
-import com.zavgar.system.history.model.History
 import com.zavgar.system.history.model.TransactionsResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_format
@@ -19,9 +18,8 @@ fun OperationsError.asSnackBarMessage(): SnackBarMessage = when (this) {
     is AppError -> mapAppError(this)
 }
 
-fun AppResult<TransactionsPageResponse, OperationsError>.toTransactionsResult(
-    dataMapper: (TransactionsPageResponse) -> History,
-): TransactionsResult = when (this) {
-    is AppResult.Success -> TransactionsResult.Success(dataMapper(data))
-    is AppResult.Error -> TransactionsResult.Error(error.asSnackBarMessage())
-}
+fun AppResult<TransactionsPageResponse, OperationsError>.toTransactionsResult(): TransactionsResult =
+    when (this) {
+        is AppResult.Success -> TransactionsResult.Success(data)
+        is AppResult.Error -> TransactionsResult.Error(error.asSnackBarMessage())
+    }

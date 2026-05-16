@@ -17,7 +17,6 @@ class RegisterUseCase(
                 name = request.name,
                 birthDate = request.birthDate,
                 phone = request.phone,
-                password = request.password,
             )
         }
 }

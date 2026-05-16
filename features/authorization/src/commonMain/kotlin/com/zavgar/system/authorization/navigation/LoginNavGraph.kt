@@ -22,15 +22,12 @@ internal class LoginNavGraph : NavGraph {
                         NavDisplay.predictivePopTransitionSpec { FadeOutTransition }
             ) {
                 LoginScreen(
-                    onNavigateToWallet = {
-                        navEventController.sendEvent(AuthEvent.LoginSubmit)
+                    onNavigateToConfirmation = { phone ->
+                        navEventController.sendEvent(AuthEvent.LoginOtpSent(phone))
                     },
                     onNavigateToRegister = {
                         navEventController.sendEvent(AuthEvent.ToRegistration)
                     },
-                    onNavigateToForgotPassword = {
-                        navEventController.sendEvent(AuthEvent.ToPasswordRecovery)
-                    }
                 )
             }
         }

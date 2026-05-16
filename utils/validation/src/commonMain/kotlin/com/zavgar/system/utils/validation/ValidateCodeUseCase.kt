@@ -1,15 +1,10 @@
 package com.zavgar.system.utils.validation
 
+class ValidateCodeUseCase {
 
-class ValidateCodeUseCase() {
-    operator fun invoke(code: String): ValidationResult<CodeValidationError> {
-        if (code.isBlank()) {
-            return ValidationResult.Error(CodeValidationError.Blank)
+    operator fun invoke(code: String): ValidationResult<CodeValidationError> =
+        validate {
+            notBlank(code, CodeValidationError.BLANK)
+            minLength(code, CODE_LENGTH, CodeValidationError.TOO_SHIRT)
         }
-        if (code.length < 6) {
-            return ValidationResult.Error(CodeValidationError.TooShort)
-        }
-        return ValidationResult.Success
-
-    }
 }

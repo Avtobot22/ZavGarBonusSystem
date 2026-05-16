@@ -23,13 +23,14 @@ fun ZavGarBaseScaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable (() -> Unit) = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
+    applyStatusBarsPadding: Boolean = true,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding(),
+            .then(if (applyStatusBarsPadding) Modifier.statusBarsPadding() else Modifier),
         contentWindowInsets = WindowInsets(),
         containerColor = colors.background,
         snackbarHost = {

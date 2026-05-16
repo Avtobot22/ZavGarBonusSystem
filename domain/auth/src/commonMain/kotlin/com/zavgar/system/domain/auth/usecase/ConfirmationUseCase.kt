@@ -16,7 +16,7 @@ class ConfirmationUseCase(
             if (request.isRegistration) {
                 authRepository.confirmRegistration(phone = request.phone, code = request.code)
             } else {
-                authRepository.confirmReset(phone = request.phone, code = request.code)
+                authRepository.confirmLogin(phone = request.phone, code = request.code)
             }
         }
 }

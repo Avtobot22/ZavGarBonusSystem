@@ -13,6 +13,6 @@ class LoginUseCase(
 ) {
     suspend operator fun invoke(request: LoginRequest): AppResult<Unit, AuthError> =
         withContext(dispatcherProvider.io) {
-            authRepository.login(phone = request.phone, password = request.password)
+            authRepository.login(phone = request.phone)
         }
 }

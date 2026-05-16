@@ -33,12 +33,7 @@ fun DeleteAccountDialog(state: AccountState, onIntent: (AccountIntent) -> Unit, 
 private fun DeleteAccountDialogPreview() {
     ZavGarThemePreview {
         DeleteAccountDialog(
-            state = AccountState(
-                confirmDeleteDialog = true,
-                oldPassword = "",
-                newPassword = "",
-                isPasswordDialogLoading = false
-            ),
+            state = AccountState(confirmDeleteDialog = true),
             onIntent = {}
         )
     }

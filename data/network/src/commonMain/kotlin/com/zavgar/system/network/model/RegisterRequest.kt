@@ -14,6 +14,4 @@ data class RegisterRequest(
     val birthDate: LocalDate,
     @SerialName("phone")
     val phone: String,
-    @SerialName("password")
-    val password: String,
 )

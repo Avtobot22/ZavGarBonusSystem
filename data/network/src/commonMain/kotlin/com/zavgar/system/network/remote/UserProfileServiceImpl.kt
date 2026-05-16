@@ -1,7 +1,6 @@
 package com.zavgar.system.network.remote
 
 import com.zavgar.system.coroutines.runSuspendCatching
-import com.zavgar.system.network.model.ChangePasswordRequest
 import com.zavgar.system.network.model.ProfileRequest
 import com.zavgar.system.network.model.ProfileResponse
 import io.ktor.client.HttpClient
@@ -26,14 +25,6 @@ class UserProfileServiceImpl(
         val response = client.put {
             url { path("auth/profile") }
             setBody(profileRequest)
-        }
-        response.body<Unit>()
-    }
-
-    override suspend fun changePassword(changePasswordRequest: ChangePasswordRequest) = runSuspendCatching {
-        val response = client.put {
-            url { path("auth/password") }
-            setBody(changePasswordRequest)
         }
         response.body<Unit>()
     }

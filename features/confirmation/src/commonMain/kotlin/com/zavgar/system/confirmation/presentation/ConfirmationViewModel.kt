@@ -66,7 +66,7 @@ class ConfirmationViewModel(
         if (currentState.screenState is ConfirmationState.ScreenState.Submitting) return
         val isValid = validateCodeUseCase(currentState.code).toPresentation { it.asUiText() }
 
-        if (isValid is ValidationResult.Error) {
+        if (isValid is ValidationResult.Invalid) {
             setState { copy(codeError = isValid.error) }
             return
         }
@@ -115,7 +115,10 @@ class ConfirmationViewModel(
                 confirmationUseCase(confirmationRequest).toConfirmationResult { it.asSnackBarMessage() }
 
             when (result) {
-                is ConfirmationResult.Success -> setEvent { ConfirmationEvent.NavigateToLogin }
+                is ConfirmationResult.Success -> setEvent {
+                    if (confirmationRequest.isRegistration) ConfirmationEvent.NavigateToLogin
+                    else ConfirmationEvent.NavigateToWallet
+                }
                 is ConfirmationResult.Error -> setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
             }
 

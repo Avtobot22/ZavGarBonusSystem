@@ -24,6 +24,9 @@ class ConfirmationNavGraph : NavGraph {
                     isRegistration = entry.isRegistration,
                     onNavigateToLogin = {
                         navGraphController.sendEvent(AuthEvent.ToLogin)
+                    },
+                    onNavigateToWallet = {
+                        navGraphController.sendEvent(AuthEvent.ConfirmLoginSuccess)
                     }
                 )
             }

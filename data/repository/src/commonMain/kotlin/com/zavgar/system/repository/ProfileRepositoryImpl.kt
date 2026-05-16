@@ -2,7 +2,6 @@ package com.zavgar.system.repository
 
 import com.zavgar.system.coroutines.CoroutineDispatcherProvider
 import com.zavgar.system.datastore.datasource.SessionDataSource
-import com.zavgar.system.domain.userinfo.error.ChangePasswordError
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.GetBalanceError
 import com.zavgar.system.domain.userinfo.error.LogoutError
@@ -13,7 +12,6 @@ import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.domain.userinfo.repository.ProfileRepository
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError
-import com.zavgar.system.network.model.ChangePasswordRequest
 import com.zavgar.system.network.model.ProfileRequest
 import com.zavgar.system.network.remote.LoyaltyService
 import com.zavgar.system.network.remote.UserProfileService
@@ -65,18 +63,6 @@ internal class ProfileRepositoryImpl(
             )
         }
 
-    override suspend fun changePassword(
-        oldPassword: String,
-        newPassword: String
-    ): AppResult<Unit, ChangePasswordError> = withContext(dispatcherProvider.io) {
-        userProfileService.changePassword(
-            ChangePasswordRequest(oldPassword = oldPassword, newPassword = newPassword)
-        ).fold(
-            onSuccess = { AppResult.Success(Unit) },
-            onFailure = { AppResult.Error(it.toChangePasswordError()) },
-        )
-    }
-
     override suspend fun logout(): AppResult<Unit, LogoutError> = withContext(dispatcherProvider.io) {
         sessionDataSource.deleteSession().onFailure { exception ->
             AppResult.Error(LogoutError.UnknownError(exception.message ?: "Storage Error"))
@@ -120,18 +106,6 @@ internal class ProfileRepositoryImpl(
         is NetworkErrorKind.Server -> GetBalanceError.ServerError
         is NetworkErrorKind.Network -> GetBalanceError.NetworkError
         is NetworkErrorKind.Unknown -> GetBalanceError.UnknownError(kind.message)
-    }
-
-    private fun Throwable.toChangePasswordError(): ChangePasswordError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> ChangePasswordError.ValidationError
-            429 -> ChangePasswordError.TooManyRequestError
-            else -> ChangePasswordError.UnknownError(kind.message)
-        }
-
-        is NetworkErrorKind.Server -> ChangePasswordError.ServerError
-        is NetworkErrorKind.Network -> ChangePasswordError.NetworkError
-        is NetworkErrorKind.Unknown -> ChangePasswordError.UnknownError(kind.message)
     }
 
     private fun Throwable.toMonthlyAccrualsError(): MonthlyAccrualsError = when (val kind = classifyNetworkError()) {

@@ -16,8 +16,4 @@ object AuthDestination {
     @CommonParcelize
     @Serializable
     data class Confirmation(val phone: String, val isRegistration: Boolean) : Destination
-
-    @Serializable
-    @CommonParcelize
-    data object Reset : Destination
 }

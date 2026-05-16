@@ -8,14 +8,12 @@ import com.zavgar.system.domain.auth.error.AuthError
 import com.zavgar.system.domain.auth.error.ConfirmationError
 import com.zavgar.system.domain.auth.error.RegisterError
 import com.zavgar.system.domain.auth.error.ResendConfirmationError
-import com.zavgar.system.domain.auth.error.ResetPasswordError
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError
 import com.zavgar.system.network.model.ConfirmationRequest
 import com.zavgar.system.network.model.LoginRequest
 import com.zavgar.system.network.model.RegisterRequest
 import com.zavgar.system.network.model.ResendRequest
-import com.zavgar.system.network.model.ResetPasswordRequest
 import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.utils.result.AppResult
 import kotlinx.coroutines.withContext
@@ -27,12 +25,28 @@ internal class AuthRepositoryImpl(
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : AuthRepository {
 
-    override suspend fun login(phone: String, password: String): AppResult<Unit, AuthError> =
+    override suspend fun login(phone: String): AppResult<Unit, AuthError> =
         withContext(dispatcherProvider.io) {
-            val response = authService.loginRequest(LoginRequest(phone = phone, password = password))
+            authService.loginRequest(LoginRequest(phone = phone))
+                .toAppResult { it.toAuthError() }
+        }
+
+    override suspend fun register(
+        name: String,
+        birthDate: LocalDate,
+        phone: String,
+    ): AppResult<Unit, RegisterError> = withContext(dispatcherProvider.io) {
+        authService.registerRequest(
+            RegisterRequest(name = name, birthDate = birthDate, phone = phone)
+        ).toAppResult { it.toRegisterError() }
+    }
+
+    override suspend fun confirmLogin(phone: String, code: String): AppResult<Unit, ConfirmationError> =
+        withContext(dispatcherProvider.io) {
+            val response = authService.confirmLogin(ConfirmationRequest(phone = phone, code = code))
                 .fold(
                     onSuccess = { it },
-                    onFailure = { return@withContext AppResult.Error(it.toAuthError()) },
+                    onFailure = { return@withContext AppResult.Error(it.toConfirmationError()) },
                 )
             sessionDataSource.saveSession(
                 Session(
@@ -41,21 +55,10 @@ internal class AuthRepositoryImpl(
                     phone = phone,
                 )
             ).onFailure { exception ->
-                AppResult.Error(AuthError.UnknownError(exception.message ?: "Storage Error"))
+                AppResult.Error(ConfirmationError.UnknownError(exception.message ?: "Storage Error"))
             }
             AppResult.Success(Unit)
         }
-
-    override suspend fun register(
-        name: String,
-        birthDate: LocalDate,
-        phone: String,
-        password: String,
-    ): AppResult<Unit, RegisterError> = withContext(dispatcherProvider.io) {
-        authService.registerRequest(
-            RegisterRequest(name = name, birthDate = birthDate, phone = phone, password = password)
-        ).toAppResult { it.toRegisterError() }
-    }
 
     override suspend fun confirmRegistration(phone: String, code: String): AppResult<Unit, ConfirmationError> =
         withContext(dispatcherProvider.io) {
@@ -63,22 +66,10 @@ internal class AuthRepositoryImpl(
                 .toAppResult { it.toConfirmationError() }
         }
 
-    override suspend fun confirmReset(phone: String, code: String): AppResult<Unit, ConfirmationError> =
-        withContext(dispatcherProvider.io) {
-            authService.confirmReset(ConfirmationRequest(phone = phone, code = code))
-                .toAppResult { it.toConfirmationError() }
-        }
-
     override suspend fun resendCode(phone: String): AppResult<Unit, ResendConfirmationError> =
         withContext(dispatcherProvider.io) {
             authService.resendCode(ResendRequest(phone = phone))
                 .toAppResult { it.toResendConfirmationError() }
-        }
-
-    override suspend fun resetPassword(phone: String, newPassword: String): AppResult<Unit, ResetPasswordError> =
-        withContext(dispatcherProvider.io) {
-            authService.resetPassword(ResetPasswordRequest(phone = phone, password = newPassword))
-                .toAppResult { it.toResetPasswordError() }
         }
 
     private fun <T, E> Result<T>.toAppResult(errorMapper: (Throwable) -> E): AppResult<T, E> =
@@ -90,7 +81,7 @@ internal class AuthRepositoryImpl(
     private fun Throwable.toAuthError(): AuthError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
             400 -> AuthError.ValidationError
-            401 -> AuthError.UserNotFound
+            404 -> AuthError.UserNotFound
             429 -> AuthError.TooManyRequestError
             else -> AuthError.UnknownError(kind.message)
         }
@@ -137,17 +128,4 @@ internal class AuthRepositoryImpl(
             is NetworkErrorKind.Network -> ResendConfirmationError.NetworkError
             is NetworkErrorKind.Unknown -> ResendConfirmationError.UnknownError(kind.message)
         }
-
-    private fun Throwable.toResetPasswordError(): ResetPasswordError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> ResetPasswordError.InvalidPhoneError
-            404 -> ResetPasswordError.UserNotFound
-            429 -> ResetPasswordError.TooManyRequestError
-            else -> ResetPasswordError.UnknownError(kind.message)
-        }
-
-        is NetworkErrorKind.Server -> ResetPasswordError.ServerError
-        is NetworkErrorKind.Network -> ResetPasswordError.NetworkError
-        is NetworkErrorKind.Unknown -> ResetPasswordError.UnknownError(kind.message)
-    }
 }

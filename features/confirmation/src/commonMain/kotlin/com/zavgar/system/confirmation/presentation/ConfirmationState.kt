@@ -1,6 +1,7 @@
 package com.zavgar.system.confirmation.presentation
 
 import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.utils.validation.CODE_LENGTH
 
 data class ConfirmationState(
     val phone: String = "",
@@ -21,7 +22,7 @@ data class ConfirmationState(
     }
 
     val isCodeValid: Boolean
-        get() = code.length == 6
+        get() = code.length == CODE_LENGTH
 
     val isConfirmButtonEnabled: Boolean
         get() = isCodeValid && screenState is ScreenState.Idle

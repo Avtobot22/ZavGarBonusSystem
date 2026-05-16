@@ -7,6 +7,4 @@ import kotlinx.serialization.Serializable
 data class LoginRequest(
     @SerialName("phone")
     val phone: String,
-    @SerialName("password")
-    val password: String
 )

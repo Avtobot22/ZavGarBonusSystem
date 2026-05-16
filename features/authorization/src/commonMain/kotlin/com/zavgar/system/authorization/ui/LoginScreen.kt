@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,19 +39,18 @@ import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
-import com.zavgar.system.designsystem.components.textfield.AppPasswordField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.MaterialTheme
 import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.login_button_text
 import com.zavgar.system.resources.login_button_text_not_account
 import com.zavgar.system.resources.login_button_text_register
-import com.zavgar.system.resources.login_forgot_password
-import com.zavgar.system.resources.login_password_label
-import com.zavgar.system.resources.login_password_placeholder
+import com.zavgar.system.resources.login_sms_hint
 import com.zavgar.system.resources.login_top_title
 import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
@@ -58,28 +60,24 @@ import org.koin.compose.koinInject
 
 @Composable
 fun LoginScreen(
+    onNavigateToConfirmation: (phone: String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
-    onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LoginLoader(
         modifier = modifier,
+        onNavigateToConfirmation = onNavigateToConfirmation,
         onNavigateToRegister = onNavigateToRegister,
-        onNavigateToForgotPassword = onNavigateToForgotPassword,
-        onNavigateToWallet = onNavigateToWallet,
     )
 }
 
 @Composable
 internal fun LoginLoader(
+    onNavigateToConfirmation: (phone: String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
-    onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = koinInject()
 ) {
-
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -87,10 +85,8 @@ internal fun LoginLoader(
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
+            is LoginEvent.NavigateToConfirmation -> onNavigateToConfirmation(event.phone)
             is LoginEvent.NavigateToRegister -> onNavigateToRegister()
-            is LoginEvent.NavigateToForgotPassword -> onNavigateToForgotPassword()
-            is LoginEvent.NavigateToWallet -> onNavigateToWallet()
-
             is LoginEvent.ShowSnackbar -> {
                 scope.launch { errorShakingState.shake() }
                 scope.launch {
@@ -137,26 +133,24 @@ internal fun LoginScaffold(
             modifier = Modifier.padding(bottom = 24.dp),
         )
 
-        AuthorizationForm(state, onIntent)
+        AppValidatedTextField(
+            value = state.phone,
+            onValueChange = { onIntent(LoginIntent.EnterPhone(it)) },
+            isValid = state.isPhoneValid,
+            label = stringResource(Res.string.phone_label),
+            placeholder = stringResource(Res.string.phone_placeholder),
+            isError = state.phoneError != null,
+            errorMessage = state.phoneError?.asString(),
+            visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            enabled = idle
+        )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterEnd,
-        ) {
-            Text(
-                text = stringResource(Res.string.login_forgot_password),
-                color = colors.accent,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .clickable(enabled = idle) { onIntent(LoginIntent.ClickForgotPassword) }
-                    .padding(8.dp),
-            )
-        }
+        SmsHintDivider()
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
 
         AppPrimaryButton(
             text = stringResource(Res.string.login_button_text),
@@ -172,6 +166,36 @@ internal fun LoginScaffold(
         Spacer(Modifier.height(16.dp))
 
         HasNotAccountRow(idle = idle, onClick = { onIntent(LoginIntent.ClickRegister) })
+    }
+}
+
+@Composable
+private fun SmsHintDivider() {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f), color = colors.outline)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Sms,
+                contentDescription = null,
+                tint = colors.accent,
+                modifier = Modifier.size(14.dp),
+            )
+            Text(
+                text = stringResource(Res.string.login_sms_hint),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.foregroundSecondary,
+            )
+        }
+        HorizontalDivider(modifier = Modifier.weight(1f), color = colors.outline)
     }
 }
 
@@ -201,52 +225,13 @@ private fun HasNotAccountRow(idle: Boolean, onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun AuthorizationForm(
-    state: LoginState,
-    onIntent: (LoginIntent) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
-        AppValidatedTextField(
-            value = state.phone,
-            onValueChange = { onIntent(LoginIntent.EnterPhone(it)) },
-            isValid = state.isPhoneValid,
-            label = stringResource(Res.string.phone_label),
-            placeholder = stringResource(Res.string.phone_placeholder),
-            isError = state.phoneError != null,
-            errorMessage = state.phoneError?.asString(),
-            visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            enabled = state.screenState is LoginState.ScreenState.Idle
-        )
-
-        AppPasswordField(
-            value = state.password,
-            onValueChange = { onIntent(LoginIntent.EnterPassword(it)) },
-            isError = state.passwordError != null,
-            errorMessage = state.passwordError?.asString(),
-            enabled = state.screenState is LoginState.ScreenState.Idle,
-            label = stringResource(Res.string.login_password_label),
-            placeholder = stringResource(Res.string.login_password_placeholder)
-        )
-    }
-}
-
-// --- ПРЕВЬЮ ---
-@Preview(name = "Light Mode - Full Screen", showBackground = true)
+@Preview(name = "Light Mode", showBackground = true)
 @Composable
 private fun LoginScreenPreview() {
-    val previewState = LoginState(
-        phone = "9991234567",
-        isPhoneValid = true,
-        phoneError = null,
-        password = "",
-        passwordError = null,
-    )
     val snackbarHostState = remember { SnackbarHostState() }
     ZavGarThemePreview {
         LoginScaffold(
-            state = previewState,
+            state = LoginState(phone = "9991234567", isPhoneValid = true),
             snackbarHostState = snackbarHostState,
             onIntent = {},
             errorShakingState = rememberShakingState()
@@ -254,42 +239,17 @@ private fun LoginScreenPreview() {
     }
 }
 
-@Preview(name = "Loading State - Full Screen", showBackground = true)
-@Composable
-private fun LoginScreenLoadingPreview() {
-    val loadingState = LoginState(
-        phone = "9991234567",
-        isPhoneValid = true,
-        phoneError = null,
-        password = "password",
-        passwordError = null,
-        screenState = LoginState.ScreenState.Submitting
-    )
-    val snackbarHostState = remember { SnackbarHostState() }
-    ZavGarThemePreview {
-        LoginScaffold(
-            state = loadingState,
-            snackbarHostState = snackbarHostState,
-            onIntent = {},
-            errorShakingState = rememberShakingState()
-        )
-    }
-}
-
-@Preview(name = "Error State - Full Screen", showBackground = true)
+@Preview(name = "Error State", showBackground = true)
 @Composable
 private fun LoginScreenErrorPreview() {
-    val errorState = LoginState(
-        phone = "123",
-        isPhoneValid = false,
-        phoneError = UiText.DynamicString("Неверный формат"),
-        password = "123",
-        passwordError = UiText.DynamicString("Слишком короткий пароль"),
-    )
     val snackbarHostState = remember { SnackbarHostState() }
     ZavGarThemePreview {
         LoginScaffold(
-            state = errorState,
+            state = LoginState(
+                phone = "123",
+                isPhoneValid = false,
+                phoneError = UiText.DynamicString("Неверный формат"),
+            ),
             snackbarHostState = snackbarHostState,
             onIntent = {},
             errorShakingState = rememberShakingState()

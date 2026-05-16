@@ -7,9 +7,7 @@ import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.auth.usecase.RegisterUseCase
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
-import com.zavgar.system.utils.validation.ValidatePasswordUseCase
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
-import com.zavgar.system.utils.validation.ValidateRepeatedPasswordUseCase
 import com.zavgar.system.domain.auth.model.RegisterRequest
 import com.zavgar.system.registration.mapper.asSnackBarMessage
 import com.zavgar.system.registration.mapper.toRegisterResult
@@ -18,6 +16,7 @@ import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
+import com.zavgar.system.utils.validation.sanitizePhone
 import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.datetime.LocalDate
 
@@ -25,8 +24,6 @@ class RegisterViewModel(
     private val validateNameUseCase: ValidateNameUseCase,
     private val validateBirthDateUseCase: ValidateBirthDateUseCase,
     private val validatePhoneUseCase: ValidatePhoneUseCase,
-    private val validatePasswordUseCase: ValidatePasswordUseCase,
-    private val validateRepeatedPasswordUseCase: ValidateRepeatedPasswordUseCase,
     private val registerUseCase: RegisterUseCase
 ) : BaseViewModel<RegisterState, RegisterIntent, RegisterEvent>(RegisterState()) {
 
@@ -35,24 +32,11 @@ class RegisterViewModel(
             is RegisterIntent.EnterName -> handleNameInput(intent.name)
             is RegisterIntent.CloseDatePicker -> handleCloseDatePicker(intent.birthDate)
             is RegisterIntent.EnterPhone -> handlePhoneInput(intent.phone)
-            is RegisterIntent.EnterPassword -> handlePasswordInput(intent.password)
-            is RegisterIntent.EnterRepeatPassword -> handleRepeatPasswordInput(intent.repeatPassword)
-            is RegisterIntent.AcceptTerms -> handleAcceptTerms(intent.isTermsAccepted)
             is RegisterIntent.OpenDatePicker -> handleOpenDatePicker()
             is RegisterIntent.DismissDatePicker -> handleDismissDatePicker()
             is RegisterIntent.ClickLogin -> handleClickLogin()
             is RegisterIntent.Submit -> handleSubmit()
         }
-    }
-
-    private fun handleAcceptTerms(termsAccepted: Boolean) = setState {
-        copy(
-            isTermsAccepted = termsAccepted
-        )
-    }
-
-    companion object {
-        private const val MAX_PHONE_LENGTH = 10
     }
 
     private fun handleNameInput(name: String) =
@@ -74,30 +58,16 @@ class RegisterViewModel(
         }
 
     private fun handlePhoneInput(phone: String) {
-        val trimmedPhone = phone.take(MAX_PHONE_LENGTH).filter { it.isDigit() }
-        val validation = validatePhoneUseCase(trimmedPhone).toPresentation { it.asUiText() }
+        val sanitizedPhone = sanitizePhone(phone)
+        val validation = validatePhoneUseCase(sanitizedPhone).toPresentation { it.asUiText() }
 
         setState {
             copy(
-                phone = trimmedPhone,
-                isPhoneValid = validation is ValidationResult.Success,
+                phone = sanitizedPhone,
+                isPhoneValid = validation is ValidationResult.Valid,
                 phoneError = null
             )
         }
-    }
-
-    private fun handlePasswordInput(password: String) = setState {
-        copy(
-            password = password,
-            passwordError = null
-        )
-    }
-
-    private fun handleRepeatPasswordInput(repeatPassword: String) = setState {
-        copy(
-            repeatPassword = repeatPassword,
-            repeatPasswordError = null
-        )
     }
 
     private fun handleOpenDatePicker() = setState { copy(isDatePickerOpen = true) }
@@ -111,72 +81,30 @@ class RegisterViewModel(
 
         val state = currentState
         val nameResult = validateNameUseCase(state.name).toPresentation { it.asUiText() }
-        val birthDateResult =
-            validateBirthDateUseCase(state.birthDate).toPresentation { it.asUiText() }
+        val birthDateResult = validateBirthDateUseCase(state.birthDate).toPresentation { it.asUiText() }
         val phoneResult = validatePhoneUseCase(state.phone).toPresentation { it.asUiText() }
-        val passwordResult =
-            validatePasswordUseCase(state.password).toPresentation { it.asUiText() }
 
-        val repeatPasswordResult = validateRepeatedPasswordUseCase(
-            state.password,
-            state.repeatPassword
-        ).toPresentation { it.asUiText() }
-
-        val isFormValid = formValidation(
-            nameResult,
-            birthDateResult,
-            phoneResult,
-            passwordResult,
-            repeatPasswordResult
-        )
-
-        if (!isFormValid) return
-        val birthDate = state.birthDate ?: return
-
-        performRegister(
-            RegisterRequest(
-                phone = state.phone,
-                name = state.name,
-                birthDate = birthDate,
-                password = state.password
-            )
-        )
-    }
-
-    private fun formValidation(
-        nameResult: ValidationResult<UiText>,
-        birthDateResult: ValidationResult<UiText>,
-        phoneResult: ValidationResult<UiText>,
-        passwordResult: ValidationResult<UiText>,
-        repeatPasswordResult: ValidationResult<UiText>
-    ): Boolean {
-        val hasErrors = listOf(
-            nameResult,
-            birthDateResult,
-            phoneResult,
-            passwordResult,
-            repeatPasswordResult
-        ).any { it is ValidationResult.Error }
+        val hasErrors = listOf(nameResult, birthDateResult, phoneResult).any { it is ValidationResult.Invalid }
 
         setState {
             copy(
-                nameError = nameResult.errorOrNull(),
-                birthDateError = birthDateResult.errorOrNull(),
-                phoneError = phoneResult.errorOrNull(),
-                passwordError = passwordResult.errorOrNull(),
-                repeatPasswordError = repeatPasswordResult.errorOrNull()
+                nameError = (nameResult as? ValidationResult.Invalid)?.error,
+                birthDateError = (birthDateResult as? ValidationResult.Invalid)?.error,
+                phoneError = (phoneResult as? ValidationResult.Invalid)?.error,
             )
         }
 
-        return !hasErrors
+        if (hasErrors) return
+        val birthDate = state.birthDate ?: return
+
+        performRegister(RegisterRequest(phone = state.phone, name = state.name, birthDate = birthDate))
     }
 
     private fun performRegister(registerRequest: RegisterRequest) {
         launchTry {
             setState { copy(screenState = RegisterState.ScreenState.Submitting) }
 
-            val result =
-                registerUseCase(registerRequest).toRegisterResult { it.asSnackBarMessage() }
+            val result = registerUseCase(registerRequest).toRegisterResult { it.asSnackBarMessage() }
 
             setState { copy(screenState = RegisterState.ScreenState.Idle) }
 
@@ -188,7 +116,6 @@ class RegisterViewModel(
                 is RegisterResult.Error -> {
                     setEvent { RegisterEvent.ShowSnackbar(result.message) }
                 }
-
             }
         } catch {
             setState { copy(screenState = RegisterState.ScreenState.Idle) }
@@ -198,9 +125,5 @@ class RegisterViewModel(
                 )
             }
         }
-    }
-
-    private fun ValidationResult<UiText>.errorOrNull(): UiText? {
-        return (this as? ValidationResult.Error)?.error
     }
 }

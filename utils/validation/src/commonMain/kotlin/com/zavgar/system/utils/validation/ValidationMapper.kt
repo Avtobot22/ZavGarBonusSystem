@@ -5,45 +5,33 @@ import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_blank_birth_date
 import com.zavgar.system.resources.error_blank_code
 import com.zavgar.system.resources.error_blank_name
-import com.zavgar.system.resources.error_blank_password
 import com.zavgar.system.resources.error_blank_phone
 import com.zavgar.system.resources.error_invalid_format_phone
 import com.zavgar.system.resources.error_invalid_length_phone
-import com.zavgar.system.resources.error_passwords_not_match
 import com.zavgar.system.resources.error_short_code
-import com.zavgar.system.resources.error_short_password
 
 fun PhoneValidationError.asUiText() = when (this) {
-    PhoneValidationError.Blank -> UiText.Resource(Res.string.error_blank_phone)
-    PhoneValidationError.InvalidFormat -> UiText.Resource(Res.string.error_invalid_format_phone)
-    PhoneValidationError.InvalidLength -> UiText.Resource(Res.string.error_invalid_length_phone)
-}
-
-fun PasswordValidationError.asUiText() = when (this) {
-    PasswordValidationError.Blank -> UiText.Resource(Res.string.error_blank_password)
-    PasswordValidationError.Short -> UiText.Resource(Res.string.error_short_password)
+    PhoneValidationError.BLANK -> UiText.Resource(Res.string.error_blank_phone)
+    PhoneValidationError.INVALID_FORMAT -> UiText.Resource(Res.string.error_invalid_format_phone)
+    PhoneValidationError.INVALID_LENGTH -> UiText.Resource(Res.string.error_invalid_length_phone)
 }
 
 fun NameValidationError.asUiText() = when (this) {
-    NameValidationError.Blank -> UiText.Resource(Res.string.error_blank_name)
+    NameValidationError.BLANK -> UiText.Resource(Res.string.error_blank_name)
 }
 
 fun BirthDateValidationError.asUiText() = when (this) {
-    BirthDateValidationError.Blank -> UiText.Resource(Res.string.error_blank_birth_date)
-}
-
-fun RepeatPasswordValidationError.asUiText() = when (this) {
-    RepeatPasswordValidationError.NotMatching -> UiText.Resource(Res.string.error_passwords_not_match)
+    BirthDateValidationError.BLANK -> UiText.Resource(Res.string.error_blank_birth_date)
 }
 
 fun CodeValidationError.asUiText() = when (this) {
-    CodeValidationError.Blank -> UiText.Resource(Res.string.error_blank_code)
-    CodeValidationError.TooShort -> UiText.Resource(Res.string.error_short_code)
+    CodeValidationError.BLANK -> UiText.Resource(Res.string.error_blank_code)
+    CodeValidationError.TOO_SHIRT -> UiText.Resource(Res.string.error_short_code)
 }
 
 fun <D, P> ValidationResult<D>.toPresentation(mapper: (D) -> P): ValidationResult<P> {
     return when (this) {
-        is ValidationResult.Success -> ValidationResult.Success
-        is ValidationResult.Error -> ValidationResult.Error(mapper(this.error))
+        is ValidationResult.Valid -> ValidationResult.Valid
+        is ValidationResult.Invalid -> ValidationResult.Invalid(mapper(this.error))
     }
 }
