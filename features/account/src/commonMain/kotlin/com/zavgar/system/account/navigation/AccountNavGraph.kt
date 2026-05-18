@@ -3,8 +3,8 @@ package com.zavgar.system.account.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.ui.NavDisplay
 import com.zavgar.system.account.ui.AccountScreen
-import com.zavgar.system.designsystem.animation.FadeInTransition
-import com.zavgar.system.designsystem.animation.FadeOutTransition
+import com.zavgar.system.navigationapi.transition.MainEnterTransition
+import com.zavgar.system.navigationapi.transition.MainPopTransition
 import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.destination.SettingsDestination
@@ -15,9 +15,9 @@ class AccountNavGraph : NavGraph {
     override val navGraph: EntryProviderScope<Destination>.(NavEventController) -> Unit = { navEventController ->
 
         entry<SettingsDestination.Profile>(
-            metadata = NavDisplay.transitionSpec { FadeInTransition } +
-                    NavDisplay.popTransitionSpec { FadeOutTransition } +
-                    NavDisplay.predictivePopTransitionSpec { FadeOutTransition }
+            metadata = NavDisplay.transitionSpec { MainEnterTransition } +
+                    NavDisplay.popTransitionSpec { MainPopTransition } +
+                    NavDisplay.predictivePopTransitionSpec { MainPopTransition }
         ) {
             AccountScreen(
                 onNavigateToLogin = {

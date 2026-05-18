@@ -57,6 +57,10 @@ junit = "1.3.0"
 # Firebase
 googleServices = "4.4.4"
 firebaseCrashlyticsPlugin = "3.0.7"
+# GitLive Firebase KMP SDK. ВНИМАНИЕ: 2.4.0 собран под Kotlin ~2.1 —
+# при несовместимости с Kotlin 2.3.21 поднять версию.
+gitliveFirebase = "2.4.0"
+# BOM нужен, чтобы GitLive android-артефакты получили версии нативного Firebase SDK.
 firebaseBom = "34.13.0"
 
 [libraries]
@@ -114,9 +118,10 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 # Qr-kit
 qrKit = { module = "network.chaintech:qr-kit", version.ref = "qrKit" }
 
-# Firebase
+# Firebase (GitLive KMP SDK)
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+gitlive-firebase-config = { module = "dev.gitlive:firebase-config", version.ref = "gitliveFirebase" }
+gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "gitliveFirebase" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }

@@ -24,6 +24,7 @@ include(":features:account")
 include(":features:history")
 
 include(":libraries:appstate")
+include(":libraries:firebase")
 include(":libraries:parcelable")
 include(":libraries:coroutines")
 include(":libraries:designsystem")

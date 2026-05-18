@@ -3,8 +3,8 @@ package com.zavgar.system.authorization.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.ui.NavDisplay
 import com.zavgar.system.authorization.ui.LoginScreen
-import com.zavgar.system.designsystem.animation.FadeInTransition
-import com.zavgar.system.designsystem.animation.FadeOutTransition
+import com.zavgar.system.navigationapi.transition.AuthEnterTransition
+import com.zavgar.system.navigationapi.transition.AuthPopTransition
 import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.AuthDestination
 import com.zavgar.system.navigationapi.destination.Destination
@@ -17,9 +17,9 @@ internal class LoginNavGraph : NavGraph {
         { navEventController ->
 
             entry<AuthDestination.Login>(
-                metadata = NavDisplay.transitionSpec { FadeInTransition } +
-                        NavDisplay.popTransitionSpec { FadeOutTransition } +
-                        NavDisplay.predictivePopTransitionSpec { FadeOutTransition }
+                metadata = NavDisplay.transitionSpec { AuthEnterTransition } +
+                        NavDisplay.popTransitionSpec { AuthPopTransition } +
+                        NavDisplay.predictivePopTransitionSpec { AuthPopTransition }
             ) {
                 LoginScreen(
                     onNavigateToConfirmation = { phone ->

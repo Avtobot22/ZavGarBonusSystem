@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,9 +52,7 @@ import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
-import com.zavgar.system.designsystem.modifiers.ShakingState
-import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.screen.ErrorScreen
+import com.zavgar.system.designsystem.modifiers.shimmerAnimation
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.designsystem.theme.accent
@@ -101,7 +101,6 @@ internal fun SettingsLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val errorShakingState = rememberShakingState()
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
@@ -123,7 +122,6 @@ internal fun SettingsLoader(
         state = state,
         onIntent = viewModel::handleIntent,
         snackbarHostState = snackbarHostState,
-        errorShakingState = errorShakingState,
         modifier = modifier
     )
 }
@@ -133,38 +131,23 @@ internal fun SettingsScaffold(
     state: SettingsState,
     onIntent: (SettingsIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
-    errorShakingState: ShakingState,
     modifier: Modifier = Modifier
 ) {
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
     ) { paddingValues ->
-        AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
-            when (state.screenState) {
-                is SettingsState.ScreenState.Content -> SettingsContent(
-                    content = state.screenState,
-                    onIntent = onIntent,
-                    modifier = Modifier.padding(paddingValues)
-                )
-
-                is SettingsState.ScreenState.Loading -> SettingsLoading(
-                    modifier = Modifier.padding(paddingValues)
-                )
-
-                is SettingsState.ScreenState.Error -> ErrorScreen(
-                    modifier = Modifier.padding(paddingValues),
-                    onRetry = { onIntent(SettingsIntent.Retry) },
-                    shakingState = errorShakingState
-                )
-            }
-        }
+        SettingsContent(
+            state = state,
+            onIntent = onIntent,
+            modifier = Modifier.padding(paddingValues)
+        )
     }
 }
 
 @Composable
 internal fun SettingsContent(
-    content: SettingsState.ScreenState.Content,
+    state: SettingsState,
     onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -187,7 +170,24 @@ internal fun SettingsContent(
             modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
         )
 
-        ProfileCard(name = content.name, phone = content.phone, balance = content.balance)
+        AnimatedState(
+            targetState = state.profileState,
+            contentKey = { it::class },
+        ) { profileState ->
+            when (profileState) {
+                is SettingsState.ProfileState.Content -> ProfileCard(
+                    name = profileState.name,
+                    phone = profileState.phone,
+                    balance = profileState.balance,
+                )
+
+                is SettingsState.ProfileState.Loading -> ProfileCardSkeleton()
+
+                is SettingsState.ProfileState.Error -> ProfileCardError(
+                    onRetry = { onIntent(SettingsIntent.Retry) },
+                )
+            }
+        }
 
         Spacer(Modifier.height(14.dp))
 
@@ -203,7 +203,7 @@ internal fun SettingsContent(
                 onClick = { /* TODO: about screen */ },
             )
             DarkModeRow(
-                checked = content.isDarkTheme,
+                checked = state.isDarkTheme,
                 onCheckedChange = { onIntent(SettingsIntent.ToggleDarkMode(it)) },
             )
             SettingRow(
@@ -212,6 +212,7 @@ internal fun SettingsContent(
                 onClick = { onIntent(SettingsIntent.Logout) },
                 destructive = true,
                 showChevron = false,
+                isLoading = state.isLoggingOut,
             )
         }
     }
@@ -220,14 +221,8 @@ internal fun SettingsContent(
 @Composable
 private fun ProfileCard(name: String, phone: String, balance: Int) {
     val colors = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(20.dp)
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(elevation = 6.dp, shape = shape, clip = false)
-            .clip(shape)
-            .background(colors.card)
-            .padding(horizontal = 18.dp, vertical = 16.dp),
+        modifier = Modifier.profileCardModifier(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -277,12 +272,105 @@ private fun ProfileCard(name: String, phone: String, balance: Int) {
 }
 
 @Composable
+private fun ProfileCardSkeleton() {
+    Row(
+        modifier = Modifier.profileCardModifier(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(54.dp)
+                .shimmerAnimation(CircleShape),
+        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(16.dp)
+                    .shimmerAnimation(RoundedCornerShape(6.dp)),
+            )
+            Box(
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(13.dp)
+                    .shimmerAnimation(RoundedCornerShape(6.dp)),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .width(52.dp)
+                .height(26.dp)
+                .shimmerAnimation(RoundedCornerShape(10.dp)),
+        )
+    }
+}
+
+@Composable
+private fun ProfileCardError(onRetry: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .profileCardModifier()
+            .clickable(role = Role.Button, onClick = onRetry),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(54.dp)
+                .clip(CircleShape)
+                .background(colors.dangerContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = null,
+                tint = colors.danger,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Не удалось загрузить профиль",
+                color = colors.foreground,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "Нажмите, чтобы повторить",
+                color = colors.foregroundSecondary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun Modifier.profileCardModifier(): Modifier {
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(20.dp)
+    return this
+        .fillMaxWidth()
+        .shadow(elevation = 6.dp, shape = shape, clip = false)
+        .clip(shape)
+        .background(colors.card)
+        .padding(horizontal = 18.dp, vertical = 16.dp)
+}
+
+@Composable
 private fun SettingRow(
     icon: ImageVector,
     title: String,
     onClick: () -> Unit,
     destructive: Boolean = false,
     showChevron: Boolean = true,
+    isLoading: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(18.dp)
@@ -295,7 +383,7 @@ private fun SettingRow(
             .shadow(elevation = 4.dp, shape = shape, clip = false)
             .clip(shape)
             .background(colors.card)
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(role = Role.Button, enabled = !isLoading, onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -321,7 +409,13 @@ private fun SettingRow(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
         )
-        if (showChevron) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = tint,
+                strokeWidth = 2.dp,
+            )
+        } else if (showChevron) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
@@ -382,16 +476,6 @@ private fun DarkModeRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     }
 }
 
-@Composable
-internal fun SettingsLoading(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
 private fun formatPhoneNomer(phone: String): String {
     val digits = phone.filter { it.isDigit() }.drop(1)
     return if (digits.length == 10) {
@@ -411,7 +495,7 @@ private fun SettingsScaffoldPreview() {
         Screen {
             SettingsScaffold(
                 state = SettingsState(
-                    screenState = SettingsState.ScreenState.Content(
+                    profileState = SettingsState.ProfileState.Content(
                         name = "Михаил Иванов",
                         phone = "+7 (999) 123-45-67",
                         balance = 1500,
@@ -419,7 +503,6 @@ private fun SettingsScaffoldPreview() {
                 ),
                 onIntent = { },
                 snackbarHostState = remember { SnackbarHostState() },
-                errorShakingState = rememberShakingState(),
             )
         }
     }
@@ -431,10 +514,23 @@ private fun SettingsScaffoldLoadingPreview() {
     ZavGarThemePreview {
         Screen {
             SettingsScaffold(
-                state = SettingsState(screenState = SettingsState.ScreenState.Loading),
+                state = SettingsState(profileState = SettingsState.ProfileState.Loading),
                 onIntent = { },
                 snackbarHostState = remember { SnackbarHostState() },
-                errorShakingState = rememberShakingState(),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScaffoldErrorPreview() {
+    ZavGarThemePreview {
+        Screen {
+            SettingsScaffold(
+                state = SettingsState(profileState = SettingsState.ProfileState.Error),
+                onIntent = { },
+                snackbarHostState = remember { SnackbarHostState() },
             )
         }
     }

@@ -1,8 +1,6 @@
 package com.zavgar.system.registration.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,7 +44,10 @@ import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundSecondary
 import com.zavgar.system.registration.presentation.RegisterEvent
 import com.zavgar.system.registration.presentation.RegisterIntent
 import com.zavgar.system.registration.presentation.RegisterState
@@ -58,8 +59,6 @@ import com.zavgar.system.resources.login_button_text
 import com.zavgar.system.resources.login_sms_hint
 import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
-import com.zavgar.system.resources.register_button_text_has_account
-import com.zavgar.system.resources.register_button_text_login
 import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
 import com.zavgar.system.resources.register_top_title
@@ -174,11 +173,11 @@ internal fun RegisterScaffold(
             shakingState = errorShakingState
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
-        HasAccountRow(
-            idle = state.screenState is RegisterState.ScreenState.Idle,
-            onClick = { onIntent(RegisterIntent.ClickLogin) }
+        RegisterPrivacyConsent(
+            privacyPolicyUrl = state.privacyPolicyUrl,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -256,39 +255,18 @@ private fun SmsHintDivider() {
     }
 }
 
-@Composable
-private fun HasAccountRow(idle: Boolean, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.register_button_text_has_account),
-                color = colors.foregroundSecondary,
-                fontSize = 14.sp,
-            )
-            Text(
-                text = stringResource(Res.string.register_button_text_login),
-                color = colors.accent,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .clickable(enabled = idle, onClick = onClick)
-                    .padding(vertical = 4.dp),
-            )
-        }
-    }
-}
-
 @Preview(name = "Light Mode", showBackground = true)
 @Composable
 private fun RegisterScreenPreview() {
     val snackbarHostState = remember { SnackbarHostState() }
     ZavGarThemePreview {
         RegisterScaffold(
-            state = RegisterState(name = "Иван", phone = "9991234567", isPhoneValid = true),
+            state = RegisterState(
+                name = "Иван",
+                phone = "9991234567",
+                isPhoneValid = true,
+                privacyPolicyUrl = "https://zavgar.ru",
+            ),
             snackbarHostState = snackbarHostState,
             onIntent = {},
             errorShakingState = rememberShakingState()
@@ -306,6 +284,7 @@ private fun RegisterScreenErrorPreview() {
                 nameError = UiText.DynamicString("Имя не может быть пустым"),
                 phoneError = UiText.DynamicString("Неверный формат телефона"),
                 birthDateError = UiText.DynamicString("Выберите дату рождения"),
+                privacyPolicyUrl = "https://zavgar.ru",
             ),
             snackbarHostState = snackbarHostState,
             onIntent = {},

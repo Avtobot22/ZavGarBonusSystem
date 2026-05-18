@@ -14,6 +14,7 @@ import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
+import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_resend_success
@@ -27,6 +28,7 @@ class ConfirmationViewModel(
     private val validateCodeUseCase: ValidateCodeUseCase,
     private val confirmationUseCase: ConfirmationUseCase,
     private val resendCodeUseCase: ResendCodeUseCase,
+    private val remoteConfigService: RemoteConfigService,
 ) : BaseViewModel<ConfirmationState, ConfirmationIntent, ConfirmationEvent>(ConfirmationState()) {
 
     init {
@@ -37,6 +39,10 @@ class ConfirmationViewModel(
 
     companion object {
         private const val TIMER_DURATION_SECONDS = 60
+        private const val PHONE_COMPARE_DIGITS = 10
+
+        // TODO: временный диагностический префикс — убрать после проверки тестового аккаунта.
+        private const val LOG_TAG = "RemoteConfigDebug"
     }
 
     override fun handleIntent(intent: ConfirmationIntent) {
@@ -48,11 +54,54 @@ class ConfirmationViewModel(
         }
     }
 
-    private fun handleInitialize(phone: String, isRegistration: Boolean) = setState {
-        copy(
-            phone = phone,
-            isRegistration = isRegistration
+    private fun handleInitialize(phone: String, isRegistration: Boolean) {
+        setState {
+            copy(
+                phone = phone,
+                isRegistration = isRegistration
+            )
+        }
+        autofillTestCodeIfNeeded(phone)
+    }
+
+    /**
+     * Если включён тестовый аккаунт и [phone] совпадает с тестовым номером —
+     * подставляет тестовый OTP и автоматически отправляет его (автопрохождение верификации).
+     */
+    private fun autofillTestCodeIfNeeded(phone: String) {
+        // TODO: временный диагностический лог — убрать после проверки тестового аккаунта.
+        val enabled = remoteConfigService.testAccountEnabled
+        val testPhone = remoteConfigService.testPhoneNumber
+        val testCode = remoteConfigService.testOtpCode
+        val matches = phonesMatch(phone, testPhone)
+        println(
+            "$LOG_TAG: autofill — testAccountEnabled=$enabled, " +
+                "phoneReceived=\"$phone\", testPhoneFromConfig=\"$testPhone\", " +
+                "phonesMatch=$matches, testOtpCode=\"$testCode\""
         )
+
+        if (!enabled) {
+            println("$LOG_TAG: autofill пропущен — test_account_enabled=false")
+            return
+        }
+        if (!matches) {
+            println("$LOG_TAG: autofill пропущен — номер не совпал с test_phone_number")
+            return
+        }
+        if (testCode.isBlank()) {
+            println("$LOG_TAG: autofill пропущен — test_otp_code пустой")
+            return
+        }
+
+        println("$LOG_TAG: autofill — подставляю код и автоотправляю")
+        setState { copy(code = testCode, codeError = null) }
+        handleSubmit()
+    }
+
+    private fun phonesMatch(first: String, second: String): Boolean {
+        fun normalize(value: String) = value.filter(Char::isDigit).takeLast(PHONE_COMPARE_DIGITS)
+        val normalizedFirst = normalize(first)
+        return normalizedFirst.isNotEmpty() && normalizedFirst == normalize(second)
     }
 
     private fun handleEnterCode(code: String) = setState {
@@ -115,15 +164,25 @@ class ConfirmationViewModel(
                 confirmationUseCase(confirmationRequest).toConfirmationResult { it.asSnackBarMessage() }
 
             when (result) {
-                is ConfirmationResult.Success -> setEvent {
-                    if (confirmationRequest.isRegistration) ConfirmationEvent.NavigateToLogin
-                    else ConfirmationEvent.NavigateToWallet
+                is ConfirmationResult.Success -> {
+                    // TODO: временный диагностический лог — убрать после проверки.
+                    println("$LOG_TAG: подтверждение успешно — переход дальше")
+                    setEvent {
+                        if (confirmationRequest.isRegistration) ConfirmationEvent.NavigateToLogin
+                        else ConfirmationEvent.NavigateToWallet
+                    }
                 }
-                is ConfirmationResult.Error -> setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
+                is ConfirmationResult.Error -> {
+                    // TODO: временный диагностический лог — убрать после проверки.
+                    println("$LOG_TAG: подтверждение отклонено сервером — навигации не будет")
+                    setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
+                }
             }
 
             setState { copy(screenState = ConfirmationState.ScreenState.Idle) }
-        } catch {
+        } catch { error ->
+            // TODO: временный диагностический лог — убрать после проверки.
+            println("$LOG_TAG: ошибка запроса подтверждения: ${error::class.simpleName}: ${error.message}")
             setState { copy(screenState = ConfirmationState.ScreenState.Idle) }
             setEvent {
                 ConfirmationEvent.ShowSnackbar(

@@ -7,8 +7,7 @@ import androidx.compose.ui.graphics.Color
 // Usage: MaterialTheme.colorScheme.accent / .card / .foreground …
 
 val ColorScheme.accent: Color get() = primary
-val ColorScheme.accentSoft: Color get() = primaryContainer
-val ColorScheme.accentGlow: Color get() = primary.copy(alpha = 0.18f)
+val ColorScheme.accentSoft: Color get() = primary.copy(alpha = 0.18f)
 val ColorScheme.card: Color get() = surface
 val ColorScheme.navBackground: Color get() = surfaceContainer
 val ColorScheme.foreground: Color get() = onBackground

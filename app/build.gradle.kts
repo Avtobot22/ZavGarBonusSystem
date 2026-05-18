@@ -82,8 +82,9 @@ dependencies {
     implementation(projects.shared)
     implementation(projects.libraries.navigationContracts)
 
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
+    // Нативный Firebase SDK подключается транзитивно через :libraries:firebase (GitLive).
+    // Плагины google-services и firebase-crashlytics остаются для обработки
+    // google-services.json и выгрузки mapping-файлов.
     implementation(libs.logcat)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.activity.compose)

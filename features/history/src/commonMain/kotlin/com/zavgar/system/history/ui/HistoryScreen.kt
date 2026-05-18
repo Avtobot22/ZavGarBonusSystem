@@ -54,7 +54,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.compose.Pagination
 import com.zavgar.system.designsystem.components.content.AnimatedState
-import com.zavgar.system.designsystem.components.content.AppProgressIndicator
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
@@ -168,8 +167,8 @@ internal fun HistoryScaffold(
                             listState.animateScrollToItem(0)
                         }
                     },
-                    containerColor = colors.accentSoft,
-                    contentColor = colors.accent,
+                    containerColor = colors.accent,
+                    contentColor = colors.onAccent,
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowUp,
@@ -187,10 +186,6 @@ internal fun HistoryScaffold(
                     shakingState = errorShakingState
                 )
 
-                HistoryState.ScreenState.Initial,
-
-                HistoryState.ScreenState.Loading -> HistoryFullScreenLoading(paddingValues)
-
                 else -> HistoryContent(
                     state = state,
                     onIntent = onIntent,
@@ -199,18 +194,6 @@ internal fun HistoryScaffold(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun HistoryFullScreenLoading(paddingValues: PaddingValues) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-        contentAlignment = Alignment.Center
-    ) {
-        AppProgressIndicator()
     }
 }
 
@@ -353,7 +336,11 @@ private fun HistoryListCard(
             .background(colors.card),
         contentAlignment = Alignment.Center
     ) {
-        if (state.screenState is HistoryState.ScreenState.Reloading) {
+        val isLoading = state.screenState is HistoryState.ScreenState.Initial ||
+                state.screenState is HistoryState.ScreenState.Loading ||
+                state.screenState is HistoryState.ScreenState.Reloading
+
+        if (isLoading) {
             LoadingHistoryList()
         } else if (state.history.transactions.isEmpty()) {
             EmptyHistoryContent(
@@ -362,9 +349,8 @@ private fun HistoryListCard(
         } else {
             LazyColumn(
                 state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 4.dp, bottom = 12.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 88.dp),
+                modifier = Modifier.fillMaxSize(),
             ) {
                 items(
                     items = state.history.transactions,

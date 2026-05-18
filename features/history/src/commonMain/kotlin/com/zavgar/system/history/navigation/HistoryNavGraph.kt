@@ -2,8 +2,8 @@ package com.zavgar.system.history.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.ui.NavDisplay
-import com.zavgar.system.designsystem.animation.FadeInTransition
-import com.zavgar.system.designsystem.animation.FadeOutTransition
+import com.zavgar.system.navigationapi.transition.MainEnterTransition
+import com.zavgar.system.navigationapi.transition.MainPopTransition
 import com.zavgar.system.history.ui.HistoryScreen
 import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.Destination
@@ -14,9 +14,9 @@ import com.zavgar.system.navigationapi.provider.NavGraph
 class HistoryNavGraph : NavGraph {
     override val navGraph: EntryProviderScope<Destination>.(NavEventController) -> Unit = { navEventController ->
         entry<HomeDestination.History>(
-            metadata = NavDisplay.transitionSpec { FadeInTransition } +
-                    NavDisplay.popTransitionSpec { FadeOutTransition } +
-                    NavDisplay.predictivePopTransitionSpec { FadeOutTransition }
+            metadata = NavDisplay.transitionSpec { MainEnterTransition } +
+                    NavDisplay.popTransitionSpec { MainPopTransition } +
+                    NavDisplay.predictivePopTransitionSpec { MainPopTransition }
         ) {
             HistoryScreen(
                 onNavigateToLogin = {

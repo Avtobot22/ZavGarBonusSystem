@@ -11,6 +11,7 @@
 		117396592FB89773008B21C9 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 117396582FB89773008B21C9 /* FirebaseAnalyticsCore */; };
 		1173965B2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 1173965A2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport */; };
 		1173965D2FB89773008B21C9 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1173965C2FB89773008B21C9 /* FirebaseCrashlytics */; };
+		11748EA62FBAB7F00094ABAC /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 11748EA52FBAB7F00094ABAC /* FirebaseRemoteConfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,16 +49,25 @@
 				1173965D2FB89773008B21C9 /* FirebaseCrashlytics in Frameworks */,
 				117396592FB89773008B21C9 /* FirebaseAnalyticsCore in Frameworks */,
 				1173965B2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				11748EA62FBAB7F00094ABAC /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		11748EA42FBAB7F00094ABAC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		434AF4F5E64A3AC927C3958E = {
 			isa = PBXGroup;
 			children = (
 				13A84BA498C80991F741F94F /* iosApp */,
+				11748EA42FBAB7F00094ABAC /* Frameworks */,
 				F2A8A212DE3586C2B3BF4378 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -98,6 +108,7 @@
 				117396582FB89773008B21C9 /* FirebaseAnalyticsCore */,
 				1173965A2FB89773008B21C9 /* FirebaseAnalyticsIdentitySupport */,
 				1173965C2FB89773008B21C9 /* FirebaseCrashlytics */,
+				11748EA52FBAB7F00094ABAC /* FirebaseRemoteConfig */,
 			);
 			productName = iosApp;
 			productReference = BAAADD6ADADDBF2D827AF569 /* ZavGarApp.app */;
@@ -479,6 +490,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		11748EA52FBAB7F00094ABAC /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 117396552FB89773008B21C9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

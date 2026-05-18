@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.zavgar.system.appstate.ZavGarAppState
-import com.zavgar.system.designsystem.animation.BottomBarEnterTransition
-import com.zavgar.system.designsystem.animation.BottomBarExitTransition
+import com.zavgar.system.navigationapi.transition.BottomBarEnterTransition
+import com.zavgar.system.navigationapi.transition.BottomBarExitTransition
 import com.zavgar.system.navigationapi.bottombar.AppBottomBar
 import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.TopLevelDestinations

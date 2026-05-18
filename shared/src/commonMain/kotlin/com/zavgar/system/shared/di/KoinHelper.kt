@@ -11,9 +11,10 @@ import com.zavgar.system.domain.operations.di.operationsDomainModule
 import com.zavgar.system.domain.session.di.sessionModule
 import com.zavgar.system.domain.userinfo.di.userInfoDomainModule
 import com.zavgar.system.events.di.eventsModule
+import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
+import com.zavgar.system.firebase.di.firebaseModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule
-import com.zavgar.system.network.di.IS_DEBUG_BUILD
 import com.zavgar.system.onboarding.di.onboardingModule
 import com.zavgar.system.network.di.networkModule
 import com.zavgar.system.repository.di.repositoryModule
@@ -56,6 +57,7 @@ internal val appModules = listOf(
     coroutinesModule,
     eventsModule,
     designSystemModule,
+    firebaseModule,
 
     // Data
     dataStoreModule,

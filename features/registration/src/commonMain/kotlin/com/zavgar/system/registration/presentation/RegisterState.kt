@@ -10,6 +10,8 @@ data class RegisterState(
     val birthDateText: String = "",
     val phone: String = "",
 
+    val privacyPolicyUrl: String = "",
+
     val nameError: UiText? = null,
     val birthDateError: UiText? = null,
     val phoneError: UiText? = null,

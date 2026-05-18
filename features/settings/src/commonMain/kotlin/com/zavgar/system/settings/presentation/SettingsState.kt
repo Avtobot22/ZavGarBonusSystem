@@ -1,17 +1,19 @@
 package com.zavgar.system.settings.presentation
 
 data class SettingsState(
-    val screenState: ScreenState = ScreenState.Loading,
+    val profileState: ProfileState = ProfileState.Loading,
+    val isDarkTheme: Boolean = false,
+    val isLoggingOut: Boolean = false,
 ) {
-    sealed interface ScreenState {
+    sealed interface ProfileState {
         data class Content(
             val name: String,
             val phone: String,
             val balance: Int,
-            val isDarkTheme: Boolean = false,
-        ) : ScreenState
-        data object Loading : ScreenState
+        ) : ProfileState
 
-        data object Error : ScreenState
+        data object Loading : ProfileState
+
+        data object Error : ProfileState
     }
 }

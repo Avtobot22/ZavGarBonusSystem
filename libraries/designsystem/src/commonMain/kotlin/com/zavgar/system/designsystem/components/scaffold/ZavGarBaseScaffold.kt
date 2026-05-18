@@ -7,12 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.zavgar.system.designsystem.background.GlowBackground
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
 
 /**
  * Унифицированный каркас для экранов main-флоу (Wallet / History / Settings / Account).

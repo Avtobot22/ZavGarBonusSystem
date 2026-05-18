@@ -4,16 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,8 +31,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +44,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +65,6 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.button.ZavGarBackButton
 import com.zavgar.system.designsystem.components.content.AnimatedState
-import com.zavgar.system.designsystem.components.content.AppProgressIndicator
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
@@ -64,9 +73,12 @@ import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
+import com.zavgar.system.designsystem.modifiers.shimmerAnimation
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.ZavGarTopSheetShape
+import com.zavgar.system.designsystem.theme.accent
 import com.zavgar.system.designsystem.theme.card
 import com.zavgar.system.designsystem.theme.foreground
 import com.zavgar.system.resources.Res
@@ -157,7 +169,7 @@ internal fun AccountScaffold(
 
                 AccountState.ScreenState.Initial,
                 AccountState.ScreenState.Loading -> AccountLoading(
-                    modifier = Modifier.statusBarsPadding().padding(paddingValues)
+                    onBack = { onIntent(AccountIntent.ClickBack) },
                 )
 
                 AccountState.ScreenState.Content -> AccountContent(
@@ -178,7 +190,6 @@ internal fun AccountContent(
 ) {
     val focusManager = LocalFocusManager.current
     val colors = MaterialTheme.colorScheme
-    val scrollState = rememberScrollState()
 
     DeleteAccountDialog(state = state, onIntent = onIntent)
     AppDatePicker(
@@ -188,76 +199,65 @@ internal fun AccountContent(
         onConfirm = { onIntent(AccountIntent.EnterBirthDate(it)) }
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
+    AccountScrollContainer(
+        modifier = modifier,
+        hero = {
+            AccountHeroSection(
+                name = state.name,
+                onBack = { onIntent(AccountIntent.ClickBack) },
+                onDelete = { onIntent(AccountIntent.ClickDelete) },
+            )
+        },
     ) {
-        AccountHeroSection(
-            name = state.name,
-            onBack = { onIntent(AccountIntent.ClickBack) },
-            onDelete = { onIntent(AccountIntent.ClickDelete) },
+        Text(
+            text = stringResource(Res.string.account_personal_data),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.foreground,
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                .background(colors.card)
-                .padding(horizontal = 24.dp, vertical = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(Res.string.account_personal_data),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.foreground,
-            )
+        AppTextField(
+            value = state.name,
+            onValueChange = { onIntent(AccountIntent.EnterName(it)) },
+            label = stringResource(Res.string.register_name_label),
+            placeholder = stringResource(Res.string.register_name_placeholder),
+            isError = state.nameError != null,
+            errorMessage = state.nameError?.asString(),
+            enabled = !state.isLoading
+        )
 
-            AppTextField(
-                value = state.name,
-                onValueChange = { onIntent(AccountIntent.EnterName(it)) },
-                label = stringResource(Res.string.register_name_label),
-                placeholder = stringResource(Res.string.register_name_placeholder),
-                isError = state.nameError != null,
-                errorMessage = state.nameError?.asString(),
-                enabled = !state.isLoading
-            )
+        AppDatePickerField(
+            value = state.birthDateText,
+            onClick = { onIntent(AccountIntent.OpenDatePicker) },
+            label = stringResource(Res.string.birth_date_label),
+            placeholder = stringResource(Res.string.birth_date_placeholder),
+            isError = state.birthDateError != null,
+            errorMessage = state.birthDateError?.asString(),
+            enabled = !state.isLoading,
+        )
 
-            AppDatePickerField(
-                value = state.birthDateText,
-                onClick = { onIntent(AccountIntent.OpenDatePicker) },
-                label = stringResource(Res.string.birth_date_label),
-                placeholder = stringResource(Res.string.birth_date_placeholder),
-                isError = state.birthDateError != null,
-                errorMessage = state.birthDateError?.asString(),
-                enabled = !state.isLoading,
-            )
+        Spacer(Modifier.height(8.dp))
 
-            Spacer(Modifier.height(8.dp))
-
-            AppPrimaryButton(
-                text = stringResource(Res.string.account_confirm),
-                onClick = {
-                    focusManager.clearFocus()
-                    onIntent(AccountIntent.Submit)
-                },
-                enabled = !state.isLoading,
-                isLoading = state.isLoading,
-            )
-        }
+        AppPrimaryButton(
+            text = stringResource(Res.string.account_confirm),
+            onClick = {
+                focusManager.clearFocus()
+                onIntent(AccountIntent.Submit)
+            },
+            enabled = !state.isLoading,
+            isLoading = state.isLoading,
+        )
     }
 }
 
 @Composable
-private fun AccountHeroSection(
-    name: String,
-    onBack: () -> Unit,
-    onDelete: () -> Unit,
+private fun HeroContainer(
     modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
+    val accent = MaterialTheme.colorScheme.accent
     val heroGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFFFF7021), Color(0xFFFF8A3D)),
+        colors = listOf(accent, lerp(accent, Color.White, 0.12f)),
         start = Offset(0f, Float.POSITIVE_INFINITY),
         end = Offset(Float.POSITIVE_INFINITY, 0f),
     )
@@ -294,58 +294,133 @@ private fun AccountHeroSection(
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
+            content = content,
+        )
+    }
+}
+
+/** Высота, на которую карточка контента «наезжает» на оранжевую шапку. */
+private val SheetOverlap = 20.dp
+
+/**
+ * Скроллируемый каркас экрана: оранжевая шапка [hero] и карточка контента под ней.
+ *
+ * Скроллится экран целиком — при открытии клавиатуры шапка уезжает вверх.
+ * Карточка приподнята на [SheetOverlap], чтобы её скруглённые углы перекрыли
+ * шапку, и растянута минимум до низа экрана (без зазора под ней).
+ */
+@Composable
+private fun AccountScrollContainer(
+    hero: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    sheetContent: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val overlapPx = with(LocalDensity.current) { SheetOverlap.roundToPx() }
+    var heroHeightPx by remember { mutableStateOf(0) }
+
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val viewportPx = constraints.maxHeight
+        val sheetMinHeightPx = (viewportPx - heroHeightPx + overlapPx).coerceAtLeast(0)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
         ) {
-            Row(
+            Box(modifier = Modifier.onSizeChanged { heroHeightPx = it.height }) {
+                hero()
+            }
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(
+                            constraints.copy(
+                                minHeight = sheetMinHeightPx.coerceAtLeast(constraints.minHeight)
+                            )
+                        )
+                        layout(
+                            placeable.width,
+                            (placeable.height - overlapPx).coerceAtLeast(0),
+                        ) {
+                            placeable.place(0, -overlapPx)
+                        }
+                    }
+                    .clip(ZavGarTopSheetShape)
+                    .background(colors.card),
             ) {
-                GlassBackButton(onClick = onBack)
-                Text(
-                    text = stringResource(Res.string.account_top_title),
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                HeroDeleteButton(onClick = onDelete)
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            val firstLetter = name.firstOrNull()?.uppercase() ?: ""
-            DashedAvatarRing {
-                Box(
+                Column(
                     modifier = Modifier
-                        .size(104.dp)
-                        .background(Color.White, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = firstLetter,
-                        fontSize = 42.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFF7021),
-                    )
-                }
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 28.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    content = sheetContent,
+                )
             }
+        }
+    }
+}
 
-            Spacer(Modifier.height(12.dp))
-
+@Composable
+private fun AccountHeroSection(
+    name: String,
+    onBack: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    HeroContainer(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            GlassBackButton(onClick = onBack)
             Text(
-                text = name,
+                text = stringResource(Res.string.account_top_title),
                 color = Color.White,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
             )
-
-            Spacer(Modifier.height(10.dp))
-
-            ProfileConfirmedBadge()
-
-            Spacer(Modifier.height(8.dp))
+            HeroDeleteButton(onClick = onDelete)
         }
+
+        Spacer(Modifier.height(12.dp))
+
+        val firstLetter = name.firstOrNull()?.uppercase() ?: ""
+        DashedAvatarRing {
+            Box(
+                modifier = Modifier
+                    .size(104.dp)
+                    .background(Color.White, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = firstLetter,
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.accent,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = name,
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        ProfileConfirmedBadge()
+
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -436,12 +511,109 @@ private fun ProfileConfirmedBadge() {
 }
 
 @Composable
-internal fun AccountLoading(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+internal fun AccountLoading(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    val placeholderColor = Color.White.copy(alpha = 0.25f)
+
+    AccountScrollContainer(
+        modifier = modifier,
+        hero = {
+            HeroContainer {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    GlassBackButton(onClick = onBack)
+                    Text(
+                        text = stringResource(Res.string.account_top_title),
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                Color.White.copy(alpha = 0.18f),
+                                RoundedCornerShape(12.dp),
+                            )
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                DashedAvatarRing {
+                    Box(
+                        modifier = Modifier
+                            .size(104.dp)
+                            .background(placeholderColor, CircleShape),
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(20.dp)
+                        .background(placeholderColor, RoundedCornerShape(8.dp)),
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                Box(
+                    modifier = Modifier
+                        .width(130.dp)
+                        .height(26.dp)
+                        .background(placeholderColor, RoundedCornerShape(20.dp)),
+                )
+
+                Spacer(Modifier.height(8.dp))
+            }
+        },
     ) {
-        AppProgressIndicator()
+        Text(
+            text = stringResource(Res.string.account_personal_data),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.foreground,
+        )
+
+        AccountFieldSkeleton()
+        AccountFieldSkeleton()
+
+        Spacer(Modifier.height(8.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+                .shimmerAnimation(RoundedCornerShape(16.dp)),
+        )
+    }
+}
+
+@Composable
+private fun AccountFieldSkeleton() {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box(
+            modifier = Modifier
+                .width(90.dp)
+                .height(13.dp)
+                .shimmerAnimation(RoundedCornerShape(6.dp)),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+                .shimmerAnimation(RoundedCornerShape(14.dp)),
+        )
     }
 }
 

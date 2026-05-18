@@ -46,8 +46,8 @@
     <string name="register_top_title">Создать аккаунт</string>
     <string name="register_name_label">Имя</string>
     <string name="register_name_placeholder">Введите ваше имя</string>
-    <string name="check_box_static_text">Даю согласие на обработку персональных данных</string>
-    <string name="check_box_link_text">персональных данных</string>
+    <string name="register_privacy_consent_text">Нажимая «Получить код», вы соглашаетесь с</string>
+    <string name="register_privacy_consent_link">политикой конфиденциальности</string>
     <string name="register_button_text">Зарегистрироваться</string>
     <string name="register_button_text_has_account">Уже есть аккаунт?</string>
     <string name="register_button_text_login">Войти</string>

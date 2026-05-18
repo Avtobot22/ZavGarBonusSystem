@@ -39,11 +39,13 @@ class SettingsViewModel(
 
     private fun loadData() {
         launchTry {
-            setState { copy(screenState = SettingsState.ScreenState.Loading) }
+            setState { copy(profileState = SettingsState.ProfileState.Loading) }
             coroutineScope {
                 val profileDeferred = async { getUserProfileUseCase() }
                 val balanceDeferred = async { getUserBalanceUseCase() }
+
                 val isDarkTheme = themeDataSource.isDarkTheme.first()
+                setState { copy(isDarkTheme = isDarkTheme) }
 
                 val profileResult = profileDeferred.await()
                 val balanceResult = balanceDeferred.await()
@@ -52,21 +54,20 @@ class SettingsViewModel(
                     profileResult is AppResult.Success && balanceResult is AppResult.Success -> {
                         setState {
                             copy(
-                                screenState = SettingsState.ScreenState.Content(
+                                profileState = SettingsState.ProfileState.Content(
                                     name = profileResult.data.name,
                                     phone = profileResult.data.phone,
                                     balance = balanceResult.data.balance,
-                                    isDarkTheme = isDarkTheme,
                                 )
                             )
                         }
                     }
 
-                    else -> setState { copy(screenState = SettingsState.ScreenState.Error) }
+                    else -> setState { copy(profileState = SettingsState.ProfileState.Error) }
                 }
             }
         } catch {
-            setState { copy(screenState = SettingsState.ScreenState.Error) }
+            setState { copy(profileState = SettingsState.ProfileState.Error) }
             setEvent {
                 SettingsEvent.ShowSnackbar(
                     SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
@@ -78,28 +79,26 @@ class SettingsViewModel(
     private fun handleToggleDarkMode(isDark: Boolean) {
         launchTry {
             themeDataSource.setDarkTheme(isDark)
-            val current = state.value.screenState
-            if (current is SettingsState.ScreenState.Content) {
-                setState { copy(screenState = current.copy(isDarkTheme = isDark)) }
-            }
+            setState { copy(isDarkTheme = isDark) }
         } catch {
             // ignore — UI remains in previous state
         }
     }
 
     private fun handleLogout() {
+        if (currentState.isLoggingOut) return
         launchTry {
-            setState { copy(screenState = SettingsState.ScreenState.Loading) }
+            setState { copy(isLoggingOut = true) }
             val result = logoutUseCase().toLogoutResult { it.asSnackBarMessage() }
             when (result) {
                 is LogoutResult.Success -> setEvent { SettingsEvent.NavigateToLogin }
                 is LogoutResult.Error -> {
-                    setState { copy(screenState = SettingsState.ScreenState.Error) }
+                    setState { copy(isLoggingOut = false) }
                     setEvent { SettingsEvent.ShowSnackbar(result.message) }
                 }
             }
         } catch {
-            setState { copy(screenState = SettingsState.ScreenState.Error) }
+            setState { copy(isLoggingOut = false) }
             setEvent {
                 SettingsEvent.ShowSnackbar(
                     SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))

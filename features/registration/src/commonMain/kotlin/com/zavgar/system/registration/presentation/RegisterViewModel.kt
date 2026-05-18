@@ -5,6 +5,7 @@ import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.auth.usecase.RegisterUseCase
+import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
@@ -24,8 +25,13 @@ class RegisterViewModel(
     private val validateNameUseCase: ValidateNameUseCase,
     private val validateBirthDateUseCase: ValidateBirthDateUseCase,
     private val validatePhoneUseCase: ValidatePhoneUseCase,
-    private val registerUseCase: RegisterUseCase
+    private val registerUseCase: RegisterUseCase,
+    private val remoteConfigService: RemoteConfigService,
 ) : BaseViewModel<RegisterState, RegisterIntent, RegisterEvent>(RegisterState()) {
+
+    init {
+        setState { copy(privacyPolicyUrl = remoteConfigService.privacyPolicyUrl) }
+    }
 
     override fun handleIntent(intent: RegisterIntent) {
         when (intent) {

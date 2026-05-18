@@ -2,6 +2,8 @@ package com.zavgar.system.network.di
 
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.domain.session.LogoutHandler
+import com.zavgar.system.firebase.config.RemoteConfigService
+import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
 import com.zavgar.system.network.model.LoginResponse
 import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.network.remote.AuthServiceImpl
@@ -35,10 +37,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-expect val BASE_URL: String
-
-const val IS_DEBUG_BUILD: String = "isDebugBuild"
-
 val networkModule = module {
 
     single {
@@ -53,9 +51,10 @@ val networkModule = module {
 
     single(named("publicClient")) {
         val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
+        val baseUrl = get<RemoteConfigService>().baseUrl
 
         HttpClient {
-            configureCommon(get(), BASE_URL, isDebugBuild)
+            configureCommon(get(), baseUrl, isDebugBuild)
         }
     }
 
@@ -63,10 +62,11 @@ val networkModule = module {
         val sessionDataSource = get<SessionDataSource>()
         val publicClient = get<HttpClient>(named("publicClient"))
         val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
+        val baseUrl = get<RemoteConfigService>().baseUrl
         val koinScope = this
 
         HttpClient {
-            configureCommon(get(), BASE_URL, isDebugBuild)
+            configureCommon(get(), baseUrl, isDebugBuild)
 
             install(Auth) {
                 bearer {
