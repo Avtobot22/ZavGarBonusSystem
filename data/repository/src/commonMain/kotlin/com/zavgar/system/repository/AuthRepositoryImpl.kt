@@ -16,6 +16,7 @@ import com.zavgar.system.network.model.RegisterRequest
 import com.zavgar.system.network.model.ResendRequest
 import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.utils.result.toAppResult
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
@@ -48,16 +49,11 @@ internal class AuthRepositoryImpl(
                     onSuccess = { it },
                     onFailure = { return@withContext AppResult.Error(it.toConfirmationError()) },
                 )
-            sessionDataSource.saveSession(
-                Session(
-                    accessToken = response.accessToken,
-                    refreshToken = response.refreshToken,
-                    phone = phone,
-                )
-            ).onFailure { exception ->
-                AppResult.Error(ConfirmationError.UnknownError(exception.message ?: "Storage Error"))
-            }
-            AppResult.Success(Unit)
+            val saved = sessionDataSource.saveSession(Session(response.accessToken, response.refreshToken, phone))
+            saved.fold(
+                onSuccess = { AppResult.Success(Unit) },
+                onFailure = { AppResult.Error(ConfirmationError.UnknownError(it.message ?: "Storage Error")) },
+            )
         }
 
     override suspend fun confirmRegistration(phone: String, code: String): AppResult<Unit, ConfirmationError> =
@@ -71,12 +67,6 @@ internal class AuthRepositoryImpl(
             authService.resendCode(ResendRequest(phone = phone))
                 .toAppResult { it.toResendConfirmationError() }
         }
-
-    private fun <T, E> Result<T>.toAppResult(errorMapper: (Throwable) -> E): AppResult<T, E> =
-        fold(
-            onSuccess = { AppResult.Success(it) },
-            onFailure = { AppResult.Error(errorMapper(it)) },
-        )
 
     private fun Throwable.toAuthError(): AuthError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
