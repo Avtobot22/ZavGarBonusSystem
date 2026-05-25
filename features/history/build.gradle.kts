@@ -22,6 +22,7 @@ kotlin {
             implementation(projects.libraries.navigationContracts)
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.designsystem)
+            implementation(projects.libraries.firebase)
             implementation(projects.libraries.parcelable)
 
             implementation(libs.compose.runtime)

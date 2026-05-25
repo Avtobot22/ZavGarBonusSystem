@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.shimmerAnimation
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.foregroundSecondary
 import com.zavgar.system.history.model.HistoryItem
 
 @Composable
@@ -34,7 +34,7 @@ internal fun LoadingDateHeaderItem(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 6.dp)
-            .width(120.dp)
+            .width(80.dp)
             .height(14.dp)
             .clip(MaterialTheme.shapes.small)
             .shimmerAnimation(),

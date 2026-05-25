@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,8 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -62,8 +62,10 @@ import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.screen.ErrorScreen
 import com.zavgar.system.designsystem.screen.Screen
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.card
+import com.zavgar.system.designsystem.theme.foreground
 import com.zavgar.system.history.model.DatePickerType
 import com.zavgar.system.history.model.History
 import com.zavgar.system.history.model.HistoryItem
@@ -76,6 +78,7 @@ import com.zavgar.system.resources.history_period_end
 import com.zavgar.system.resources.history_period_start
 import com.zavgar.system.resources.home_title_history
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -137,7 +140,6 @@ internal fun HistoryScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier
 ) {
-    val colors = MaterialTheme.colorScheme
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -158,23 +160,16 @@ internal fun HistoryScaffold(
         floatingActionButton = {
             AnimatedVisibility(
                 visible = showFab,
-                enter = fadeIn() + scaleIn(),
-                exit = fadeOut() + scaleOut()
+                enter = fadeIn() + scaleIn(initialScale = 0.85f),
+                exit = fadeOut() + scaleOut(targetScale = 0.85f)
             ) {
-                FloatingActionButton(
+                ScrollToTopButton(
                     onClick = {
                         coroutineScope.launch {
                             listState.animateScrollToItem(0)
                         }
-                    },
-                    containerColor = colors.accent,
-                    contentColor = colors.onAccent,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowUp,
-                        contentDescription = "Наверх"
-                    )
-                }
+                    }
+                )
             }
         }
     ) { paddingValues ->
@@ -194,6 +189,31 @@ internal fun HistoryScaffold(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ScrollToTopButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(percent = 50)
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .shadow(elevation = 3.dp, shape = shape, clip = false)
+            .clip(shape)
+            .background(colors.card)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowUp,
+            contentDescription = "Наверх",
+            tint = colors.accent,
+            modifier = Modifier.size(22.dp),
+        )
     }
 }
 
@@ -349,16 +369,17 @@ private fun HistoryListCard(
         } else {
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(top = 4.dp, bottom = 88.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 44.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(
+                itemsIndexed(
                     items = state.history.transactions,
-                    key = { item -> item.id }
-                ) { item ->
+                    key = { _, item -> item.id }
+                ) { index, item ->
+                    val isLast = index == state.history.transactions.lastIndex
                     when (item) {
                         is HistoryItem.DateHeader -> DateHeaderItem(item)
-                        is HistoryItem.TransactionItem -> TransactionItem(item)
+                        is HistoryItem.TransactionItem -> TransactionItem(item, showDivider = !isLast)
                     }
                 }
 
@@ -408,7 +429,9 @@ private fun HistoryScaffoldPreview() {
             nextCursor = null,
             hasMore = false,
         ),
+        periodStart = LocalDate(2025, 11, 10),
         periodStartText = "10.11.2025",
+        periodEnd = LocalDate(2026, 4, 24),
         periodEndText = "24.04.2026",
         isRefreshing = false,
         isLoadingNextPage = false,

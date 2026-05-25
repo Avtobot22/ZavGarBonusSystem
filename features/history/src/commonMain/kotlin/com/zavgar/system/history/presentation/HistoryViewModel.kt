@@ -7,6 +7,8 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.operations.model.TransactionsRequest
 import com.zavgar.system.domain.operations.usecase.GetOperationsUseCase
+import com.zavgar.system.firebase.analytics.AnalyticsEvent
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
 import com.zavgar.system.history.mapper.toPresentation
 import com.zavgar.system.history.mapper.toTransactionsResult
 import com.zavgar.system.history.model.DatePickerType
@@ -16,12 +18,19 @@ import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_date_range
 import com.zavgar.system.resources.error_unknown_error
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 class HistoryViewModel(
     private val getOperationsUseCase: GetOperationsUseCase,
-) : BaseViewModel<HistoryState, HistoryIntent, HistoryEvent>(HistoryState()) {
+    private val analyticsTracker: AnalyticsTracker,
+    clock: Clock = Clock.System,
+) : BaseViewModel<HistoryState, HistoryIntent, HistoryEvent>(initialState(clock)) {
 
     private enum class LoadMode { FIRST_PAGE, REFRESH, NEXT_PAGE }
+
+    private var loadedPages: Int = 0
 
     init {
         loadData(LoadMode.FIRST_PAGE)
@@ -142,15 +151,26 @@ class HistoryViewModel(
 
     private fun applyResult(mode: LoadMode, result: TransactionsResult) {
         when (result) {
-            is TransactionsResult.Success -> setState {
-                val baseItems =
-                    if (mode == LoadMode.NEXT_PAGE) history.transactions else emptyList()
-                copy(
-                    screenState = HistoryState.ScreenState.Content,
-                    history = result.page.toPresentation(baseItems),
-                    isRefreshing = false,
-                    isLoadingNextPage = false,
-                )
+            is TransactionsResult.Success -> {
+                setState {
+                    val baseItems =
+                        if (mode == LoadMode.NEXT_PAGE) history.transactions else emptyList()
+                    copy(
+                        screenState = HistoryState.ScreenState.Content,
+                        history = result.page.toPresentation(baseItems),
+                        isRefreshing = false,
+                        isLoadingNextPage = false,
+                    )
+                }
+                if (mode == LoadMode.NEXT_PAGE) {
+                    loadedPages++
+                    analyticsTracker.log(AnalyticsEvent.HistoryLoadMore(page = loadedPages))
+                } else {
+                    loadedPages = 0
+                    analyticsTracker.log(
+                        AnalyticsEvent.HistoryViewed(itemsCount = currentState.history.transactions.size)
+                    )
+                }
             }
 
             is TransactionsResult.Error -> applyError(mode, result.message)
@@ -172,5 +192,16 @@ class HistoryViewModel(
             )
         }
         setEvent { HistoryEvent.ShowSnackbar(message) }
+    }
+
+    private companion object {
+        fun initialState(clock: Clock): HistoryState {
+            val today = clock.todayIn(TimeZone.currentSystemDefault())
+            val periodStart = LocalDate(year = today.year, month = today.month, day = 1)
+            return HistoryState(
+                periodStart = periodStart,
+                periodEnd = today,
+            )
+        }
     }
 }

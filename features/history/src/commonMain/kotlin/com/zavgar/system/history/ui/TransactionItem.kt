@@ -31,7 +31,7 @@ import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.history.model.HistoryItem
 
 @Composable
-internal fun TransactionItem(item: HistoryItem.TransactionItem) {
+internal fun TransactionItem(item: HistoryItem.TransactionItem, showDivider: Boolean = true) {
     val colors = MaterialTheme.colorScheme
     val color = if (item.isIncome) colors.success else colors.danger
     val iconBg = if (item.isIncome) colors.successContainer else colors.dangerContainer
@@ -83,10 +83,12 @@ internal fun TransactionItem(item: HistoryItem.TransactionItem) {
                 fontWeight = FontWeight.Bold,
             )
         }
-        HorizontalDivider(
-            color = colors.border,
-            thickness = 0.5.dp,
-        )
+        if (showDivider) {
+            HorizontalDivider(
+                color = colors.border,
+                thickness = 0.5.dp,
+            )
+        }
     }
 }
 
