@@ -90,10 +90,13 @@ import com.zavgar.system.resources.birth_date_label
 import com.zavgar.system.resources.birth_date_placeholder
 import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+
+private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
 
 @Composable
 fun AccountScreen(
@@ -122,8 +125,22 @@ internal fun AccountLoader(
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
-            is AccountEvent.NavigateToLogin -> onNavigateToLogin()
             is AccountEvent.NavigateBack -> onNavigateBack()
+            is AccountEvent.DeleteAccountSuccess -> {
+                scope.launch {
+                    val shown = launch {
+                        snackbarHostState.showCustomSnackbar(
+                            type = event.message.type,
+                            message = event.message.message.suspendAsString(),
+                            withDismissAction = true,
+                        )
+                    }
+                    delay(DELETE_SUCCESS_VISIBLE_MILLIS)
+                    shown.cancel()
+                    onNavigateToLogin()
+                }
+            }
+
             is AccountEvent.ShowSnackbar -> {
                 scope.launch { errorShakingState.shake() }
                 scope.launch {
@@ -299,7 +316,6 @@ private fun HeroContainer(
     }
 }
 
-/** Высота, на которую карточка контента «наезжает» на оранжевую шапку. */
 private val SheetOverlap = 20.dp
 
 /**

@@ -15,6 +15,8 @@ import com.zavgar.system.domain.userinfo.model.UpdateProfileRequest
 import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.UpdateUserProfileUseCase
+import com.zavgar.system.firebase.analytics.AnalyticsEvent
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.resources.Res
@@ -31,7 +33,8 @@ class AccountViewModel(
     private val updateProfileUseCase: UpdateUserProfileUseCase,
     private val deleteProfileUseCase: DeleteUserProfileUseCase,
     private val validateNameUseCase: ValidateNameUseCase,
-    private val validateBirthDateUseCase: ValidateBirthDateUseCase
+    private val validateBirthDateUseCase: ValidateBirthDateUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<AccountState, AccountIntent, AccountEvent>(AccountState()) {
 
     init {
@@ -131,15 +134,16 @@ class AccountViewModel(
 
             when (val result = appResult.toDeleteResult()) {
                 is DeleteResult.Success -> {
+                    analyticsTracker.log(AnalyticsEvent.DeleteAccount)
+                    analyticsTracker.clearUser()
                     setEvent {
-                        AccountEvent.ShowSnackbar(
+                        AccountEvent.DeleteAccountSuccess(
                             SnackBarMessage(
                                 message = UiText.Resource(Res.string.profile_delete_success),
                                 type = SnackBarType.SUCCESS
                             )
                         )
                     }
-                    setEvent { AccountEvent.NavigateToLogin }
                 }
 
                 is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }

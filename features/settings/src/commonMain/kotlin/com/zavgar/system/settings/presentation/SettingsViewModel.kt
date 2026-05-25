@@ -3,12 +3,15 @@ package com.zavgar.system.settings.presentation
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.datastore.datasource.ThemeDataSource
+import com.zavgar.system.domain.theme.usecase.ObserveDarkThemeUseCase
+import com.zavgar.system.domain.theme.usecase.SetDarkThemeUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
+import com.zavgar.system.domain.userinfo.usecase.LogoutUseCase
+import com.zavgar.system.firebase.analytics.AnalyticsEvent
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
-import com.zavgar.system.domain.userinfo.usecase.LogoutUseCase
 import com.zavgar.system.settings.mapper.asSnackBarMessage
 import com.zavgar.system.settings.mapper.toLogoutResult
 import com.zavgar.system.settings.model.LogoutResult
@@ -21,7 +24,9 @@ class SettingsViewModel(
     private val logoutUseCase: LogoutUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val getUserBalanceUseCase: GetUserBalanceUseCase,
-    private val themeDataSource: ThemeDataSource,
+    private val observeDarkThemeUseCase: ObserveDarkThemeUseCase,
+    private val setDarkThemeUseCase: SetDarkThemeUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<SettingsState, SettingsIntent, SettingsEvent>(SettingsState()) {
 
     init {
@@ -44,7 +49,7 @@ class SettingsViewModel(
                 val profileDeferred = async { getUserProfileUseCase() }
                 val balanceDeferred = async { getUserBalanceUseCase() }
 
-                val isDarkTheme = themeDataSource.isDarkTheme.first()
+                val isDarkTheme = observeDarkThemeUseCase().first()
                 setState { copy(isDarkTheme = isDarkTheme) }
 
                 val profileResult = profileDeferred.await()
@@ -78,10 +83,9 @@ class SettingsViewModel(
 
     private fun handleToggleDarkMode(isDark: Boolean) {
         launchTry {
-            themeDataSource.setDarkTheme(isDark)
+            setDarkThemeUseCase(isDark)
             setState { copy(isDarkTheme = isDark) }
         } catch {
-            // ignore — UI remains in previous state
         }
     }
 
@@ -91,7 +95,11 @@ class SettingsViewModel(
             setState { copy(isLoggingOut = true) }
             val result = logoutUseCase().toLogoutResult { it.asSnackBarMessage() }
             when (result) {
-                is LogoutResult.Success -> setEvent { SettingsEvent.NavigateToLogin }
+                is LogoutResult.Success -> {
+                    analyticsTracker.log(AnalyticsEvent.Logout)
+                    analyticsTracker.clearUser()
+                    setEvent { SettingsEvent.NavigateToLogin }
+                }
                 is LogoutResult.Error -> {
                     setState { copy(isLoggingOut = false) }
                     setEvent { SettingsEvent.ShowSnackbar(result.message) }

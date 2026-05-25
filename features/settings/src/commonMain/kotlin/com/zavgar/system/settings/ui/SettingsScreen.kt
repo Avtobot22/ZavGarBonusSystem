@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
@@ -67,7 +66,6 @@ import com.zavgar.system.designsystem.theme.foregroundSecondary
 import com.zavgar.system.designsystem.theme.onAccent
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.home_title_setting
-import com.zavgar.system.resources.settings_about_app_button
 import com.zavgar.system.resources.settings_logout_button
 import com.zavgar.system.resources.settings_profil_details_button
 import com.zavgar.system.settings.presentation.SettingsEvent
@@ -196,11 +194,6 @@ internal fun SettingsContent(
                 icon = Icons.Default.Person,
                 title = stringResource(Res.string.settings_profil_details_button),
                 onClick = { onIntent(SettingsIntent.ToProfileDetail) },
-            )
-            SettingRow(
-                icon = Icons.Default.Info,
-                title = stringResource(Res.string.settings_about_app_button),
-                onClick = { /* TODO: about screen */ },
             )
             DarkModeRow(
                 checked = state.isDarkTheme,

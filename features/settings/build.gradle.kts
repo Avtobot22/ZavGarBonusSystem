@@ -16,13 +16,14 @@ kotlin {
 
             implementation(projects.core)
 
-            implementation(projects.data.datastore)
+            implementation(projects.domain.theme)
             implementation(projects.domain.userinfo)
             implementation(projects.utils.result)
             implementation(projects.resources)
             implementation(projects.libraries.navigationContracts)
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.designsystem)
+            implementation(projects.libraries.firebase)
             implementation(projects.libraries.parcelable)
 
             implementation(libs.compose.runtime)
