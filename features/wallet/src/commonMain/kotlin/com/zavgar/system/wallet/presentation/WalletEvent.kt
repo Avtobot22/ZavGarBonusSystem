@@ -2,7 +2,7 @@ package com.zavgar.system.wallet.presentation
 
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 
-interface WalletEvent {
+sealed interface WalletEvent {
 
     data object NavigateToLogin : WalletEvent
 

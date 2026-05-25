@@ -6,22 +6,28 @@ import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.domain.session.LogoutHandler
 import com.zavgar.system.domain.session.usecase.GetSessionUseCase
+import com.zavgar.system.domain.userinfo.usecase.GetCachedBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetMonthlyAccrualsUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
+import com.zavgar.system.firebase.analytics.AnalyticsEvent
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode
-import com.zavgar.system.wallet.mapper.toBalanceResult
 import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.wallet.mapper.toBalanceResult
 import com.zavgar.system.wallet.model.BalanceResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlin.time.Clock
 
 class WalletViewModel(
     private val getUserBalanceUseCase: GetUserBalanceUseCase,
+    private val getCachedBalanceUseCase: GetCachedBalanceUseCase,
     private val getMonthlyAccrualsUseCase: GetMonthlyAccrualsUseCase,
     private val getSessionUseCase: GetSessionUseCase,
     private val logoutHandler: LogoutHandler,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<WalletState, WalletIntent, WalletEvent>(WalletState()) {
 
     private var fetchJob: Job? = null
@@ -76,40 +82,55 @@ class WalletViewModel(
     }
 
     private fun applyFetchStartState(isInitial: Boolean) {
+        val current = currentState.screenState
         if (isInitial) {
-            setState { copy(screenState = WalletState.ScreenState.Loading) }
+            if (current is WalletState.ScreenState.Content) {
+                setState { copy(screenState = current.copy(isRefreshing = true, isStale = false)) }
+            } else {
+                setState { copy(screenState = WalletState.ScreenState.Loading) }
+            }
             return
         }
-        val current = currentState.screenState
         if (current is WalletState.ScreenState.Content) {
-            setState { copy(screenState = current.copy(isRefreshing = true)) }
+            setState { copy(screenState = current.copy(isRefreshing = true, isStale = false)) }
         } else {
             setState { copy(screenState = WalletState.ScreenState.Content(isRefreshing = true)) }
         }
     }
 
     private fun handleBalanceSuccess(result: BalanceResult.Success, isInitial: Boolean) {
+        val updatedAt = Clock.System.now().toEpochMilliseconds()
         val current = currentState.screenState
         val content = if (current is WalletState.ScreenState.Content) {
-            current.copy(balance = result.balance, isRefreshing = false)
+            current.copy(
+                balance = result.balance,
+                isRefreshing = false,
+                isStale = false,
+                lastUpdatedMillis = updatedAt,
+            )
         } else {
-            WalletState.ScreenState.Content(balance = result.balance)
+            WalletState.ScreenState.Content(balance = result.balance, lastUpdatedMillis = updatedAt)
         }
         setState { copy(screenState = content) }
+        analyticsTracker.log(AnalyticsEvent.WalletBalanceViewed)
         if (!isInitial) startCooldownTimer()
     }
 
     private fun handleBalanceError(result: BalanceResult.Error, isInitial: Boolean) {
+        val current = currentState.screenState
+        // Есть кэшированный контент — остаёмся на нём и показываем баннер «устаревшие данные»
+        if (current is WalletState.ScreenState.Content) {
+            setState { copy(screenState = current.copy(isRefreshing = false, isStale = true)) }
+            setEvent { WalletEvent.ShowSnackbar(result.message) }
+            return
+        }
         if (!isInitial) {
-            val current = currentState.screenState
-            if (current is WalletState.ScreenState.Content) {
-                setState { copy(screenState = current.copy(isRefreshing = false)) }
-            }
             setEvent { WalletEvent.ShowSnackbar(result.message) }
             return
         }
         if (currentState.phone.isNotBlank()) {
             setState { copy(screenState = WalletState.ScreenState.Offline) }
+            analyticsTracker.log(AnalyticsEvent.WalletBalanceError(errorType = "offline"))
             setEvent {
                 WalletEvent.ShowSnackbar(
                     SnackBarMessage(
@@ -120,6 +141,7 @@ class WalletViewModel(
             }
         } else {
             setState { copy(screenState = WalletState.ScreenState.Error) }
+            analyticsTracker.log(AnalyticsEvent.WalletBalanceError(errorType = "server"))
             setEvent { WalletEvent.ShowSnackbar(result.message) }
         }
     }
@@ -127,7 +149,7 @@ class WalletViewModel(
     private fun handleBalanceException(isInitial: Boolean) {
         val current = currentState.screenState
         if (current is WalletState.ScreenState.Content) {
-            setState { copy(screenState = current.copy(isRefreshing = false)) }
+            setState { copy(screenState = current.copy(isRefreshing = false, isStale = true)) }
         } else if (isInitial) {
             setState { copy(screenState = WalletState.ScreenState.Error) }
         }
@@ -158,7 +180,6 @@ class WalletViewModel(
                 }
             }
         } catch {
-            // ignore — timer never produces real errors
         }
     }
 
@@ -167,9 +188,22 @@ class WalletViewModel(
             when (val result = getSessionUseCase()) {
                 is AppResult.Success -> {
                     setState { copy(phone = result.data.phone) }
+                    val cached = getCachedBalanceUseCase()
+                    if (cached != null) {
+                        setState {
+                            copy(
+                                screenState = WalletState.ScreenState.Content(
+                                    balance = cached.balance,
+                                    isRefreshing = true,
+                                    lastUpdatedMillis = cached.updatedAtMillis,
+                                )
+                            )
+                        }
+                    }
                     fetchBalance(isInitial = true)
                     fetchMonthlyAccruals()
                 }
+
                 is AppResult.Error -> logoutHandler.logout()
             }
         } catch {
@@ -184,7 +218,6 @@ class WalletViewModel(
                 is AppResult.Error -> Unit
             }
         } catch {
-            // non-critical — wallet stays functional without monthly sum
         }
     }
 

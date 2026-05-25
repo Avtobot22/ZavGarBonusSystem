@@ -14,6 +14,10 @@ data class WalletState(
             val balance: Int = 0,
             val timerSeconds: Int = 0,
             val isRefreshing: Boolean = false,
+            // Время последнего успешного обновления (epoch millis) для баннера устаревших данных
+            val lastUpdatedMillis: Long? = null,
+            // true, когда показываем кэш, а свежий запрос упал
+            val isStale: Boolean = false,
         ) : ScreenState
 
         data object Error : ScreenState

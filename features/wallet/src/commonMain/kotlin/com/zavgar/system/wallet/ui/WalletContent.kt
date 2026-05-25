@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,9 +36,18 @@ import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.home_top_title_wallet
 import com.zavgar.system.resources.refresh_points
+import com.zavgar.system.resources.wallet_balance_unit
+import com.zavgar.system.resources.wallet_monthly_earned_empty
+import com.zavgar.system.resources.wallet_monthly_earned_title
+import com.zavgar.system.resources.wallet_monthly_earned_value
+import com.zavgar.system.resources.wallet_refresh_cooldown
+import com.zavgar.system.resources.wallet_stale_banner
 import com.zavgar.system.wallet.presentation.WalletIntent
 import com.zavgar.system.wallet.presentation.WalletState
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 
 @Composable
 internal fun WalletContent(
@@ -71,13 +81,23 @@ internal fun WalletContent(
 
         QrCard(card = state.phone, balance = screenState.balance)
 
+        if (screenState.isStale && screenState.lastUpdatedMillis != null) {
+            Spacer(Modifier.height(12.dp))
+            StaleBanner(updatedAtMillis = screenState.lastUpdatedMillis)
+        }
+
         Spacer(Modifier.height(16.dp))
 
+        val onCooldown = screenState.timerSeconds > 0
         AppPrimaryButton(
-            text = stringResource(Res.string.refresh_points),
+            text = if (onCooldown) {
+                stringResource(Res.string.wallet_refresh_cooldown, formatCooldown(screenState.timerSeconds))
+            } else {
+                stringResource(Res.string.refresh_points)
+            },
             onClick = { onIntent(WalletIntent.RefreshBalance) },
             isLoading = screenState.isRefreshing,
-            enabled = !screenState.isRefreshing,
+            enabled = !screenState.isRefreshing && !onCooldown,
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Refresh,
@@ -127,7 +147,7 @@ private fun QrCard(card: String, balance: Int) {
                 lineHeight = 46.sp,
             )
             Text(
-                text = "баллов",
+                text = stringResource(Res.string.wallet_balance_unit),
                 color = colors.foregroundSecondary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -165,7 +185,7 @@ private fun MonthlyEarned(earned: Int?) {
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "ЗАРАБОТАНО ЗА МЕСЯЦ",
+                text = stringResource(Res.string.wallet_monthly_earned_title),
                 color = colors.foregroundSecondary,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -173,13 +193,61 @@ private fun MonthlyEarned(earned: Int?) {
             )
             Spacer(Modifier.height(3.dp))
             Text(
-                text = if (earned != null) "+$earned баллов" else "—",
+                text = if (earned != null) {
+                    stringResource(Res.string.wallet_monthly_earned_value, earned)
+                } else {
+                    stringResource(Res.string.wallet_monthly_earned_empty)
+                },
                 color = colors.success,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
     }
+}
+
+@Composable
+private fun StaleBanner(updatedAtMillis: Long) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(colors.dangerContainer)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = null,
+            tint = colors.danger,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            text = stringResource(Res.string.wallet_stale_banner, formatTime(updatedAtMillis)),
+            color = colors.danger,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            lineHeight = 18.sp,
+        )
+    }
+}
+
+/** Форматирует оставшиеся секунды кулдауна как m:ss. */
+private fun formatCooldown(totalSeconds: Int): String {
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
+}
+
+/** Форматирует epoch millis как HH:MM в локальной таймзоне. */
+private fun formatTime(epochMillis: Long): String {
+    val dateTime = Instant.fromEpochMilliseconds(epochMillis)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+    val hour = dateTime.hour.toString().padStart(2, '0')
+    val minute = dateTime.minute.toString().padStart(2, '0')
+    return "$hour:$minute"
 }
 
 private fun formatBalance(value: Int): String {

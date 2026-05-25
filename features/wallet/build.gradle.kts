@@ -16,7 +16,6 @@ kotlin {
 
             implementation(projects.core)
 
-            implementation(projects.data.network)
             implementation(projects.domain.session)
             implementation(projects.domain.userinfo)
             implementation(projects.utils.result)
@@ -24,6 +23,7 @@ kotlin {
             implementation(projects.libraries.navigationContracts)
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.designsystem)
+            implementation(projects.libraries.firebase)
             implementation(projects.libraries.parcelable)
 
             implementation(libs.compose.runtime)
@@ -35,6 +35,7 @@ kotlin {
 
             implementation(libs.koin.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.logging)
         }
     }

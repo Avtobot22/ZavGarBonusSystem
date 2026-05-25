@@ -68,7 +68,13 @@
     <string name="home_top_title_wallet">Бонусная система</string>
     <string name="home_bottom_title_wallet">Главная</string>
     <string name="points">бонусов</string>
+    <string name="wallet_balance_unit">баллов</string>
+    <string name="wallet_monthly_earned_title">ЗАРАБОТАНО ЗА МЕСЯЦ</string>
+    <string name="wallet_monthly_earned_value">+%1$d баллов</string>
+    <string name="wallet_monthly_earned_empty">—</string>
     <string name="refresh_points">Обновить баллы</string>
+    <string name="wallet_refresh_cooldown">Обновить через %1$s</string>
+    <string name="wallet_stale_banner">Данные могут быть устаревшими · обновлено %1$s</string>
     <string name="info_offline_mode">Для получения остатка бонусов подключитесь к сети</string>
 
     <!--    Settings-->
