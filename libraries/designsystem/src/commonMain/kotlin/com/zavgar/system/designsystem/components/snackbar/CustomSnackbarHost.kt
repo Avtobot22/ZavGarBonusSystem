@@ -127,21 +127,12 @@ private fun SnackBar(
                         .height(IntrinsicSize.Min),
                     verticalAlignment = Alignment.Top
                 ) {
-                    // Цветная полоса-акцент слева
-                    Box(
-                        modifier = Modifier
-                            .width(4.dp)
-                            .fillMaxHeight()
-                            .background(palette.accent)
-                    )
-
                     Row(
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 14.dp),
                         verticalAlignment = Alignment.Top
                     ) {
-                        // Иконка в круге с мягкой заливкой
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
@@ -163,7 +154,7 @@ private fun SnackBar(
                             val hasTitle = !visuals.title.isNullOrEmpty()
 
                             Text(
-                                text = if (hasTitle) visuals.title.orEmpty() else visuals.message,
+                                text = if (hasTitle) visuals.title else visuals.message,
                                 style = MaterialTheme.typography.titleSmall.copy(
                                     fontSize = 15.sp,
                                     lineHeight = 20.sp,
@@ -209,8 +200,6 @@ private fun SnackBar(
                         }
                     }
                 }
-
-                // Progress-бар оставшегося времени показа
                 val durationMillis = visuals.duration.toMillisOrNull()
                 if (durationMillis != null) {
                     SnackbarProgressBar(

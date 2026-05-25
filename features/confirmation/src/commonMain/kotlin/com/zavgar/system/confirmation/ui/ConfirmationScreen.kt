@@ -38,6 +38,7 @@ import com.zavgar.system.designsystem.components.button.ZavGarBackButton
 import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
+import com.zavgar.system.designsystem.feedback.rememberZavGarHaptics
 import com.zavgar.system.confirmation.ui.components.OtpTextField
 import com.zavgar.system.utils.validation.CODE_LENGTH
 import com.zavgar.system.designsystem.modifiers.ShakingState
@@ -85,6 +86,7 @@ internal fun ConfirmationLoader(
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val haptics = rememberZavGarHaptics()
 
     LaunchedEffect(phone, isRegistration) {
         viewModel.handleIntent(ConfirmationIntent.Initialize(phone, isRegistration))
@@ -92,9 +94,16 @@ internal fun ConfirmationLoader(
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
-            is ConfirmationEvent.NavigateToLogin -> onNavigateToLogin()
-            is ConfirmationEvent.NavigateToWallet -> onNavigateToWallet()
+            is ConfirmationEvent.NavigateToLogin -> {
+                haptics.success()
+                onNavigateToLogin()
+            }
+            is ConfirmationEvent.NavigateToWallet -> {
+                haptics.success()
+                onNavigateToWallet()
+            }
             is ConfirmationEvent.ShowSnackbar -> {
+                haptics.error()
                 scope.launch { errorShakingState.shake() }
                 scope.launch {
                     snackbarHostState.showCustomSnackbar(
