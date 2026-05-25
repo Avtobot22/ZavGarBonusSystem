@@ -26,7 +26,7 @@ fun BirthDateValidationError.asUiText() = when (this) {
 
 fun CodeValidationError.asUiText() = when (this) {
     CodeValidationError.BLANK -> UiText.Resource(Res.string.error_blank_code)
-    CodeValidationError.TOO_SHIRT -> UiText.Resource(Res.string.error_short_code)
+    CodeValidationError.TOO_SHORT -> UiText.Resource(Res.string.error_short_code)
 }
 
 fun <D, P> ValidationResult<D>.toPresentation(mapper: (D) -> P): ValidationResult<P> {

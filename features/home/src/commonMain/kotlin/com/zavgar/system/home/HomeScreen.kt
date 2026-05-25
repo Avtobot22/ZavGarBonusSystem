@@ -9,13 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.zavgar.system.appstate.ZavGarAppState
-import com.zavgar.system.navigationapi.transition.BottomBarEnterTransition
-import com.zavgar.system.navigationapi.transition.BottomBarExitTransition
 import com.zavgar.system.navigationapi.bottombar.AppBottomBar
 import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.TopLevelDestinations
 import com.zavgar.system.navigationapi.event.HomeEvent
 import com.zavgar.system.navigationapi.marker.TopLevel
+import com.zavgar.system.navigationapi.transition.BottomBarEnterTransition
+import com.zavgar.system.navigationapi.transition.BottomBarExitTransition
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -44,7 +44,7 @@ private fun HomeLoader(
 
     val currentSection = appState.navBackStack.topLevelKey as? TopLevel
 
-    val lastValidSection = remember(currentSection) { currentSection } ?: TopLevelDestinations.firstOrNull()
+    val lastValidSection = currentSection ?: TopLevelDestinations.firstOrNull()
 
     val setCurrentState = { section: TopLevel ->
         navEventController.sendEvent(HomeEvent.OnTabClick(section))
