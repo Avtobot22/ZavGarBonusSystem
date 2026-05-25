@@ -12,6 +12,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.gitlive.firebase.config)
             implementation(libs.gitlive.firebase.crashlytics)
+            implementation(libs.gitlive.firebase.analytics)
 
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)

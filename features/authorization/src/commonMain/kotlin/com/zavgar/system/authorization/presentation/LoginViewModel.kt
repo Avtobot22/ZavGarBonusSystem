@@ -6,6 +6,9 @@ import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.domain.auth.model.LoginRequest
 import com.zavgar.system.domain.auth.usecase.LoginUseCase
+import com.zavgar.system.firebase.analytics.AnalyticsEvent
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.firebase.analytics.AuthFlow
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
@@ -18,7 +21,8 @@ import com.zavgar.system.utils.validation.toPresentation
 
 class LoginViewModel(
     private val validatePhoneUseCase: ValidatePhoneUseCase,
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<LoginState, LoginIntent, LoginEvent>(LoginState()) {
 
     override fun handleIntent(intent: LoginIntent) {
@@ -60,7 +64,10 @@ class LoginViewModel(
         requestOtp(LoginRequest(phone = state.phone))
     }
 
-    private fun handleRegister() = setEvent { LoginEvent.NavigateToRegister }
+    private fun handleRegister() {
+        analyticsTracker.log(AnalyticsEvent.AuthLinkClick(AuthFlow.REGISTRATION))
+        setEvent { LoginEvent.NavigateToRegister }
+    }
 
     private fun requestOtp(loginRequest: LoginRequest) {
         launchTry {
@@ -69,7 +76,10 @@ class LoginViewModel(
             val result = loginUseCase(loginRequest).toLoginResult { it.asSnackBarMessage() }
 
             when (result) {
-                is LoginResult.Success -> setEvent { LoginEvent.NavigateToConfirmation(loginRequest.phone) }
+                is LoginResult.Success -> {
+                    analyticsTracker.log(AnalyticsEvent.OtpRequested(AuthFlow.LOGIN))
+                    setEvent { LoginEvent.NavigateToConfirmation(loginRequest.phone) }
+                }
                 is LoginResult.Error -> setEvent { LoginEvent.ShowSnackbar(result.message) }
             }
 

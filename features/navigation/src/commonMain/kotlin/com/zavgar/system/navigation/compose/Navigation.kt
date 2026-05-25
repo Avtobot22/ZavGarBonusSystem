@@ -3,9 +3,12 @@ package com.zavgar.system.navigation.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.navigation.analytics.screenName
 import com.zavgar.system.navigation.provider.NavGraphProvider
 import com.zavgar.system.navigationapi.controller.NavBackStack
 import com.zavgar.system.navigationapi.controller.NavEventController
@@ -34,6 +37,7 @@ private fun NavigationLoader(
     modifier: Modifier = Modifier,
     navEventController: NavEventController = koinInject(),
     navGraphProvider: NavGraphProvider = koinInject(),
+    analyticsTracker: AnalyticsTracker = koinInject(),
 ) {
 
     val dialogStrategy = remember { DialogSceneStrategy<Destination>() }
@@ -42,6 +46,11 @@ private fun NavigationLoader(
         navEventController.eventState.collect { event ->
             handleNavEvent(event, navBackStack)
         }
+    }
+
+    LaunchedEffect(navBackStack, analyticsTracker) {
+        snapshotFlow { navBackStack.backStack.lastOrNull()?.screenName() }
+            .collect { screenName -> screenName?.let(analyticsTracker::logScreenView) }
     }
 
     NavDisplay(

@@ -5,6 +5,9 @@ import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.auth.usecase.RegisterUseCase
+import com.zavgar.system.firebase.analytics.AnalyticsEvent
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.firebase.analytics.AuthFlow
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
@@ -27,6 +30,7 @@ class RegisterViewModel(
     private val validatePhoneUseCase: ValidatePhoneUseCase,
     private val registerUseCase: RegisterUseCase,
     private val remoteConfigService: RemoteConfigService,
+    private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<RegisterState, RegisterIntent, RegisterEvent>(RegisterState()) {
 
     init {
@@ -80,7 +84,10 @@ class RegisterViewModel(
 
     private fun handleDismissDatePicker() = setState { copy(isDatePickerOpen = false) }
 
-    private fun handleClickLogin() = setEvent { RegisterEvent.NavigateToLogin }
+    private fun handleClickLogin() {
+        analyticsTracker.log(AnalyticsEvent.AuthLinkClick(AuthFlow.LOGIN))
+        setEvent { RegisterEvent.NavigateToLogin }
+    }
 
     private fun handleSubmit() {
         if (currentState.screenState is RegisterState.ScreenState.Submitting) return
@@ -116,6 +123,7 @@ class RegisterViewModel(
 
             when (result) {
                 is RegisterResult.Success -> {
+                    analyticsTracker.log(AnalyticsEvent.OtpRequested(AuthFlow.REGISTRATION))
                     setEvent { RegisterEvent.NavigateToConfirm(registerRequest.phone) }
                 }
 

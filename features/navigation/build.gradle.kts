@@ -17,6 +17,7 @@ kotlin {
             implementation(projects.libraries.parcelable)
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.appstate)
+            implementation(projects.libraries.firebase)
             implementation(projects.resources)
 
             implementation(libs.compose.runtime)

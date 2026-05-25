@@ -1,5 +1,8 @@
 package com.zavgar.system.firebase.di
 
+import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.firebase.analytics.AnalyticsTrackerImpl
+import com.zavgar.system.firebase.analytics.analyticsPlatform
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.firebase.config.RemoteConfigServiceImpl
 import com.zavgar.system.firebase.crash.CrashReporter
@@ -22,4 +25,6 @@ val firebaseModule = module {
     } bind RemoteConfigService::class
 
     single<CrashReporter> { CrashReporterImpl() }
+
+    single<AnalyticsTracker> { AnalyticsTrackerImpl(platform = analyticsPlatform) }
 }
