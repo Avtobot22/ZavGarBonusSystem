@@ -10,6 +10,8 @@ include(":domain:session")
 include(":domain:userinfo")
 include(":domain:auth")
 include(":domain:operations")
+include(":domain:theme")
+include(":domain:onboarding")
 
 include(":features:authorization")
 include(":features:registration")

@@ -7,8 +7,10 @@ import com.zavgar.system.coroutines.di.coroutinesModule
 import com.zavgar.system.datastore.di.dataStoreModule
 import com.zavgar.system.designsystem.di.designSystemModule
 import com.zavgar.system.domain.auth.di.authDomainModule
+import com.zavgar.system.domain.onboarding.di.onboardingDomainModule
 import com.zavgar.system.domain.operations.di.operationsDomainModule
 import com.zavgar.system.domain.session.di.sessionModule
+import com.zavgar.system.domain.theme.di.themeDomainModule
 import com.zavgar.system.domain.userinfo.di.userInfoDomainModule
 import com.zavgar.system.events.di.eventsModule
 import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
@@ -69,6 +71,8 @@ internal val appModules = listOf(
     authDomainModule,
     operationsDomainModule,
     userInfoDomainModule,
+    themeDomainModule,
+    onboardingDomainModule,
     validationModule,
 
     // Navigation

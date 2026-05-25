@@ -1,7 +1,7 @@
 package com.zavgar.system.splash.presentation
 
 import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.datastore.datasource.OnboardingDataSource
+import com.zavgar.system.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.zavgar.system.domain.session.usecase.GetSessionUseCase
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 class SplashViewModel(
     private val remoteConfigService: RemoteConfigService,
     private val getSessionUseCase: GetSessionUseCase,
-    private val onboardingDataSource: OnboardingDataSource,
+    private val observeOnboardingCompletedUseCase: ObserveOnboardingCompletedUseCase,
 ) : BaseViewModel<SplashState, SplashIntent, SplashEvent>(SplashState) {
 
     init {
@@ -25,7 +25,7 @@ class SplashViewModel(
             remoteConfigService.activate()
 
             val result = getSessionUseCase()
-            val isOnboardingCompleted = onboardingDataSource.isOnboardingCompleted.first()
+            val isOnboardingCompleted = observeOnboardingCompletedUseCase().first()
 
             when (result) {
                 is AppResult.Success -> setEvent { SplashEvent.NavigateToWallet }

@@ -10,8 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.zavgar.system.appstate.ZavGarAppState
 import com.zavgar.system.appstate.rememberZavGarAppState
-import com.zavgar.system.datastore.datasource.ThemeDataSource
 import com.zavgar.system.designsystem.theme.ZavGarTheme
+import com.zavgar.system.domain.theme.usecase.ObserveDarkThemeUseCase
 import com.zavgar.system.events.AppEvent
 import com.zavgar.system.events.AppEventBus
 import com.zavgar.system.home.Home
@@ -26,9 +26,9 @@ fun ZavGarMultiplatformApp(
     appState: ZavGarAppState = rememberZavGarAppState(),
     appEventBus: AppEventBus = koinInject(),
     navEventController: NavEventController = koinInject(),
-    themeDataSource: ThemeDataSource = koinInject(),
+    observeDarkThemeUseCase: ObserveDarkThemeUseCase = koinInject(),
 ) {
-    val isDarkTheme by themeDataSource.isDarkTheme.collectAsState(false)
+    val isDarkTheme by observeDarkThemeUseCase().collectAsState(false)
 
     LaunchedEffect(appEventBus) {
         appEventBus.events.collect { event ->

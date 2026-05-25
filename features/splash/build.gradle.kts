@@ -16,7 +16,7 @@ kotlin {
 
             implementation(projects.core)
 
-            implementation(projects.data.datastore)
+            implementation(projects.domain.onboarding)
             implementation(projects.domain.session)
             implementation(projects.utils.result)
             implementation(projects.resources)
