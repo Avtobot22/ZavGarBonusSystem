@@ -44,7 +44,7 @@ koin = "4.2.1"
 material = "1.14.0"
 
 # Ktor
-ktor = "3.4.3"
+ktor = "3.5.0"
 
 #Qr-kit
 qrKit = "3.1.3"
@@ -104,7 +104,6 @@ koin_core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin_compose = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 
 # --- Ktor Core & Logic ---
-#// можно объекдинить в бундл
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
@@ -122,6 +121,7 @@ qrKit = { module = "network.chaintech:qr-kit", version.ref = "qrKit" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 gitlive-firebase-config = { module = "dev.gitlive:firebase-config", version.ref = "gitliveFirebase" }
 gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "gitliveFirebase" }
+gitlive-firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "gitliveFirebase" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }
