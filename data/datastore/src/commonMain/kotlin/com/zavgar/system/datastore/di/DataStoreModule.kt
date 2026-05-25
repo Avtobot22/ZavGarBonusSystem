@@ -1,5 +1,7 @@
 package com.zavgar.system.datastore.di
 
+import com.zavgar.system.datastore.datasource.BalanceCacheDataSource
+import com.zavgar.system.datastore.datasource.BalanceCacheDataSourceImpl
 import com.zavgar.system.datastore.datasource.OnboardingDataSource
 import com.zavgar.system.datastore.datasource.OnboardingDataSourceImpl
 import com.zavgar.system.datastore.datasource.SessionDataSourceImpl
@@ -20,6 +22,7 @@ val dataStoreModule = module {
     singleOf(::SessionDataSourceImpl) bind SessionDataSource::class
     singleOf(::ThemeDataSourceImpl) bind ThemeDataSource::class
     singleOf(::OnboardingDataSourceImpl) bind OnboardingDataSource::class
+    singleOf(::BalanceCacheDataSourceImpl) bind BalanceCacheDataSource::class
 
     includes(platformDataStoreModule)
 }

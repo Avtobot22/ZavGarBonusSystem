@@ -1,6 +1,7 @@
 package com.zavgar.system.repository
 
 import com.zavgar.system.coroutines.CoroutineDispatcherProvider
+import com.zavgar.system.datastore.datasource.BalanceCacheDataSource
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.GetBalanceError
@@ -8,6 +9,7 @@ import com.zavgar.system.domain.userinfo.error.LogoutError
 import com.zavgar.system.domain.userinfo.error.MonthlyAccrualsError
 import com.zavgar.system.domain.userinfo.error.ProfileError
 import com.zavgar.system.domain.userinfo.model.Balance
+import com.zavgar.system.domain.userinfo.model.CachedBalance
 import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.domain.userinfo.repository.ProfileRepository
 import com.zavgar.system.network.mapper.NetworkErrorKind
@@ -23,6 +25,7 @@ internal class ProfileRepositoryImpl(
     private val userProfileService: UserProfileService,
     private val loyaltyService: LoyaltyService,
     private val sessionDataSource: SessionDataSource,
+    private val balanceCacheDataSource: BalanceCacheDataSource,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : ProfileRepository {
 
@@ -42,17 +45,34 @@ internal class ProfileRepositoryImpl(
         }
 
     override suspend fun delete(): AppResult<Unit, DeleteError> = withContext(dispatcherProvider.io) {
-        userProfileService.delete().fold(
-            onSuccess = { AppResult.Success(Unit) },
-            onFailure = { AppResult.Error(it.toDeleteError()) },
-        )
+        val serverResult = userProfileService.delete()
+        val sessionResult = sessionDataSource.deleteSession()
+
+        serverResult.onFailure { serverError ->
+            return@withContext AppResult.Error(serverError.toDeleteError())
+        }
+        sessionResult.onFailure { exception ->
+            return@withContext AppResult.Error(
+                DeleteError.UnknownError(exception.message ?: "Local storage cleanup failed")
+            )
+        }
+        AppResult.Success(Unit)
     }
 
     override suspend fun getBalance(): AppResult<Balance, GetBalanceError> = withContext(dispatcherProvider.io) {
         loyaltyService.getBalance().fold(
-            onSuccess = { AppResult.Success(Balance(balance = it.balance)) },
+            onSuccess = {
+                balanceCacheDataSource.saveBalance(it.balance)
+                AppResult.Success(Balance(balance = it.balance))
+            },
             onFailure = { AppResult.Error(it.toGetBalanceError()) },
         )
+    }
+
+    override suspend fun getCachedBalance(): CachedBalance? = withContext(dispatcherProvider.io) {
+        balanceCacheDataSource.getCachedBalance()?.let {
+            CachedBalance(balance = it.balance, updatedAtMillis = it.updatedAtMillis)
+        }
     }
 
     override suspend fun getMonthlyAccruals(): AppResult<Int, MonthlyAccrualsError> =
@@ -64,13 +84,19 @@ internal class ProfileRepositoryImpl(
         }
 
     override suspend fun logout(): AppResult<Unit, LogoutError> = withContext(dispatcherProvider.io) {
-        sessionDataSource.deleteSession().onFailure { exception ->
-            AppResult.Error(LogoutError.UnknownError(exception.message ?: "Storage Error"))
+        val serverResult = userProfileService.logout()
+        val sessionResult = sessionDataSource.deleteSession()
+
+        serverResult.onFailure { serverError ->
+            return@withContext AppResult.Error(serverError.toLogoutError())
         }
-        userProfileService.logout().fold(
-            onSuccess = { AppResult.Success(Unit) },
-            onFailure = { AppResult.Error(it.toLogoutError()) },
-        )
+        sessionResult.onFailure { exception ->
+            return@withContext AppResult.Error(
+                LogoutError.UnknownError(exception.message ?: "Local session deletion failed")
+            )
+        }
+
+        AppResult.Success(Unit)
     }
 
     private fun Throwable.toProfileError(): ProfileError = when (val kind = classifyNetworkError()) {
