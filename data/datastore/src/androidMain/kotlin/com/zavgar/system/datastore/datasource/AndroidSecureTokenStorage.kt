@@ -23,12 +23,14 @@ internal class AndroidSecureTokenStorage(
         )
     }
 
-    override suspend fun saveAccessToken(token: String) =
+    override suspend fun saveAccessToken(token: String) {
         prefs.edit().putString(KEY_ACCESS, token).apply()
+    }
 
 
-    override suspend fun saveRefreshToken(token: String) =
+    override suspend fun saveRefreshToken(token: String) {
         prefs.edit().putString(KEY_REFRESH, token).apply()
+    }
 
 
     override suspend fun getAccessToken(): String? =
@@ -39,8 +41,9 @@ internal class AndroidSecureTokenStorage(
         prefs.getString(KEY_REFRESH, null)
 
 
-    override suspend fun clear() =
+    override suspend fun clear() {
         prefs.edit().clear().apply()
+    }
 
 
     private companion object {

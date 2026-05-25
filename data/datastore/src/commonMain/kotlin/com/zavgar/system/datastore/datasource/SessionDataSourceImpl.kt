@@ -70,7 +70,7 @@ internal class SessionDataSourceImpl(
         runSuspendCatching {
             secureTokenStorage.clear()
             dataStore.edit { settings ->
-                settings.clear()
+                settings.remove(APP_PHONE)
             }
         }
 }

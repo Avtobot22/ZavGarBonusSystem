@@ -76,19 +76,24 @@ internal class IosSecureTokenStorage : SecureTokenStorage {
             CFDictionaryAddValue(updateAttrs, kSecValueData, dataRef)
             CFDictionaryAddValue(updateAttrs, kSecAttrAccessible, kSecAttrAccessibleAfterFirstUnlock)
 
-            val status = SecItemUpdate(updateQuery, updateAttrs)
+            val updateStatus = SecItemUpdate(updateQuery, updateAttrs)
             CFRelease(updateQuery)
             CFRelease(updateAttrs)
 
-            if (status == errSecItemNotFound) {
+            if (updateStatus == errSecItemNotFound) {
                 val addQuery = newMutableDictionary()
                 CFDictionaryAddValue(addQuery, kSecClass, kSecClassGenericPassword)
                 CFDictionaryAddValue(addQuery, kSecAttrService, serviceRef)
                 CFDictionaryAddValue(addQuery, kSecAttrAccount, accountRef)
                 CFDictionaryAddValue(addQuery, kSecValueData, dataRef)
                 CFDictionaryAddValue(addQuery, kSecAttrAccessible, kSecAttrAccessibleAfterFirstUnlock)
-                SecItemAdd(addQuery, null)
+                val addStatus = SecItemAdd(addQuery, null)
                 CFRelease(addQuery)
+                if (addStatus != errSecSuccess) {
+                    error("Keychain SecItemAdd failed for account=$account, status=$addStatus")
+                }
+            } else if (updateStatus != errSecSuccess) {
+                error("Keychain SecItemUpdate failed for account=$account, status=$updateStatus")
             }
         } finally {
             CFRelease(serviceRef)
