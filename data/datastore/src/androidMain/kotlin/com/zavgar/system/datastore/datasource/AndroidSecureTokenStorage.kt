@@ -24,12 +24,18 @@ internal class AndroidSecureTokenStorage(
     }
 
     override suspend fun saveAccessToken(token: String) {
-        prefs.edit().putString(KEY_ACCESS, token).apply()
+        val committed = prefs.edit().putString(KEY_ACCESS, token).commit()
+        if (!committed) {
+            error("EncryptedSharedPreferences commit failed for key=$KEY_ACCESS")
+        }
     }
 
 
     override suspend fun saveRefreshToken(token: String) {
-        prefs.edit().putString(KEY_REFRESH, token).apply()
+        val committed = prefs.edit().putString(KEY_REFRESH, token).commit()
+        if (!committed) {
+            error("EncryptedSharedPreferences commit failed for key=$KEY_REFRESH")
+        }
     }
 
 
@@ -42,7 +48,10 @@ internal class AndroidSecureTokenStorage(
 
 
     override suspend fun clear() {
-        prefs.edit().clear().apply()
+        val committed = prefs.edit().clear().commit()
+        if (!committed) {
+            error("EncryptedSharedPreferences commit failed while clearing tokens")
+        }
     }
 
 
