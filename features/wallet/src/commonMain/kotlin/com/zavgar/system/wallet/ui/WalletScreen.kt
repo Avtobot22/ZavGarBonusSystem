@@ -26,7 +26,7 @@ import com.zavgar.system.wallet.presentation.WalletIntent
 import com.zavgar.system.wallet.presentation.WalletState
 import com.zavgar.system.wallet.presentation.WalletViewModel
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun WalletScreen(
@@ -43,7 +43,7 @@ fun WalletScreen(
 internal fun WalletLoader(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier,
-    viewModel: WalletViewModel = koinInject()
+    viewModel: WalletViewModel = koinViewModel()
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()

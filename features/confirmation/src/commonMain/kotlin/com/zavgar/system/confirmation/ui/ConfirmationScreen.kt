@@ -53,7 +53,7 @@ import com.zavgar.system.resources.confirmation_text
 import com.zavgar.system.resources.confirmation_top_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ConfirmationScreen(
@@ -79,7 +79,7 @@ internal fun ConfirmationLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ConfirmationViewModel = koinInject()
+    viewModel: ConfirmationViewModel = koinViewModel()
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()

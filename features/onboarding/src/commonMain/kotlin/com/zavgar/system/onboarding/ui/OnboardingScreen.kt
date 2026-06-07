@@ -51,7 +51,7 @@ import com.zavgar.system.resources.onboarding_skip
 import com.zavgar.system.resources.onboarding_start
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun OnboardingScreen(
@@ -68,7 +68,7 @@ fun OnboardingScreen(
 private fun OnboardingLoader(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier,
-    viewModel: OnboardingViewModel = koinInject(),
+    viewModel: OnboardingViewModel = koinViewModel(),
 ) {
     viewModel.event.ObserveAsEvents { event ->
         when (event) {

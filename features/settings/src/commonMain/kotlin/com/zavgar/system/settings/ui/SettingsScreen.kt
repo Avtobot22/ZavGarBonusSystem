@@ -74,7 +74,7 @@ import com.zavgar.system.settings.presentation.SettingsState
 import com.zavgar.system.settings.presentation.SettingsViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SettingsScreen(
@@ -94,7 +94,7 @@ internal fun SettingsLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToProfileDetail: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = koinInject()
+    viewModel: SettingsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

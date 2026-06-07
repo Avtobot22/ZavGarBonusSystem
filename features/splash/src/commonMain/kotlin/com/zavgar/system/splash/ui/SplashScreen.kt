@@ -23,7 +23,7 @@ import com.zavgar.system.designsystem.theme.*
 import com.zavgar.system.splash.presentation.SplashEvent
 import com.zavgar.system.splash.presentation.SplashState
 import com.zavgar.system.splash.presentation.SplashViewModel
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SplashScreen(
@@ -46,7 +46,7 @@ private fun SplashLoader(
     onNavigateToWallet: () -> Unit,
     onNavigateToOnboarding: () -> Unit,
     modifier: Modifier,
-    viewModel: SplashViewModel = koinInject()
+    viewModel: SplashViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

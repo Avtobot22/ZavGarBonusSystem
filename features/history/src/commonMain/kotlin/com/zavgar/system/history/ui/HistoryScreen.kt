@@ -80,7 +80,7 @@ import com.zavgar.system.resources.home_title_history
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HistoryScreen(
@@ -97,7 +97,7 @@ fun HistoryScreen(
 internal fun HistoryLoader(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HistoryViewModel = koinInject()
+    viewModel: HistoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()

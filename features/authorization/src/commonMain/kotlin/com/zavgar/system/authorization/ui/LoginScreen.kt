@@ -58,7 +58,7 @@ import com.zavgar.system.resources.phone_label
 import com.zavgar.system.resources.phone_placeholder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
@@ -78,7 +78,7 @@ internal fun LoginLoader(
     onNavigateToConfirmation: (phone: String) -> Unit,
     onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = koinInject()
+    viewModel: LoginViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)

@@ -64,7 +64,7 @@ import com.zavgar.system.resources.register_name_placeholder
 import com.zavgar.system.resources.register_top_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RegisterScreen(
@@ -84,7 +84,7 @@ internal fun RegisterLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RegisterViewModel = koinInject()
+    viewModel: RegisterViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)

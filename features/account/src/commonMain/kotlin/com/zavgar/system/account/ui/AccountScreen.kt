@@ -94,7 +94,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
 
@@ -116,7 +116,7 @@ internal fun AccountLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel = koinInject()
+    viewModel: AccountViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()
