@@ -32,6 +32,7 @@ include(":libraries:coroutines")
 include(":libraries:designsystem")
 include(":libraries:events")
 include(":libraries:navigation-contracts")
+include(":libraries:analytics-api")
 
 include(":shared")
 include(":utils:validation")

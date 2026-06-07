@@ -1,6 +1,6 @@
 package com.zavgar.system.firebase.di
 
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.firebase.analytics.AnalyticsTrackerImpl
 import com.zavgar.system.firebase.analytics.analyticsPlatform
 import com.zavgar.system.firebase.config.RemoteConfigService

@@ -8,8 +8,8 @@ import com.zavgar.system.domain.theme.usecase.SetDarkThemeUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.LogoutUseCase
-import com.zavgar.system.firebase.analytics.AnalyticsEvent
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.settings.mapper.asSnackBarMessage

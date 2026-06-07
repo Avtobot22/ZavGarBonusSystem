@@ -14,9 +14,9 @@ import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
-import com.zavgar.system.firebase.analytics.AnalyticsEvent
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
-import com.zavgar.system.firebase.analytics.AuthFlow
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AuthFlow
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.resources.Res

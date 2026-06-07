@@ -15,8 +15,8 @@ import com.zavgar.system.domain.userinfo.model.UpdateProfileRequest
 import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.UpdateUserProfileUseCase
-import com.zavgar.system.firebase.analytics.AnalyticsEvent
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.resources.Res

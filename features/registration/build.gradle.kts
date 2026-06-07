@@ -24,6 +24,7 @@ kotlin {
             implementation(projects.libraries.coroutines)
             implementation(projects.libraries.designsystem)
             implementation(projects.libraries.firebase)
+            implementation(projects.libraries.analyticsApi)
             implementation(projects.libraries.parcelable)
 
             implementation(libs.compose.runtime)

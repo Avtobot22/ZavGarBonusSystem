@@ -10,6 +10,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.libraries.analyticsApi)
+
             implementation(libs.gitlive.firebase.config)
             implementation(libs.gitlive.firebase.crashlytics)
             implementation(libs.gitlive.firebase.analytics)

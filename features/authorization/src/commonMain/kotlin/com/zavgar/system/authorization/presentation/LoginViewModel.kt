@@ -6,9 +6,9 @@ import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.domain.auth.model.LoginRequest
 import com.zavgar.system.domain.auth.usecase.LoginUseCase
-import com.zavgar.system.firebase.analytics.AnalyticsEvent
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
-import com.zavgar.system.firebase.analytics.AuthFlow
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AuthFlow
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase

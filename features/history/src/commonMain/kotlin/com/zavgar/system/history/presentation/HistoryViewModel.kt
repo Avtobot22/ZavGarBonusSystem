@@ -7,8 +7,8 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.operations.model.TransactionsRequest
 import com.zavgar.system.domain.operations.usecase.GetOperationsUseCase
-import com.zavgar.system.firebase.analytics.AnalyticsEvent
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.history.mapper.toPresentation
 import com.zavgar.system.history.mapper.toTransactionsResult
 import com.zavgar.system.history.model.DatePickerType

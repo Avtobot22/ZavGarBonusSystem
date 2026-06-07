@@ -9,8 +9,8 @@ import com.zavgar.system.domain.session.usecase.GetSessionUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetCachedBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetMonthlyAccrualsUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
-import com.zavgar.system.firebase.analytics.AnalyticsEvent
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode

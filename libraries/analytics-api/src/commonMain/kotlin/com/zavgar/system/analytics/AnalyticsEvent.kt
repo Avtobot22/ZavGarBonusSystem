@@ -1,9 +1,10 @@
-package com.zavgar.system.firebase.analytics
+package com.zavgar.system.analytics
 
 /**
  * Типобезопасные события аналитики. Каждое событие знает своё имя и параметры.
  *
- * Имена и ключи — snake_case, латиница, ≤ 40 символов (требование Firebase).
+ * Имена и ключи — snake_case, латиница, ≤ 40 символов (общепринятое ограничение
+ * провайдеров аналитики).
  */
 sealed interface AnalyticsEvent {
 
@@ -58,13 +59,13 @@ sealed interface AnalyticsEvent {
         )
     }
 
-    /** Предопределённое событие Firebase `login`. */
+    /** Предопределённое событие провайдера `login`. */
     data object LoginSuccess : AnalyticsEvent {
         override val name: String = "login"
         override val params: Map<String, Any?> = mapOf("method" to METHOD_PHONE_OTP)
     }
 
-    /** Предопределённое событие Firebase `sign_up`. */
+    /** Предопределённое событие провайдера `sign_up`. */
     data object SignUpSuccess : AnalyticsEvent {
         override val name: String = "sign_up"
         override val params: Map<String, Any?> = mapOf("method" to METHOD_PHONE_OTP)

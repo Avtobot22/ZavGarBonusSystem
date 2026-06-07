@@ -7,7 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import com.zavgar.system.firebase.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.navigation.analytics.screenName
 import com.zavgar.system.navigation.provider.NavGraphProvider
 import com.zavgar.system.navigationapi.controller.NavBackStack
