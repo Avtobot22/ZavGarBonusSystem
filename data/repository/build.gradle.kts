@@ -24,6 +24,12 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
         }
+
+        // Ktor on the test classpath so tests can build the exceptions that the
+        // repository error-mapping classifies (ClientRequestException, etc.).
+        getByName("androidHostTest").dependencies {
+            implementation(libs.ktor.client.core)
+        }
     }
 
     android {

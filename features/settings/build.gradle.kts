@@ -37,6 +37,10 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.logging)
         }
+
+        getByName("androidHostTest").dependencies {
+            implementation(libs.kotlinx.datetime)
+        }
     }
 
     android {
