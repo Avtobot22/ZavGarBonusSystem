@@ -40,12 +40,13 @@ import org.koin.dsl.module
 val networkModule = module {
 
     single {
+        val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
         Json {
             ignoreUnknownKeys = true
             isLenient = true
             encodeDefaults = true
             coerceInputValues = true
-            prettyPrint = true
+            prettyPrint = isDebugBuild
         }
     }
 
