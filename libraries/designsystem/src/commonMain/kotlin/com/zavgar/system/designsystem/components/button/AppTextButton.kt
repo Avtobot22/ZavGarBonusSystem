@@ -1,6 +1,5 @@
 package com.zavgar.system.designsystem.components.button
 
-
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +20,7 @@ fun AppTextButton(
     textOrange: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     TextButton(
         onClick = onClick,
@@ -29,8 +28,8 @@ fun AppTextButton(
         enabled = enabled,
         colors = ButtonDefaults.textButtonColors(
             contentColor = MaterialTheme.colorScheme.onBackground,
-            disabledContentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-        )
+            disabledContentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+        ),
     ) {
         val orangeColor = if (enabled) {
             MaterialTheme.colorScheme.primary
@@ -41,8 +40,8 @@ fun AppTextButton(
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
-                        color = LocalContentColor.current
-                    )
+                        color = LocalContentColor.current,
+                    ),
                 ) {
                     append(textGray)
                 }
@@ -50,13 +49,13 @@ fun AppTextButton(
                 withStyle(
                     style = SpanStyle(
                         color = orangeColor,
-                        fontWeight = FontWeight.Bold
-                    )
+                        fontWeight = FontWeight.Bold,
+                    ),
                 ) {
                     append(textOrange)
                 }
             },
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.titleSmall,
         )
     }
 }
@@ -68,7 +67,7 @@ private fun AppTextButtonPreview() {
         AppTextButton(
             textGray = "Нет аккаунта?",
             textOrange = "Зарегистрироваться",
-            onClick = {}
+            onClick = {},
         )
     }
 }
@@ -81,7 +80,7 @@ private fun AppTextButtonNotEnabledPreview() {
             textGray = "Нет аккаунта?",
             textOrange = "Зарегистрироваться",
             onClick = {},
-            enabled = false
+            enabled = false,
         )
     }
 }

@@ -3,6 +3,7 @@
 package com.zavgar.system.settings.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.theme.usecase.ObserveDarkThemeUseCase
 import com.zavgar.system.domain.theme.usecase.SetDarkThemeUseCase
 import com.zavgar.system.domain.userinfo.error.LogoutError
@@ -12,7 +13,6 @@ import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.LogoutUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.Runs
 import io.mockk.coEvery

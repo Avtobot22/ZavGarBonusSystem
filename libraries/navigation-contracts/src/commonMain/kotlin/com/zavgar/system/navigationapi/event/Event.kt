@@ -9,5 +9,4 @@ sealed interface Event {
     data object OnBack : Event {
         override fun nextDestination(): Destination = Destination.Back
     }
-
 }

@@ -44,8 +44,8 @@ fun AppPrimaryButton(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-        )
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+        ),
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -80,7 +80,7 @@ private fun AppPrimaryButtonEnabledPreview() {
             onClick = {},
             enabled = true,
             isLoading = false,
-            shakingState = rememberShakingState()
+            shakingState = rememberShakingState(),
         )
     }
 }
@@ -94,7 +94,7 @@ private fun AppPrimaryButtonLoadingPreview() {
             onClick = {},
             enabled = true,
             isLoading = true,
-            shakingState = rememberShakingState()
+            shakingState = rememberShakingState(),
         )
     }
 }
@@ -108,7 +108,7 @@ private fun AppPrimaryButtonNotEnabledPreview() {
             onClick = {},
             enabled = false,
             isLoading = false,
-            shakingState = rememberShakingState()
+            shakingState = rememberShakingState(),
         )
     }
 }

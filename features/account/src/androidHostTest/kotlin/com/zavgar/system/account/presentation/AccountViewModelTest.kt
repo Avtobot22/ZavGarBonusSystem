@@ -3,13 +3,13 @@
 package com.zavgar.system.account.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.ProfileError
 import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.UpdateUserProfileUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase

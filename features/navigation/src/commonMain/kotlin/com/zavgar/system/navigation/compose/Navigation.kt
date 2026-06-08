@@ -39,7 +39,6 @@ private fun NavigationLoader(
     navGraphProvider: NavGraphProvider = koinInject(),
     analyticsTracker: AnalyticsTracker = koinInject(),
 ) {
-
     val dialogStrategy = remember { DialogSceneStrategy<Destination>() }
 
     LaunchedEffect(navEventController) {
@@ -73,8 +72,11 @@ private fun handleNavEvent(
         event is ClearAndNavigate -> navBackStack.clearAndNavigate(destination)
         event is ReplaceNavigation -> navBackStack.replaceTop(destination)
         destination is TopLevel -> {
-            if (destination == navBackStack.topLevelKey) navBackStack.clearTopLevel(destination)
-            else navBackStack.addTopLevel(destination)
+            if (destination == navBackStack.topLevelKey) {
+                navBackStack.clearTopLevel(destination)
+            } else {
+                navBackStack.addTopLevel(destination)
+            }
         }
         else -> navBackStack.add(destination)
     }

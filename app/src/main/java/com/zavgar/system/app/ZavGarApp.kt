@@ -18,9 +18,7 @@ class ZavGarApp : Application() {
             isDebugBuild = BuildConfig.DEBUG,
             appModule = module {
                 single<Context> { this@ZavGarApp }
-            }
+            },
         )
-
     }
-
 }

@@ -4,12 +4,12 @@ import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.mapAppError
-import com.zavgar.system.utils.result.AppError
-import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.domain.auth.error.AuthError
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_login
 import com.zavgar.system.resources.error_user_not_found
+import com.zavgar.system.utils.result.AppError
+import com.zavgar.system.utils.result.AppResult
 
 fun <T, E> AppResult<T, E>.toLoginResult(errorMapper: (E) -> SnackBarMessage): LoginResult {
     return when (this) {

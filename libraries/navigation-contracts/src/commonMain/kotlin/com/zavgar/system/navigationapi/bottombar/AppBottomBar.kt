@@ -25,7 +25,7 @@ fun AppBottomBar(
     items: ImmutableList<TopLevel>,
     currentSection: TopLevel,
     setCurrentSection: (TopLevel) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val barShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
 
@@ -39,7 +39,7 @@ fun AppBottomBar(
                 .navigationBarsPadding()
                 .height(60.dp),
             containerColor = Color.Transparent,
-            windowInsets = WindowInsets()
+            windowInsets = WindowInsets(),
         ) {
             items.forEach { item ->
                 val selected = item == currentSection
@@ -55,7 +55,7 @@ fun AppBottomBar(
                     },
                     label = {
                         Text(
-                            text = stringResource(title)
+                            text = stringResource(title),
                         )
                     },
                     alwaysShowLabel = true,
@@ -64,8 +64,8 @@ fun AppBottomBar(
                         selectedTextColor = MaterialTheme.colorScheme.primary,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurface,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        indicatorColor = Color.Transparent
-                    )
+                        indicatorColor = Color.Transparent,
+                    ),
                 )
             }
         }

@@ -7,7 +7,6 @@ import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
 import kotlinx.coroutines.flow.first
 
-
 class SplashViewModel(
     private val remoteConfigService: RemoteConfigService,
     private val getSessionUseCase: GetSessionUseCase,
@@ -30,8 +29,11 @@ class SplashViewModel(
             when (result) {
                 is AppResult.Success -> setEvent { SplashEvent.NavigateToWallet }
                 is AppResult.Error -> setEvent {
-                    if (isOnboardingCompleted) SplashEvent.NavigateToLogin
-                    else SplashEvent.NavigateToOnboarding
+                    if (isOnboardingCompleted) {
+                        SplashEvent.NavigateToLogin
+                    } else {
+                        SplashEvent.NavigateToOnboarding
+                    }
                 }
             }
         } catch {

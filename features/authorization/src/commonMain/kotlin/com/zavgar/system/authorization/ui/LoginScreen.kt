@@ -64,7 +64,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun LoginScreen(
     onNavigateToConfirmation: (phone: String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LoginLoader(
         modifier = modifier,
@@ -78,7 +78,7 @@ internal fun LoginLoader(
     onNavigateToConfirmation: (phone: String) -> Unit,
     onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = koinViewModel()
+    viewModel: LoginViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
@@ -107,7 +107,7 @@ internal fun LoginLoader(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -117,7 +117,7 @@ internal fun LoginScaffold(
     snackbarHostState: SnackbarHostState,
     onIntent: (LoginIntent) -> Unit,
     errorShakingState: ShakingState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
     val colors = MaterialTheme.colorScheme
@@ -145,7 +145,7 @@ internal fun LoginScaffold(
             errorMessage = state.phoneError?.asString(),
             visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            enabled = idle
+            enabled = idle,
         )
 
         Spacer(Modifier.height(16.dp))
@@ -236,7 +236,7 @@ private fun LoginScreenPreview() {
             state = LoginState(phone = "9991234567", isPhoneValid = true),
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShakingState()
+            errorShakingState = rememberShakingState(),
         )
     }
 }
@@ -254,7 +254,7 @@ private fun LoginScreenErrorPreview() {
             ),
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShakingState()
+            errorShakingState = rememberShakingState(),
         )
     }
 }

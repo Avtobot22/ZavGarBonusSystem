@@ -14,7 +14,7 @@ data class ConfirmationState(
 
     val screenState: ScreenState = ScreenState.Idle,
 
-    val timerSeconds: Int = 0
+    val timerSeconds: Int = 0,
 ) {
     sealed interface ScreenState {
         data object Idle : ScreenState

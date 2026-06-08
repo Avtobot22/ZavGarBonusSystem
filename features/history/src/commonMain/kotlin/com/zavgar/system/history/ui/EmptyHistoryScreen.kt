@@ -22,35 +22,35 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun EmptyHistoryContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ReceiptLong,
             contentDescription = null,
             modifier = Modifier.size(80.dp).padding(bottom = 24.dp),
-            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
         )
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             AppTextMain(
                 text = stringResource(Res.string.history_empty_title),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             AppTextSecondary(
                 text = stringResource(Res.string.history_empty_description),
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

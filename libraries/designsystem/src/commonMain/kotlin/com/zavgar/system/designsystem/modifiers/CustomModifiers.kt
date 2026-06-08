@@ -27,9 +27,9 @@ fun Modifier.shimmerAnimation(shape: Shape = MaterialTheme.shapes.small): Modifi
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Restart,
         ),
-        label = ""
+        label = "",
     )
 
     val shimmerColors = listOf(

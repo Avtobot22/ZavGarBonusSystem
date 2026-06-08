@@ -13,5 +13,4 @@ val confirmationModule = module {
     viewModelOf(::ConfirmationViewModel)
 
     factoryOf(::ConfirmationNavGraph) bind NavGraph::class
-
 }

@@ -13,7 +13,7 @@ class CustomSnackbarVisuals(
     override val actionLabel: String? = null,
     override val withDismissAction: Boolean = false,
     override val duration: SnackbarDuration =
-        if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite
+        if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite,
 ) : SnackbarVisuals
 
 suspend fun SnackbarHostState.showCustomSnackbar(
@@ -22,9 +22,8 @@ suspend fun SnackbarHostState.showCustomSnackbar(
     title: String? = null,
     actionLabel: String? = null,
     withDismissAction: Boolean = false,
-    duration: SnackbarDuration = if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Long
+    duration: SnackbarDuration = if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Long,
 ): SnackbarResult {
-
     currentSnackbarData?.dismiss()
 
     val visuals = CustomSnackbarVisuals(
@@ -33,7 +32,7 @@ suspend fun SnackbarHostState.showCustomSnackbar(
         message = message,
         actionLabel = actionLabel,
         withDismissAction = withDismissAction,
-        duration = duration
+        duration = duration,
     )
 
     return showSnackbar(visuals)

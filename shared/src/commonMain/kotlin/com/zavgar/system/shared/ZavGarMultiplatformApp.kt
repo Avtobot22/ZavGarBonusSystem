@@ -48,9 +48,9 @@ fun ZavGarMultiplatformApp(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .consumeWindowInsets(paddingValues)
+                        .consumeWindowInsets(paddingValues),
                 )
-            }
+            },
         )
     }
 }

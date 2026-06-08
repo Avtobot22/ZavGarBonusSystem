@@ -8,11 +8,9 @@ import com.zavgar.system.domain.operations.model.TransactionsPageResponse
 import com.zavgar.system.history.model.History
 import com.zavgar.system.history.model.HistoryItem
 
-
 fun TransactionsPageResponse.toPresentation(
     currentHistoryItems: List<HistoryItem> = emptyList(),
 ): History {
-
     val newHistoryItems = buildList {
         addAll(currentHistoryItems)
 
@@ -29,7 +27,7 @@ fun TransactionsPageResponse.toPresentation(
                     HistoryItem.DateHeader(
                         id = "header_$dateStr",
                         date = dateStr,
-                    )
+                    ),
                 )
                 lastDateStr = dateStr
             }
@@ -51,7 +49,7 @@ fun TransactionsPageResponse.toPresentation(
                     amount = amountFormatted,
                     store = transaction.store,
                     isIncome = isIncome,
-                )
+                ),
             )
         }
     }

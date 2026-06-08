@@ -38,7 +38,7 @@ private const val BOTTOM_BAR_DURATION = 220
 /** Вперёд: новый экран проявляется, текущий гаснет. */
 val AuthEnterTransition: ContentTransform =
     fadeIn(tween(AUTH_FADE_IN, easing = FastOutSlowInEasing)) togetherWith
-            fadeOut(tween(AUTH_FADE_OUT, easing = FastOutSlowInEasing))
+        fadeOut(tween(AUTH_FADE_OUT, easing = FastOutSlowInEasing))
 
 /** Назад: симметричный кросс-фейд. */
 val AuthPopTransition: ContentTransform = AuthEnterTransition
@@ -52,17 +52,17 @@ val AuthPopTransition: ContentTransform = AuthEnterTransition
 /** Вперёд: новый экран въезжает справа, старый уезжает влево. */
 val MainEnterTransition: ContentTransform =
     fadeIn(
-        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing)
+        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing),
     ) togetherWith fadeOut(
-        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing)
+        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing),
     )
 
 /** Назад: предыдущий экран въезжает слева, текущий уезжает вправо. */
 val MainPopTransition: ContentTransform =
     fadeIn(
-        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing)
+        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing),
     ) togetherWith fadeOut(
-        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing)
+        animationSpec = tween(MAIN_DURATION, easing = FastOutSlowInEasing),
     )
 
 /* ------------------------------ BOTTOM BAR ----------------------------- */

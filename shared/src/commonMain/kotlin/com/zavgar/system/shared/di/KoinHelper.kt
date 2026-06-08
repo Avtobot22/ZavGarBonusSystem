@@ -17,10 +17,10 @@ import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
 import com.zavgar.system.firebase.di.firebaseModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule
-import com.zavgar.system.onboarding.di.onboardingModule
 import com.zavgar.system.network.di.networkModule
-import com.zavgar.system.repository.di.repositoryModule
+import com.zavgar.system.onboarding.di.onboardingModule
 import com.zavgar.system.registration.di.registrationModule
+import com.zavgar.system.repository.di.repositoryModule
 import com.zavgar.system.settings.di.settingsModule
 import com.zavgar.system.splash.di.splashModule
 import com.zavgar.system.utils.validation.di.validationModule
@@ -87,5 +87,5 @@ internal val appModules = listOf(
     walletModule,
     settingsModule,
     accountModule,
-    historyModule
+    historyModule,
 )

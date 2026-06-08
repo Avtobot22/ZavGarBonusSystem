@@ -19,32 +19,31 @@ import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 @Composable
 fun AppProgressIndicator(
     text: String = "Идёт загрузка...",
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(48.dp),
                 color = MaterialTheme.colorScheme.primary,
-                strokeWidth = 4.dp
+                strokeWidth = 4.dp,
             )
 
             AppTextSecondary(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

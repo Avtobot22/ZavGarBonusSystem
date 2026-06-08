@@ -3,8 +3,8 @@
 package com.zavgar.system.onboarding.presentation
 
 import app.cash.turbine.test
-import com.zavgar.system.domain.onboarding.usecase.CompleteOnboardingUseCase
 import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.domain.onboarding.usecase.CompleteOnboardingUseCase
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify

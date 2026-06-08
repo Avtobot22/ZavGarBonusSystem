@@ -41,7 +41,7 @@ actual fun AppDatePicker(
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 return utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
             }
-        }
+        },
     )
 
     DatePickerDialog(
@@ -55,7 +55,7 @@ actual fun AppDatePicker(
                             .date
                         onConfirm(date)
                     }
-                }
+                },
             ) {
                 Text(stringResource(Res.string.dialog_picker_confirm))
             }
@@ -65,7 +65,7 @@ actual fun AppDatePicker(
                 Text(stringResource(Res.string.dialog_picker_cancel))
             }
         },
-        shape = MaterialTheme.shapes.small
+        shape = MaterialTheme.shapes.small,
     ) {
         DatePicker(state = datePickerState)
     }

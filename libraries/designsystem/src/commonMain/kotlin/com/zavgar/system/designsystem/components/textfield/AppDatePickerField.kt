@@ -20,7 +20,7 @@ fun AppDatePickerField(
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -37,7 +37,7 @@ fun AppDatePickerField(
             trailingIcon = {
                 Icon(Icons.Default.DateRange, contentDescription = null)
             },
-            readOnly = true
+            readOnly = true,
         )
 
         Box(
@@ -46,11 +46,11 @@ fun AppDatePickerField(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    enabled = enabled
+                    enabled = enabled,
                 ) {
                     focusManager.clearFocus()
                     onClick()
-                }
+                },
         )
     }
 }

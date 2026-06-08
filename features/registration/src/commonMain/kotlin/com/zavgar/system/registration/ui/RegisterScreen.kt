@@ -70,12 +70,12 @@ import org.koin.compose.viewmodel.koinViewModel
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     RegisterLoader(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToConfirm = onNavigateToConfirm,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -84,7 +84,7 @@ internal fun RegisterLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: RegisterViewModel = koinViewModel()
+    viewModel: RegisterViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
@@ -113,7 +113,7 @@ internal fun RegisterLoader(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -123,7 +123,7 @@ internal fun RegisterScaffold(
     snackbarHostState: SnackbarHostState,
     onIntent: (RegisterIntent) -> Unit,
     errorShakingState: ShakingState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
     val colors = MaterialTheme.colorScheme
@@ -132,7 +132,7 @@ internal fun RegisterScaffold(
         initialDate = state.birthDate,
         isOpen = state.isDatePickerOpen,
         onDismiss = { onIntent(RegisterIntent.DismissDatePicker) },
-        onConfirm = { onIntent(RegisterIntent.CloseDatePicker(it)) }
+        onConfirm = { onIntent(RegisterIntent.CloseDatePicker(it)) },
     )
 
     ZavGarAuthScaffold(
@@ -170,7 +170,7 @@ internal fun RegisterScaffold(
             enabled = state.isRegisterButtonEnabled,
             isLoading = state.screenState is RegisterState.ScreenState.Submitting,
             modifier = Modifier.padding(top = 16.dp),
-            shakingState = errorShakingState
+            shakingState = errorShakingState,
         )
 
         Spacer(Modifier.height(12.dp))
@@ -185,7 +185,7 @@ internal fun RegisterScaffold(
 @Composable
 private fun RegisterForm(
     state: RegisterState,
-    onIntent: (RegisterIntent) -> Unit
+    onIntent: (RegisterIntent) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -197,7 +197,7 @@ private fun RegisterForm(
             placeholder = stringResource(Res.string.register_name_placeholder),
             isError = state.nameError != null,
             errorMessage = state.nameError?.asString(),
-            enabled = state.screenState is RegisterState.ScreenState.Idle
+            enabled = state.screenState is RegisterState.ScreenState.Idle,
         )
 
         AppDatePickerField(
@@ -220,7 +220,7 @@ private fun RegisterForm(
             errorMessage = state.phoneError?.asString(),
             visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            enabled = state.screenState is RegisterState.ScreenState.Idle
+            enabled = state.screenState is RegisterState.ScreenState.Idle,
         )
     }
 }
@@ -269,7 +269,7 @@ private fun RegisterScreenPreview() {
             ),
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShakingState()
+            errorShakingState = rememberShakingState(),
         )
     }
 }
@@ -288,7 +288,7 @@ private fun RegisterScreenErrorPreview() {
             ),
             snackbarHostState = snackbarHostState,
             onIntent = {},
-            errorShakingState = rememberShakingState()
+            errorShakingState = rememberShakingState(),
         )
     }
 }

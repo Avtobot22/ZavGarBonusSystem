@@ -27,7 +27,7 @@ fun AppDateChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Outlined.EditCalendar, // Иконка календаря
-    interactionSource: MutableInteractionSource? = null
+    interactionSource: MutableInteractionSource? = null,
 ) {
     Surface(
         onClick = onClick,
@@ -36,32 +36,32 @@ fun AppDateChip(
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         shadowElevation = 8.dp,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
         ) {
             if (label != null) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    )
+                        fontWeight = FontWeight.Bold,
+                    ),
                 )
             }
 
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
 
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -74,7 +74,7 @@ private fun AppDateChipPreview() {
         AppDateChip(
             value = "10.04.2025",
             label = "C",
-            onClick = {}
+            onClick = {},
         )
     }
 }

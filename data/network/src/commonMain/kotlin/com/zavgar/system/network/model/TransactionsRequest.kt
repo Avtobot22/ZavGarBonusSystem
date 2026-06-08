@@ -20,5 +20,5 @@ data class TransactionsRequest(
     @SerialName("limit")
     val limit: Int = PAGINATION_LIMIT,
     @SerialName("sortOrder")
-    val sortOrder: SortOrder = SortOrder.DESC
+    val sortOrder: SortOrder = SortOrder.DESC,
 )

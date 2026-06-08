@@ -1,19 +1,19 @@
 package com.zavgar.system.authorization.presentation
 
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AuthFlow
 import com.zavgar.system.authorization.mapper.asSnackBarMessage
 import com.zavgar.system.authorization.mapper.toLoginResult
 import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.domain.auth.model.LoginRequest
-import com.zavgar.system.domain.auth.usecase.LoginUseCase
-import com.zavgar.system.analytics.AnalyticsEvent
-import com.zavgar.system.analytics.AnalyticsTracker
-import com.zavgar.system.analytics.AuthFlow
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
-import com.zavgar.system.utils.validation.ValidatePhoneUseCase
+import com.zavgar.system.domain.auth.model.LoginRequest
+import com.zavgar.system.domain.auth.usecase.LoginUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
+import com.zavgar.system.utils.validation.ValidatePhoneUseCase
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.sanitizePhone
@@ -40,7 +40,7 @@ class LoginViewModel(
             copy(
                 phone = sanitizedPhone,
                 isPhoneValid = validation is ValidationResult.Valid,
-                phoneError = null
+                phoneError = null,
             )
         }
     }
@@ -88,7 +88,7 @@ class LoginViewModel(
             setState { copy(screenState = LoginState.ScreenState.Idle) }
             setEvent {
                 LoginEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }

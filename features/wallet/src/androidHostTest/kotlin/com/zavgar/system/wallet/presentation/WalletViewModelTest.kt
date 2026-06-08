@@ -2,6 +2,7 @@
 
 package com.zavgar.system.wallet.presentation
 
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.session.LogoutHandler
 import com.zavgar.system.domain.session.error.SessionError
 import com.zavgar.system.domain.session.model.Session
@@ -12,7 +13,6 @@ import com.zavgar.system.domain.userinfo.model.Balance
 import com.zavgar.system.domain.userinfo.usecase.GetCachedBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetMonthlyAccrualsUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.Runs
 import io.mockk.coEvery

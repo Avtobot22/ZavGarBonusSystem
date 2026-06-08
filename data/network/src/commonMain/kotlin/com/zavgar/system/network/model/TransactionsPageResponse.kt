@@ -10,5 +10,5 @@ data class TransactionsPageResponse(
     @SerialName("nextCursor")
     val nextCursor: String? = null,
     @SerialName("hasMore")
-    val hasMore: Boolean
+    val hasMore: Boolean,
 )

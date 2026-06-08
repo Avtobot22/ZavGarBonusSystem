@@ -23,5 +23,5 @@ data class Transaction(
     @SerialName("pointsType")
     val pointsType: PointsType,
     @SerialName("phone")
-    val phone: String
+    val phone: String,
 )

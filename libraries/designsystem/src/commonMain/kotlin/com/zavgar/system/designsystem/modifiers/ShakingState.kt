@@ -54,7 +54,7 @@ fun rememberShakingState(
     return remember {
         ShakingState(
             power,
-            direction
+            direction,
         )
     }
 }

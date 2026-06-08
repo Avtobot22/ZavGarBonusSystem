@@ -27,5 +27,5 @@ val onboardingPages: List<OnboardingPage> = listOf(
         icon = Icons.Filled.QrCode2,
         titleRes = Res.string.onboarding_slide_2_title,
         descriptionRes = Res.string.onboarding_slide_2_description,
-    )
+    ),
 )

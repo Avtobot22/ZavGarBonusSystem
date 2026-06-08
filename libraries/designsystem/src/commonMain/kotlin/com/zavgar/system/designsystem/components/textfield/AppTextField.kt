@@ -57,7 +57,7 @@ fun AppTextField(
         AppTextMain(
             text = label,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         )
 
         OutlinedTextField(
@@ -69,7 +69,7 @@ fun AppTextField(
             placeholder = {
                 AppTextSecondary(
                     text = placeholder,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
@@ -95,7 +95,7 @@ fun AppTextField(
             keyboardOptions = keyboardOptions,
             trailingIcon = trailingIcon,
             readOnly = readOnly,
-            interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+            interactionSource = interactionSource ?: remember { MutableInteractionSource() },
         )
 
         if (isError && !errorMessage.isNullOrBlank()) {
@@ -103,7 +103,7 @@ fun AppTextField(
                 text = errorMessage,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
         }
     }
@@ -120,7 +120,7 @@ fun AppPasswordField(
     isError: Boolean = false,
     errorMessage: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(
-        keyboardType = KeyboardType.Password
+        keyboardType = KeyboardType.Password,
     ),
     readOnly: Boolean = false,
     interactionSource: MutableInteractionSource? = null,
@@ -148,10 +148,10 @@ fun AppPasswordField(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
+        },
     )
 }
 
@@ -167,7 +167,7 @@ fun AppValidatedTextField(
     isError: Boolean = false,
     errorMessage: String? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     AppTextField(
         value = value,
@@ -185,10 +185,12 @@ fun AppValidatedTextField(
                 Icon(
                     imageVector = vectorResource(Res.drawable.icon_check),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary
+                    tint = MaterialTheme.colorScheme.tertiary,
                 )
             }
-        } else null
+        } else {
+            null
+        },
     )
 }
 
@@ -201,9 +203,8 @@ private fun AppTextFieldPreview() {
                 .fillMaxSize()
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-
             // --- 1. ОБЫЧНОЕ ПОЛЕ (Email/Имя) ---
             var simpleText by remember { mutableStateOf("") }
 
@@ -211,7 +212,7 @@ private fun AppTextFieldPreview() {
                 label = "Имя пользователя",
                 placeholder = "Введите ваше имя",
                 value = simpleText,
-                onValueChange = { simpleText = it }
+                onValueChange = { simpleText = it },
             )
 
             // --- 2. ПОЛЕ С ОШИБКОЙ ---
@@ -225,13 +226,13 @@ private fun AppTextFieldPreview() {
                 value = errorText,
                 onValueChange = { errorText = it },
                 isError = isError,
-                errorMessage = "Поле не может быть пустым"
+                errorMessage = "Поле не может быть пустым",
             )
 
             // --- 3. ПОЛЕ ПАРОЛЯ (С логикой глаза) ---
             AppPasswordField(
                 value = simpleText,
-                onValueChange = { simpleText = it }
+                onValueChange = { simpleText = it },
             )
 
             // --- 4. ОТКЛЮЧЕННОЕ ПОЛЕ (Disabled) ---
@@ -240,7 +241,7 @@ private fun AppTextFieldPreview() {
                 placeholder = "Сюда нельзя писать",
                 value = "Заблокировано",
                 onValueChange = {},
-                enabled = false
+                enabled = false,
             )
         }
     }

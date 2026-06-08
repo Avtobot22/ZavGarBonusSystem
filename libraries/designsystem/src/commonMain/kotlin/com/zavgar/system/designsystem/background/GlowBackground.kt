@@ -17,7 +17,7 @@ fun GlowBackground(
     color: Color = MaterialTheme.colorScheme.primary,
     modifier: Modifier = Modifier,
     radius: Dp = 380.dp,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val radiusPx = with(LocalDensity.current) { radius.toPx() }
 
@@ -28,14 +28,14 @@ fun GlowBackground(
                 val brush = Brush.radialGradient(
                     colors = listOf(
                         color.copy(alpha = 0.25f),
-                        Color.Transparent
+                        Color.Transparent,
                     ),
-                    radius = radiusPx
+                    radius = radiusPx,
                 )
                 onDrawBehind {
                     drawRect(brush = brush)
                 }
-            }
+            },
     ) {
         content()
     }

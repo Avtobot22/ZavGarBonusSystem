@@ -5,7 +5,6 @@ import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.marker.TopLevel
 import kotlinx.serialization.Serializable
 
-
 /**
  * Event to navigate in bottomNavigation.
  */

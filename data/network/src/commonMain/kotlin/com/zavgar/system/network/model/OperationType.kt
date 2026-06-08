@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class OperationType {
     CREDITING,
-    DEBITING
+    DEBITING,
 }

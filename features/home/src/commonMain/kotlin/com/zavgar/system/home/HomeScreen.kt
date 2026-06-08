@@ -82,7 +82,7 @@ private fun HomeScaffold(
                     AppBottomBar(
                         items = navItems,
                         currentSection = section,
-                        setCurrentSection = setCurrentState
+                        setCurrentSection = setCurrentState,
                     )
                 }
             }

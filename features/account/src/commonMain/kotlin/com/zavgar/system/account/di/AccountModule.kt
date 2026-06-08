@@ -13,5 +13,4 @@ val accountModule = module {
     viewModelOf(::AccountViewModel)
 
     factoryOf(::AccountNavGraph) bind NavGraph::class
-
 }

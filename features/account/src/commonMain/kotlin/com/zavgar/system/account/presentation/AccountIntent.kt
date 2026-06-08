@@ -25,5 +25,4 @@ sealed interface AccountIntent {
     data object Submit : AccountIntent
 
     data object Retry : AccountIntent
-
 }

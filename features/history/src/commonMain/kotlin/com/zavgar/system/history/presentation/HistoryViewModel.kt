@@ -1,5 +1,7 @@
 package com.zavgar.system.history.presentation
 
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
@@ -7,8 +9,6 @@ import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.operations.model.TransactionsRequest
 import com.zavgar.system.domain.operations.usecase.GetOperationsUseCase
-import com.zavgar.system.analytics.AnalyticsEvent
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.history.mapper.toPresentation
 import com.zavgar.system.history.mapper.toTransactionsResult
 import com.zavgar.system.history.model.DatePickerType
@@ -66,7 +66,7 @@ class HistoryViewModel(
                     SnackBarMessage(
                         message = UiText.Resource(Res.string.error_invalid_date_range),
                         type = SnackBarType.WARNING,
-                    )
+                    ),
                 )
             }
             return
@@ -168,7 +168,7 @@ class HistoryViewModel(
                 } else {
                     loadedPages = 0
                     analyticsTracker.log(
-                        AnalyticsEvent.HistoryViewed(itemsCount = currentState.history.transactions.size)
+                        AnalyticsEvent.HistoryViewed(itemsCount = currentState.history.transactions.size),
                     )
                 }
             }

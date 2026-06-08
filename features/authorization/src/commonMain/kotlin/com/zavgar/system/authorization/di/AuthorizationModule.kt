@@ -13,5 +13,4 @@ val authorizationModule = module {
     viewModelOf(::LoginViewModel)
 
     factoryOf(::LoginNavGraph) bind NavGraph::class
-
 }

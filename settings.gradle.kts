@@ -1,3 +1,5 @@
+rootProject.name = "ZavGarBonusSystem"
+
 include(":app")
 
 include(":core")

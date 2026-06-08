@@ -5,7 +5,7 @@ sealed interface HistoryItem {
 
     data class DateHeader(
         override val id: String,
-        val date: String
+        val date: String,
     ) : HistoryItem
 
     data class TransactionItem(
@@ -13,6 +13,6 @@ sealed interface HistoryItem {
         val store: String,
         val time: String,
         val amount: String,
-        val isIncome: Boolean
+        val isIncome: Boolean,
     ) : HistoryItem
 }

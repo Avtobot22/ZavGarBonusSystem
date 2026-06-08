@@ -18,7 +18,7 @@ data class AccountState(
 
     val confirmDeleteDialog: Boolean = false,
 
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 ) {
 
     sealed interface ScreenState {

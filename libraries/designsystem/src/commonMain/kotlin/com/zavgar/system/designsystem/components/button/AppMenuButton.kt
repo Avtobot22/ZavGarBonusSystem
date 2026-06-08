@@ -32,7 +32,7 @@ fun AppMenuButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isDestructive: Boolean = false,
-    showChevron: Boolean = true
+    showChevron: Boolean = true,
 ) {
     val contentColor = if (isDestructive) {
         MaterialTheme.colorScheme.error
@@ -46,31 +46,31 @@ fun AppMenuButton(
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = contentColor
+            contentColor = contentColor,
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = 8.dp
+            defaultElevation = 8.dp,
         ),
-        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 40.dp)
+        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 40.dp),
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = contentColor,
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
+                    .align(Alignment.CenterStart),
             )
 
             AppTextMain(
                 text = text,
                 color = contentColor,
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 ),
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
             )
 
             if (showChevron && !isDestructive) {
@@ -79,7 +79,7 @@ fun AppMenuButton(
                     contentDescription = null,
                     tint = contentColor,
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
+                        .align(Alignment.CenterEnd),
                 )
             }
         }
@@ -93,25 +93,25 @@ fun ProfileMenuPreview() {
         Column(
             modifier = Modifier
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AppMenuButton(
                 text = "Учетная запись",
                 icon = Icons.Default.Person,
-                onClick = {}
+                onClick = {},
             )
 
             AppMenuButton(
                 text = "О приложении",
                 icon = Icons.Default.Info,
-                onClick = {}
+                onClick = {},
             )
 
             AppMenuButton(
                 text = "Выйти",
                 icon = Icons.AutoMirrored.Filled.ExitToApp,
                 onClick = {},
-                isDestructive = true
+                isDestructive = true,
             )
         }
     }

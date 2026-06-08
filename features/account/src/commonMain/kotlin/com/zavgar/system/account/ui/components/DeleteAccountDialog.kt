@@ -34,7 +34,7 @@ private fun DeleteAccountDialogPreview() {
     ZavGarThemePreview {
         DeleteAccountDialog(
             state = AccountState(confirmDeleteDialog = true),
-            onIntent = {}
+            onIntent = {},
         )
     }
 }

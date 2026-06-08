@@ -3,10 +3,10 @@
 package com.zavgar.system.authorization.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.auth.error.AuthError
 import com.zavgar.system.domain.auth.model.LoginRequest
 import com.zavgar.system.domain.auth.usecase.LoginUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
 import io.mockk.coEvery

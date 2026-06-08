@@ -3,10 +3,10 @@
 package com.zavgar.system.confirmation.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.auth.error.ConfirmationError
 import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidateCodeUseCase

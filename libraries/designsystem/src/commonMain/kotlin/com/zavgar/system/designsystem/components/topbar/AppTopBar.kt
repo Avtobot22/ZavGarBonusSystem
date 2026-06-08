@@ -35,13 +35,13 @@ fun AppTopBar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         AppTextMain(
             text = title,
             style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
-            modifier = Modifier
+            modifier = Modifier,
         )
     }
 }
@@ -51,13 +51,13 @@ fun AppProfilTopBar(
     title: String,
     onBackClick: () -> Unit,
     onActionClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -65,7 +65,7 @@ fun AppProfilTopBar(
             modifier = Modifier
                 .size(48.dp)
                 .clickable { onBackClick() },
-            tint = MaterialTheme.colorScheme.onBackground
+            tint = MaterialTheme.colorScheme.onBackground,
         )
 
         AppTextMain(
@@ -74,18 +74,17 @@ fun AppProfilTopBar(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 8.dp),
         )
 
         AppCircleIcon(
             imageVector = Icons.Default.DeleteOutline,
             modifier = Modifier
                 .size(48.dp)
-                .clickable { onActionClick() }
+                .clickable { onActionClick() },
         )
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -105,7 +104,7 @@ fun AppTopBarPreview() {
             AppProfilTopBar(
                 title = "Аккаунт",
                 onBackClick = {},
-                onActionClick = {}
+                onActionClick = {},
             )
         }
     }

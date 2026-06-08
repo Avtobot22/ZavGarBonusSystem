@@ -17,7 +17,7 @@ fun AppClickablePasswordField(
     placeholder: String = "",
     isError: Boolean = false,
     errorMessage: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -31,7 +31,7 @@ fun AppClickablePasswordField(
             isError = isError,
             errorMessage = errorMessage,
             enabled = enabled,
-            readOnly = true
+            readOnly = true,
         )
 
         Box(
@@ -40,11 +40,11 @@ fun AppClickablePasswordField(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    enabled = enabled
+                    enabled = enabled,
                 ) {
                     focusManager.clearFocus()
                     onClick()
-                }
+                },
         )
     }
 }

@@ -14,5 +14,4 @@ object AndroidDeepLink {
      * Returns the [Intent] to the home screen.
      */
     fun homeIntent(): Intent = Intent(Intent.ACTION_VIEW, Destination.URI.toUri())
-
 }

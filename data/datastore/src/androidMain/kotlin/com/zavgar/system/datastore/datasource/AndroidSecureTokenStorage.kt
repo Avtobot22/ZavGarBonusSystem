@@ -30,7 +30,6 @@ internal class AndroidSecureTokenStorage(
         }
     }
 
-
     override suspend fun saveRefreshToken(token: String) {
         val committed = prefs.edit().putString(KEY_REFRESH, token).commit()
         if (!committed) {
@@ -38,14 +37,11 @@ internal class AndroidSecureTokenStorage(
         }
     }
 
-
     override suspend fun getAccessToken(): String? =
         prefs.getString(KEY_ACCESS, null)
 
-
     override suspend fun getRefreshToken(): String? =
         prefs.getString(KEY_REFRESH, null)
-
 
     override suspend fun clear() {
         val committed = prefs.edit().clear().commit()
@@ -53,7 +49,6 @@ internal class AndroidSecureTokenStorage(
             error("EncryptedSharedPreferences commit failed while clearing tokens")
         }
     }
-
 
     private companion object {
         const val PREFS_FILE = "zavgar_secure_tokens"

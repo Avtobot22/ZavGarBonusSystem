@@ -12,5 +12,5 @@ data class LoginResponse(
     @SerialName("refreshToken")
     val refreshToken: String,
     @SerialName("refreshExpiresIn")
-    val refreshExpiresIn: Long
+    val refreshExpiresIn: Long,
 )

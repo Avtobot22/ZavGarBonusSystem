@@ -1,9 +1,9 @@
 package com.zavgar.system.onboarding.presentation
 
-import com.zavgar.system.core.presentation.BaseViewModel
-import com.zavgar.system.domain.onboarding.usecase.CompleteOnboardingUseCase
 import com.zavgar.system.analytics.AnalyticsEvent
 import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.domain.onboarding.usecase.CompleteOnboardingUseCase
 
 class OnboardingViewModel(
     private val completeOnboardingUseCase: CompleteOnboardingUseCase,

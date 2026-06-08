@@ -6,6 +6,8 @@ import com.zavgar.system.account.mapper.toProfileUpdateResult
 import com.zavgar.system.account.model.DeleteResult
 import com.zavgar.system.account.model.ProfileGetResult
 import com.zavgar.system.account.model.ProfileUpdateResult
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
@@ -15,14 +17,12 @@ import com.zavgar.system.domain.userinfo.model.UpdateProfileRequest
 import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.UpdateUserProfileUseCase
-import com.zavgar.system.analytics.AnalyticsEvent
-import com.zavgar.system.analytics.AnalyticsTracker
-import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
-import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.profile_delete_success
 import com.zavgar.system.resources.profile_update_success
+import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
+import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
@@ -72,7 +72,7 @@ class AccountViewModel(
                             name = result.profile.name,
                             phone = result.profile.phone,
                             birthDate = result.profile.birthDate,
-                            birthDateText = result.profile.birthDate.toDisplayString()
+                            birthDateText = result.profile.birthDate.toDisplayString(),
                         )
                     }
 
@@ -85,7 +85,7 @@ class AccountViewModel(
             setState { copy(isLoading = false, screenState = AccountState.ScreenState.Error) }
             setEvent {
                 AccountEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }
@@ -98,7 +98,7 @@ class AccountViewModel(
     private fun handleEnterName(name: String) = setState {
         copy(
             name = name,
-            nameError = null
+            nameError = null,
         )
     }
 
@@ -107,7 +107,7 @@ class AccountViewModel(
             birthDate = birthDate,
             birthDateText = birthDate.toDisplayString(),
             birthDateError = null,
-            isDatePickerOpen = false
+            isDatePickerOpen = false,
         )
     }
 
@@ -140,8 +140,8 @@ class AccountViewModel(
                         AccountEvent.DeleteAccountSuccess(
                             SnackBarMessage(
                                 message = UiText.Resource(Res.string.profile_delete_success),
-                                type = SnackBarType.SUCCESS
-                            )
+                                type = SnackBarType.SUCCESS,
+                            ),
                         )
                     }
                 }
@@ -152,7 +152,7 @@ class AccountViewModel(
             setState { copy(isLoading = false) }
             setEvent {
                 AccountEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }
@@ -171,7 +171,7 @@ class AccountViewModel(
         setState {
             copy(
                 nameError = nameResult.errorOrNull(),
-                birthDateError = birthDateResult.errorOrNull()
+                birthDateError = birthDateResult.errorOrNull(),
             )
         }
 
@@ -180,8 +180,8 @@ class AccountViewModel(
         performUpdate(
             UpdateProfileRequest(
                 name = state.name,
-                birthDate = requireNotNull(state.birthDate)
-            )
+                birthDate = requireNotNull(state.birthDate),
+            ),
         )
     }
 
@@ -197,8 +197,8 @@ class AccountViewModel(
                     AccountEvent.ShowSnackbar(
                         SnackBarMessage(
                             message = UiText.Resource(Res.string.profile_update_success),
-                            type = SnackBarType.SUCCESS
-                        )
+                            type = SnackBarType.SUCCESS,
+                        ),
                     )
                 }
 
@@ -210,7 +210,7 @@ class AccountViewModel(
             setState { copy(isLoading = false) }
             setEvent {
                 AccountEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }

@@ -85,11 +85,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HistoryScreen(
     onNavigateToLogin: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     HistoryLoader(
         onNavigateToLogin = onNavigateToLogin,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -97,7 +97,7 @@ fun HistoryScreen(
 internal fun HistoryLoader(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HistoryViewModel = koinViewModel()
+    viewModel: HistoryViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()
@@ -128,7 +128,7 @@ internal fun HistoryLoader(
         onIntent = viewModel::handleIntent,
         snackbarHostState = snackbarHostState,
         errorShakingState = errorShakingState,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -138,15 +138,15 @@ internal fun HistoryScaffold(
     onIntent: (HistoryIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
     errorShakingState: ShakingState,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     val historyNotEmpty = state.history.transactions.isNotEmpty()
-    val isLoadingFirstPage = state.screenState is HistoryState.ScreenState.Loading
-            || state.screenState is HistoryState.ScreenState.Initial
-            || state.screenState is HistoryState.ScreenState.Reloading
+    val isLoadingFirstPage = state.screenState is HistoryState.ScreenState.Loading ||
+        state.screenState is HistoryState.ScreenState.Initial ||
+        state.screenState is HistoryState.ScreenState.Reloading
 
     val showFab by remember(historyNotEmpty, isLoadingFirstPage) {
         derivedStateOf {
@@ -161,31 +161,31 @@ internal fun HistoryScaffold(
             AnimatedVisibility(
                 visible = showFab,
                 enter = fadeIn() + scaleIn(initialScale = 0.85f),
-                exit = fadeOut() + scaleOut(targetScale = 0.85f)
+                exit = fadeOut() + scaleOut(targetScale = 0.85f),
             ) {
                 ScrollToTopButton(
                     onClick = {
                         coroutineScope.launch {
                             listState.animateScrollToItem(0)
                         }
-                    }
+                    },
                 )
             }
-        }
+        },
     ) { paddingValues ->
         AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (state.screenState) {
                 HistoryState.ScreenState.Error -> ErrorScreen(
                     onRetry = { onIntent(HistoryIntent.Retry) },
                     modifier = Modifier.padding(paddingValues),
-                    shakingState = errorShakingState
+                    shakingState = errorShakingState,
                 )
 
                 else -> HistoryContent(
                     state = state,
                     onIntent = onIntent,
                     listState = listState,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
                 )
             }
         }
@@ -222,7 +222,7 @@ internal fun HistoryContent(
     state: HistoryState,
     onIntent: (HistoryIntent) -> Unit,
     listState: LazyListState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
 
@@ -297,10 +297,10 @@ private fun HistoryHeader(
                 onIntent(
                     HistoryIntent.CloseDatePicker(
                         if (state.datePickerOpen == DatePickerType.START) DatePickerType.START else DatePickerType.END,
-                        it
-                    )
+                        it,
+                    ),
                 )
-            }
+            },
         )
     }
 }
@@ -354,11 +354,11 @@ private fun HistoryListCard(
             .shadow(elevation = 6.dp, shape = shape, clip = false)
             .clip(shape)
             .background(colors.card),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         val isLoading = state.screenState is HistoryState.ScreenState.Initial ||
-                state.screenState is HistoryState.ScreenState.Loading ||
-                state.screenState is HistoryState.ScreenState.Reloading
+            state.screenState is HistoryState.ScreenState.Loading ||
+            state.screenState is HistoryState.ScreenState.Reloading
 
         if (isLoading) {
             LoadingHistoryList()
@@ -374,7 +374,7 @@ private fun HistoryListCard(
             ) {
                 itemsIndexed(
                     items = state.history.transactions,
-                    key = { _, item -> item.id }
+                    key = { _, item -> item.id },
                 ) { index, item ->
                     val isLast = index == state.history.transactions.lastIndex
                     when (item) {
@@ -443,7 +443,7 @@ private fun HistoryScaffoldPreview() {
                 onIntent = {},
                 snackbarHostState = remember { SnackbarHostState() },
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }

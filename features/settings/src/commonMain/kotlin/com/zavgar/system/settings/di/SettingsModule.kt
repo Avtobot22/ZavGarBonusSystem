@@ -13,5 +13,4 @@ val settingsModule = module {
     viewModelOf(::SettingsViewModel)
 
     factoryOf(::SettingsNavGraph) bind NavGraph::class
-
 }

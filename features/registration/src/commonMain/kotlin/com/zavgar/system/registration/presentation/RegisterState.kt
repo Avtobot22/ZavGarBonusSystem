@@ -20,7 +20,7 @@ data class RegisterState(
 
     val isDatePickerOpen: Boolean = false,
 
-    val screenState: ScreenState = ScreenState.Idle
+    val screenState: ScreenState = ScreenState.Idle,
 ) {
     sealed interface ScreenState {
         data object Idle : ScreenState
@@ -29,8 +29,8 @@ data class RegisterState(
 
     val isFormFilled: Boolean
         get() = name.isNotBlank() &&
-                birthDate != null &&
-                phone.isNotBlank()
+            birthDate != null &&
+            phone.isNotBlank()
 
     val isRegisterButtonEnabled: Boolean
         get() = isFormFilled && screenState is ScreenState.Idle

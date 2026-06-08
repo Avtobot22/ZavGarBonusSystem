@@ -36,7 +36,6 @@ object HomeDestination {
 
         @CommonIgnoredOnParcel
         override val bottomTitle: StringResource = Res.string.home_title_setting
-
     }
 
     @Serializable

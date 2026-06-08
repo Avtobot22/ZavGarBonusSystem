@@ -145,7 +145,7 @@ private fun OnboardingContent(
                 ) {
                     Text(
                         text = stringResource(
-                            if (isLastPage) Res.string.onboarding_start else Res.string.onboarding_next
+                            if (isLastPage) Res.string.onboarding_start else Res.string.onboarding_next,
                         ),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
@@ -233,7 +233,7 @@ private fun OnboardingDots(
                     .width(dotWidth)
                     .clip(RoundedCornerShape(3.dp))
                     .background(
-                        if (selected) Color.White else Color.White.copy(alpha = 0.4f)
+                        if (selected) Color.White else Color.White.copy(alpha = 0.4f),
                     ),
             )
         }

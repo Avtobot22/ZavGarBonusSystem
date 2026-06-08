@@ -102,12 +102,12 @@ private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
 fun AccountScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AccountLoader(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateBack = onNavigateBack,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -116,7 +116,7 @@ internal fun AccountLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel = koinViewModel()
+    viewModel: AccountViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()
@@ -159,7 +159,7 @@ internal fun AccountLoader(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -169,7 +169,7 @@ internal fun AccountScaffold(
     snackbarHostState: SnackbarHostState,
     onIntent: (AccountIntent) -> Unit,
     errorShakingState: ShakingState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
@@ -181,18 +181,19 @@ internal fun AccountScaffold(
                 AccountState.ScreenState.Error -> ErrorScreen(
                     onRetry = { onIntent(AccountIntent.Retry) },
                     modifier = Modifier.statusBarsPadding().padding(paddingValues),
-                    shakingState = errorShakingState
+                    shakingState = errorShakingState,
                 )
 
                 AccountState.ScreenState.Initial,
-                AccountState.ScreenState.Loading -> AccountLoading(
+                AccountState.ScreenState.Loading,
+                -> AccountLoading(
                     onBack = { onIntent(AccountIntent.ClickBack) },
                 )
 
                 AccountState.ScreenState.Content -> AccountContent(
                     state = state,
                     onIntent = onIntent,
-                    modifier = Modifier
+                    modifier = Modifier,
                 )
             }
         }
@@ -203,7 +204,7 @@ internal fun AccountScaffold(
 internal fun AccountContent(
     state: AccountState,
     onIntent: (AccountIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
     val colors = MaterialTheme.colorScheme
@@ -213,7 +214,7 @@ internal fun AccountContent(
         initialDate = state.birthDate,
         isOpen = state.isDatePickerOpen,
         onDismiss = { onIntent(AccountIntent.DismissDatePicker) },
-        onConfirm = { onIntent(AccountIntent.EnterBirthDate(it)) }
+        onConfirm = { onIntent(AccountIntent.EnterBirthDate(it)) },
     )
 
     AccountScrollContainer(
@@ -240,7 +241,7 @@ internal fun AccountContent(
             placeholder = stringResource(Res.string.register_name_placeholder),
             isError = state.nameError != null,
             errorMessage = state.nameError?.asString(),
-            enabled = !state.isLoading
+            enabled = !state.isLoading,
         )
 
         AppDatePickerField(
@@ -285,27 +286,27 @@ private fun HeroContainer(
             .fillMaxWidth()
             .background(heroGradient)
             .statusBarsPadding()
-            .padding(bottom = 36.dp)
+            .padding(bottom = 36.dp),
     ) {
         Box(
             modifier = Modifier
                 .size(180.dp)
                 .offset(x = (-60).dp, y = (-40).dp)
-                .background(blobColor, CircleShape)
+                .background(blobColor, CircleShape),
         )
         Box(
             modifier = Modifier
                 .size(140.dp)
                 .align(Alignment.TopEnd)
                 .offset(x = 40.dp, y = (-20).dp)
-                .background(blobColor, CircleShape)
+                .background(blobColor, CircleShape),
         )
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .align(Alignment.BottomEnd)
                 .offset(x = (-30).dp, y = 30.dp)
-                .background(blobColor, CircleShape)
+                .background(blobColor, CircleShape),
         )
 
         Column(
@@ -354,8 +355,8 @@ private fun AccountScrollContainer(
                     .layout { measurable, constraints ->
                         val placeable = measurable.measure(
                             constraints.copy(
-                                minHeight = sheetMinHeightPx.coerceAtLeast(constraints.minHeight)
-                            )
+                                minHeight = sheetMinHeightPx.coerceAtLeast(constraints.minHeight),
+                            ),
                         )
                         layout(
                             placeable.width,
@@ -455,9 +456,10 @@ private fun DashedAvatarRing(content: @Composable () -> Unit) {
                     style = Stroke(
                         width = strokeWidthPx,
                         pathEffect = PathEffect.dashPathEffect(
-                            floatArrayOf(dashWidthPx, gapWidthPx), 0f
-                        )
-                    )
+                            floatArrayOf(dashWidthPx, gapWidthPx),
+                            0f,
+                        ),
+                    ),
                 )
             },
         contentAlignment = Alignment.Center,
@@ -478,7 +480,7 @@ private fun GlassBackButton(onClick: () -> Unit) {
     ) {
         ZavGarBackButton(
             onClick = onClick,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
         )
     }
 }
@@ -558,7 +560,7 @@ internal fun AccountLoading(
                             .background(
                                 Color.White.copy(alpha = 0.18f),
                                 RoundedCornerShape(12.dp),
-                            )
+                            ),
                     )
                 }
 
@@ -645,7 +647,7 @@ fun AccountScreenPreview() {
         nameError = null,
         birthDateError = null,
         isLoading = false,
-        isDatePickerOpen = false
+        isDatePickerOpen = false,
     )
     ZavGarThemePreview {
         Screen {
@@ -654,7 +656,7 @@ fun AccountScreenPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }
@@ -672,7 +674,7 @@ fun AccountScreenWithErrorsPreview() {
         nameError = UiText.Resource(Res.string.register_name_placeholder),
         birthDateError = UiText.Resource(Res.string.birth_date_placeholder),
         isLoading = false,
-        isDatePickerOpen = false
+        isDatePickerOpen = false,
     )
     ZavGarThemePreview {
         Screen {
@@ -681,7 +683,7 @@ fun AccountScreenWithErrorsPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }

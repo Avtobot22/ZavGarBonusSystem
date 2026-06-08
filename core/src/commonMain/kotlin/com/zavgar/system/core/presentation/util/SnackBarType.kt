@@ -4,5 +4,5 @@ enum class SnackBarType {
     INFO,
     SUCCESS,
     WARNING,
-    ERROR
+    ERROR,
 }

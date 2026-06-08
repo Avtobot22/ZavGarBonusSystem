@@ -18,7 +18,7 @@ data class HistoryState(
     val isLoadingNextPage: Boolean = false,
     val isRefreshing: Boolean = false,
 
-    val datePickerOpen: DatePickerType? = null
+    val datePickerOpen: DatePickerType? = null,
 
 ) {
 

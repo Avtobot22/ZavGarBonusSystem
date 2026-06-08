@@ -9,5 +9,4 @@ object SettingsDestination {
     @Serializable
     @CommonParcelize
     data object Profile : Destination, BottomBarVisible
-
 }

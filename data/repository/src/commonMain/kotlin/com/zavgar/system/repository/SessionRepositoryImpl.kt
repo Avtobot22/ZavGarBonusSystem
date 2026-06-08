@@ -18,7 +18,6 @@ class SessionRepositoryImpl(
         dataSource.getSession()
             .map { Session(phone = it.phone, accessToken = it.accessToken, refreshToken = it.refreshToken) }
             .toAppResult { SessionError.NotFound }
-
     }
 
     override suspend fun deleteSession(): AppResult<Unit, SessionError> = withContext(dispatcherProvider.io) {

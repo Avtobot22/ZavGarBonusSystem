@@ -15,7 +15,7 @@ fun <S : Any> AnimatedState(
     label: String = "AnimatedState",
     skipAnimation: (S) -> Boolean = { false },
     contentKey: (S) -> Any? = { it },
-    content: @Composable (S) -> Unit
+    content: @Composable (S) -> Unit,
 ) {
     if (skipAnimation(targetState)) {
         content(targetState)
@@ -25,7 +25,7 @@ fun <S : Any> AnimatedState(
             modifier = modifier,
             label = label,
             transitionSpec = transitionSpec,
-            contentKey = contentKey
+            contentKey = contentKey,
         ) { state ->
             content(state)
         }

@@ -13,5 +13,5 @@ data class ProfileResponse(
     val phone: String,
     @SerialName("birthDate")
     @Serializable(with = LocalDateDDMMYYYYSerializer::class)
-    val birthDate: LocalDate
+    val birthDate: LocalDate,
 )

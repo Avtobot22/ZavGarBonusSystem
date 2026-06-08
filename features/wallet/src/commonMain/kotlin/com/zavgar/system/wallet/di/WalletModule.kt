@@ -12,5 +12,4 @@ val walletModule = module {
     viewModelOf(::WalletViewModel)
 
     factoryOf(::WalletNavGraph) bind NavGraph::class
-
 }

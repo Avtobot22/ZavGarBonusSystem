@@ -3,13 +3,13 @@
 package com.zavgar.system.history.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.operations.error.OperationsError
 import com.zavgar.system.domain.operations.model.OperationType
 import com.zavgar.system.domain.operations.model.PointsType
 import com.zavgar.system.domain.operations.model.Transaction
 import com.zavgar.system.domain.operations.model.TransactionsPageResponse
 import com.zavgar.system.domain.operations.usecase.GetOperationsUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.history.model.DatePickerType
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.coEvery

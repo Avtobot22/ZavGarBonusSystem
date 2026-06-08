@@ -55,7 +55,7 @@ fun OtpTextField(
             decorationBox = {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     repeat(length) { index ->
                         val char = when {
@@ -68,7 +68,7 @@ fun OtpTextField(
                             char = char,
                             isFocused = isFocused,
                             isError = isError,
-                            enabled = enabled
+                            enabled = enabled,
                         )
                     }
                 }
@@ -82,7 +82,7 @@ fun OtpTextField(
                 text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
         }
     }
@@ -120,12 +120,12 @@ fun OtpCell(
             .height(58.dp)
             .background(
                 color = backgroundColor,
-                shape = MaterialTheme.shapes.small
+                shape = MaterialTheme.shapes.small,
             )
             .border(
                 width = if (isFocused && enabled) 2.dp else 1.dp,
                 color = borderColor,
-                shape = MaterialTheme.shapes.small
+                shape = MaterialTheme.shapes.small,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -140,7 +140,6 @@ fun OtpCell(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun OtpTextFieldPreview() {
@@ -149,13 +148,13 @@ fun OtpTextFieldPreview() {
 
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // Обычное состояние
             OtpTextField(
                 value = otpValue,
                 onValueChange = { otpValue = it },
-                length = 4
+                length = 4,
             )
 
             // Состояние с ошибкой
@@ -165,7 +164,7 @@ fun OtpTextFieldPreview() {
                 length = 4,
                 isError = true,
                 errorMessage = "Поле не может быть пустым",
-                modifier = Modifier
+                modifier = Modifier,
             )
 
 //            // Отключенное состояние
@@ -185,4 +184,3 @@ fun OtpTextFieldPreview() {
         }
     }
 }
-

@@ -13,6 +13,6 @@ fun MainView(
     modifier: Modifier = Modifier,
 ) {
     ZavGarMultiplatformApp(
-        modifier = modifier
+        modifier = modifier,
     )
 }

@@ -10,7 +10,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.marker.BottomBarVisible
 
-
 /**
  * Controller to manage the navigation back stack.
  *

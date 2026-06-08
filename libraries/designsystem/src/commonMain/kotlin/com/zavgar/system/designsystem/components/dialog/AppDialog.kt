@@ -36,7 +36,7 @@ fun AppDialog(
     onConfirm: () -> Unit,
     isDialogOpen: Boolean,
     onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (isDialogOpen) {
         AlertDialog(
@@ -58,7 +58,7 @@ fun AppDialog(
                 }
             },
             modifier = modifier,
-            shape = MaterialTheme.shapes.medium
+            shape = MaterialTheme.shapes.medium,
         )
     }
 }
@@ -74,7 +74,7 @@ private fun DialogPreview() {
             cancelText = "Отмена",
             onConfirm = {},
             isDialogOpen = true,
-            onDismissRequest = {}
+            onDismissRequest = {},
         )
     }
 }

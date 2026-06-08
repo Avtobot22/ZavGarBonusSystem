@@ -7,7 +7,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 class MaskVisualTransformation(
     private val mask: String,
-    private val maskChar: Char = '#'
+    private val maskChar: Char = '#',
 ) : VisualTransformation {
 
     override fun filter(text: AnnotatedString): TransformedText {

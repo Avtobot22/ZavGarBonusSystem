@@ -82,7 +82,9 @@ class AuthRepositoryImplTest {
 
         assertEquals(AppResult.Success(Unit), result)
         coVerify(exactly = 1) {
-            sessionDataSource.saveSession(Session(accessToken = "access", refreshToken = "refresh", phone = "1234567890"))
+            sessionDataSource.saveSession(
+                Session(accessToken = "access", refreshToken = "refresh", phone = "1234567890"),
+            )
         }
     }
 

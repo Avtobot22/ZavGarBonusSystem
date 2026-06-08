@@ -2,8 +2,8 @@ package com.zavgar.system.domain.onboarding.usecase
 
 import com.zavgar.system.domain.onboarding.repository.OnboardingRepository
 import io.mockk.Runs
-import io.mockk.coVerify
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest

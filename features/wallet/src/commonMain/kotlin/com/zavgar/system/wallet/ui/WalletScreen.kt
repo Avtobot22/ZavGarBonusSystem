@@ -31,11 +31,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun WalletScreen(
     onNavigateToLogin: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     WalletLoader(
         onNavigateToLogin = onNavigateToLogin,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -43,9 +43,8 @@ fun WalletScreen(
 internal fun WalletLoader(
     onNavigateToLogin: () -> Unit,
     modifier: Modifier,
-    viewModel: WalletViewModel = koinViewModel()
+    viewModel: WalletViewModel = koinViewModel(),
 ) {
-
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -74,7 +73,7 @@ internal fun WalletLoader(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -84,7 +83,7 @@ internal fun WalletScaffold(
     snackbarHostState: SnackbarHostState,
     onIntent: (WalletIntent) -> Unit,
     errorShakingState: ShakingState,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
@@ -93,21 +92,22 @@ internal fun WalletScaffold(
         AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (val screenState = state.screenState) {
                 WalletState.ScreenState.Initial,
-                WalletState.ScreenState.Loading -> WalletLoading(
-                    modifier = Modifier.padding(paddingValues)
+                WalletState.ScreenState.Loading,
+                -> WalletLoading(
+                    modifier = Modifier.padding(paddingValues),
                 )
 
                 is WalletState.ScreenState.Content -> {
                     PullToRefreshBox(
                         isRefreshing = screenState.isRefreshing,
                         onRefresh = { onIntent(WalletIntent.PullToRefresh) },
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
                     ) {
                         WalletContent(
                             state = state,
                             screenState = screenState,
                             onIntent = onIntent,
-                            modifier = Modifier
+                            modifier = Modifier,
                         )
                     }
                 }
@@ -115,18 +115,18 @@ internal fun WalletScaffold(
                 WalletState.ScreenState.Error -> ErrorScreen(
                     onRetry = { onIntent(WalletIntent.Retry) },
                     modifier = Modifier.padding(paddingValues),
-                    shakingState = errorShakingState
+                    shakingState = errorShakingState,
                 )
 
                 WalletState.ScreenState.Offline -> {
                     PullToRefreshBox(
                         isRefreshing = false,
                         onRefresh = { onIntent(WalletIntent.PullToRefresh) },
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
                     ) {
                         WalletOfflineContent(
                             phone = state.phone,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
                 }
@@ -144,14 +144,14 @@ private fun WalletScaffoldContentPreview() {
                 state = WalletState(
                     screenState = WalletState.ScreenState.Content(
                         balance = 1250,
-                        isRefreshing = false
+                        isRefreshing = false,
                     ),
                     phone = "+7 (999) 123-45-67",
                 ),
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }
@@ -170,7 +170,7 @@ private fun WalletScaffoldLoadingPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }
@@ -189,7 +189,7 @@ private fun WalletScaffoldErrorPreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }
@@ -208,7 +208,7 @@ private fun WalletScaffoldOfflinePreview() {
                 snackbarHostState = remember { SnackbarHostState() },
                 onIntent = {},
                 modifier = Modifier,
-                errorShakingState = rememberShakingState()
+                errorShakingState = rememberShakingState(),
             )
         }
     }

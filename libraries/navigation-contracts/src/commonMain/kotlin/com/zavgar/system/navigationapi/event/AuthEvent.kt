@@ -24,7 +24,6 @@ object AuthEvent {
         override fun nextDestination(): Destination = AuthDestination.Register
     }
 
-
     // --- Registration Screen Events ---
 
     /**
@@ -42,7 +41,6 @@ object AuthEvent {
     data object ToLogin : Event {
         override fun nextDestination(): Destination = AuthDestination.Login
     }
-
 
     // --- Confirmation Screen Events ---
 

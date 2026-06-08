@@ -7,5 +7,4 @@ sealed interface WalletIntent {
     data object Retry : WalletIntent
 
     data object PullToRefresh : WalletIntent
-
 }

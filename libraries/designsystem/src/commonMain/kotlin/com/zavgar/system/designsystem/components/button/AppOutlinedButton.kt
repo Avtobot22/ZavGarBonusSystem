@@ -24,7 +24,7 @@ fun AppOutlinedButton(
     enabled: Boolean = true,
     isLoading: Boolean = false,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -36,9 +36,9 @@ fun AppOutlinedButton(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.primary,
             disabledContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
         ),
-        contentPadding = contentPadding
+        contentPadding = contentPadding,
     ) {
         if (isLoading) {
             CircularProgressIndicator(
@@ -67,7 +67,7 @@ fun AppOutlinedButton(
         modifier = modifier,
         enabled = enabled,
         isLoading = isLoading,
-        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 40.dp)
+        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 40.dp),
     ) {
         Text(text = text, textAlign = TextAlign.Center)
     }
@@ -81,7 +81,7 @@ private fun AppOutlinedButtonEnabledPreview() {
             text = "Сохранить изменения",
             onClick = {},
             enabled = true,
-            isLoading = false
+            isLoading = false,
         )
     }
 }
@@ -94,7 +94,7 @@ private fun AppOutlinedButtonLoadingPreview() {
             text = "Сохранить изменения",
             onClick = {},
             enabled = true,
-            isLoading = true
+            isLoading = true,
         )
     }
 }
@@ -107,7 +107,7 @@ private fun AppOutlinedButtonNotEnabledPreview() {
             text = "Сохранить изменения",
             onClick = {},
             enabled = false,
-            isLoading = false
+            isLoading = false,
         )
     }
 }

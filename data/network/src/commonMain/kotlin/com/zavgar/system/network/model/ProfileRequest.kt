@@ -11,5 +11,5 @@ data class ProfileRequest(
     val name: String,
     @SerialName("birthDate")
     @Serializable(with = LocalDateDDMMYYYYSerializer::class)
-    val birthDate: LocalDate
+    val birthDate: LocalDate,
 )

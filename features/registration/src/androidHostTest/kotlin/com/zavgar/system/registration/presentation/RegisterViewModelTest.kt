@@ -3,10 +3,10 @@
 package com.zavgar.system.registration.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.domain.auth.error.RegisterError
 import com.zavgar.system.domain.auth.model.RegisterRequest
 import com.zavgar.system.domain.auth.usecase.RegisterUseCase
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase

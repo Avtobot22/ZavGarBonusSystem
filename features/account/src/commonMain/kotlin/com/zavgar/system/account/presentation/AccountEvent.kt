@@ -17,5 +17,4 @@ sealed interface AccountEvent {
     data object NavigateBack : AccountEvent
 
     data class ShowSnackbar(val message: SnackBarMessage) : AccountEvent
-
 }

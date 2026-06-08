@@ -25,21 +25,20 @@ fun AppCircleIcon(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    iconScale: Float = 0.9f
+    iconScale: Float = 0.9f,
 ) {
-
     Box(
         modifier = modifier
             .drawBehind {
                 drawCircle(color = backgroundColor)
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = painter,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.fillMaxSize(fraction = iconScale)
+            modifier = Modifier.fillMaxSize(fraction = iconScale),
         )
     }
 }
@@ -50,14 +49,14 @@ fun AppCircleIcon(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    iconScale: Float = 0.9f
+    iconScale: Float = 0.9f,
 ) {
     AppCircleIcon(
         painter = rememberVectorPainter(imageVector),
         modifier = modifier,
         tint = tint,
         backgroundColor = backgroundColor,
-        iconScale = iconScale
+        iconScale = iconScale,
     )
 }
 
@@ -81,7 +80,7 @@ private fun AppCircleIconGrayPreview() {
             modifier = Modifier
                 .size(48.dp),
             tint = MaterialTheme.colorScheme.onSecondaryContainer,
-            backgroundColor = MaterialTheme.colorScheme.secondaryContainer
+            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
         )
     }
 }

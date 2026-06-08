@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 
 internal class SessionDataSourceImpl(
     private val dataStore: DataStore<Preferences>,
-    private val secureTokenStorage: SecureTokenStorage
+    private val secureTokenStorage: SecureTokenStorage,
 ) : SessionDataSource {
 
     private companion object {

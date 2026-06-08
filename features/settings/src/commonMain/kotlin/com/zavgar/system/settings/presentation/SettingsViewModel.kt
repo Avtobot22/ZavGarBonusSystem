@@ -1,5 +1,7 @@
 package com.zavgar.system.settings.presentation
 
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
@@ -8,8 +10,6 @@ import com.zavgar.system.domain.theme.usecase.SetDarkThemeUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.LogoutUseCase
-import com.zavgar.system.analytics.AnalyticsEvent
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.settings.mapper.asSnackBarMessage
@@ -63,7 +63,7 @@ class SettingsViewModel(
                                     name = profileResult.data.name,
                                     phone = profileResult.data.phone,
                                     balance = balanceResult.data.balance,
-                                )
+                                ),
                             )
                         }
                     }
@@ -75,7 +75,7 @@ class SettingsViewModel(
             setState { copy(profileState = SettingsState.ProfileState.Error) }
             setEvent {
                 SettingsEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }
@@ -109,7 +109,7 @@ class SettingsViewModel(
             setState { copy(isLoggingOut = false) }
             setEvent {
                 SettingsEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }

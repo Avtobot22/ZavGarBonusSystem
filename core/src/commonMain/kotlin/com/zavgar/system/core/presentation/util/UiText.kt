@@ -11,7 +11,7 @@ sealed interface UiText {
 
     data class Resource(
         val res: StringResource,
-        val args: List<Any> = emptyList()
+        val args: List<Any> = emptyList(),
     ) : UiText
 
     @Composable

@@ -20,7 +20,10 @@ class AuthorizationResultMapperTest {
         var mapperCalled = false
         val source: AppResult<Unit, AuthError> = AppResult.Success(Unit)
 
-        val result = source.toLoginResult { mapperCalled = true; it.asSnackBarMessage() }
+        val result = source.toLoginResult {
+            mapperCalled = true
+            it.asSnackBarMessage()
+        }
 
         assertEquals(LoginResult.Success, result)
         assertTrue(!mapperCalled)

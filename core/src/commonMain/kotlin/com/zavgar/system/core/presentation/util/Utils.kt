@@ -7,14 +7,14 @@ import kotlinx.datetime.number
 // Экстеншены для форматирования дат в UI
 fun LocalDate.toDisplayString(): String {
     return "${day.toString().padStart(2, '0')}." +
-            "${month.number.toString().padStart(2, '0')}." +
-            "$year"
+        "${month.number.toString().padStart(2, '0')}." +
+        "$year"
 }
 
 fun LocalDateTime.toDayMonthYearStr(): String {
     val d = day.toString().padStart(2, '0')
     val m = month.number.toString().padStart(2, '0')
-    return "$d.$m.${year}"
+    return "$d.$m.$year"
 }
 
 fun LocalDateTime.toHourMinuteStr(): String {
