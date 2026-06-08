@@ -1,26 +1,26 @@
 package com.zavgar.system.confirmation.presentation
 
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.analytics.AuthFlow
 import com.zavgar.system.confirmation.mapper.asSnackBarMessage
-import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.confirmation.mapper.toConfirmationResult
 import com.zavgar.system.confirmation.mapper.toResendConfirmationResult
 import com.zavgar.system.confirmation.model.ConfirmationResult
 import com.zavgar.system.confirmation.model.ResendConfirmationResult
-import com.zavgar.system.domain.auth.model.ConfirmationRequest
-import com.zavgar.system.domain.auth.model.ResendRequest
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.domain.auth.model.ConfirmationRequest
+import com.zavgar.system.domain.auth.model.ResendRequest
 import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
-import com.zavgar.system.analytics.AnalyticsEvent
-import com.zavgar.system.analytics.AnalyticsTracker
-import com.zavgar.system.analytics.AuthFlow
 import com.zavgar.system.firebase.config.RemoteConfigService
-import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_resend_success
+import com.zavgar.system.resources.error_unknown_error
+import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
@@ -47,6 +47,7 @@ class ConfirmationViewModel(
     companion object {
         private const val TIMER_DURATION_SECONDS = 60
         private const val PHONE_COMPARE_DIGITS = 10
+        private const val SECOND_MILLIS = 1000L
     }
 
     override fun handleIntent(intent: ConfirmationIntent) {
@@ -62,7 +63,7 @@ class ConfirmationViewModel(
         setState {
             copy(
                 phone = phone,
-                isRegistration = isRegistration
+                isRegistration = isRegistration,
             )
         }
         autofillTestCodeIfNeeded(phone)
@@ -92,7 +93,7 @@ class ConfirmationViewModel(
     private fun handleEnterCode(code: String) = setState {
         copy(
             code = code,
-            codeError = null
+            codeError = null,
         )
     }
 
@@ -106,17 +107,18 @@ class ConfirmationViewModel(
         }
 
         performConfirmation(ConfirmationRequest(currentState.phone, currentState.code, currentState.isRegistration))
-
     }
 
     private fun handleResend() {
-        if (currentState.timerSeconds > 0 || currentState.screenState is ConfirmationState.ScreenState.Submitting) return
+        val isSubmitting = currentState.screenState is ConfirmationState.ScreenState.Submitting
+        if (currentState.timerSeconds > 0 || isSubmitting) return
 
         launchTry {
             analyticsTracker.log(AnalyticsEvent.OtpResend(authFlow))
 
             val result =
-                resendCodeUseCase(ResendRequest(currentState.phone)).toResendConfirmationResult { it.asSnackBarMessage() }
+                resendCodeUseCase(ResendRequest(currentState.phone))
+                    .toResendConfirmationResult { it.asSnackBarMessage() }
 
             startTimer()
 
@@ -125,19 +127,17 @@ class ConfirmationViewModel(
                     ConfirmationEvent.ShowSnackbar(
                         SnackBarMessage(
                             message = UiText.Resource(Res.string.confirmation_resend_success),
-                            type = SnackBarType.SUCCESS
-                        )
+                            type = SnackBarType.SUCCESS,
+                        ),
                     )
                 }
 
                 is ResendConfirmationResult.Error -> setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
             }
-
-
         } catch {
             setEvent {
                 ConfirmationEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }
@@ -158,13 +158,16 @@ class ConfirmationViewModel(
                         analyticsTracker.log(AnalyticsEvent.LoginSuccess)
                     }
                     setEvent {
-                        if (confirmationRequest.isRegistration) ConfirmationEvent.NavigateToLogin
-                        else ConfirmationEvent.NavigateToWallet
+                        if (confirmationRequest.isRegistration) {
+                            ConfirmationEvent.NavigateToLogin
+                        } else {
+                            ConfirmationEvent.NavigateToWallet
+                        }
                     }
                 }
                 is ConfirmationResult.Error -> {
                     analyticsTracker.log(
-                        AnalyticsEvent.OtpVerifyError(authFlow, errorType = "verify_failed")
+                        AnalyticsEvent.OtpVerifyError(authFlow, errorType = "verify_failed"),
                     )
                     setEvent { ConfirmationEvent.ShowSnackbar(result.message) }
                 }
@@ -175,7 +178,7 @@ class ConfirmationViewModel(
             setState { copy(screenState = ConfirmationState.ScreenState.Idle) }
             setEvent {
                 ConfirmationEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
+                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
                 )
             }
         }
@@ -186,7 +189,7 @@ class ConfirmationViewModel(
         setState { copy(timerSeconds = TIMER_DURATION_SECONDS) }
         timerJob = launchTry {
             for (seconds in (TIMER_DURATION_SECONDS - 1) downTo 0) {
-                delay(1000)
+                delay(SECOND_MILLIS)
                 setState { copy(timerSeconds = seconds) }
             }
         } catch {

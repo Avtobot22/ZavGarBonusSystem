@@ -1,5 +1,7 @@
 package com.zavgar.system.wallet.presentation
 
+import com.zavgar.system.analytics.AnalyticsEvent
+import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
@@ -9,8 +11,6 @@ import com.zavgar.system.domain.session.usecase.GetSessionUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetCachedBalanceUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetMonthlyAccrualsUseCase
 import com.zavgar.system.domain.userinfo.usecase.GetUserBalanceUseCase
-import com.zavgar.system.analytics.AnalyticsEvent
-import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.info_offline_mode
@@ -35,6 +35,7 @@ class WalletViewModel(
 
     companion object {
         private const val COOLDOWN_SECONDS = 10
+        private const val SECOND_MILLIS = 1000L
     }
 
     init {
@@ -135,8 +136,8 @@ class WalletViewModel(
                 WalletEvent.ShowSnackbar(
                     SnackBarMessage(
                         message = UiText.Resource(Res.string.info_offline_mode),
-                        type = SnackBarType.INFO
-                    )
+                        type = SnackBarType.INFO,
+                    ),
                 )
             }
         } else {
@@ -157,8 +158,8 @@ class WalletViewModel(
             WalletEvent.ShowSnackbar(
                 SnackBarMessage(
                     message = UiText.Resource(Res.string.error_unknown_error),
-                    type = SnackBarType.ERROR
-                )
+                    type = SnackBarType.ERROR,
+                ),
             )
         }
     }
@@ -173,7 +174,7 @@ class WalletViewModel(
 
         cooldownJob = launchTry {
             for (seconds in (COOLDOWN_SECONDS - 1) downTo 0) {
-                delay(1000)
+                delay(SECOND_MILLIS)
                 val state = currentState.screenState
                 if (state is WalletState.ScreenState.Content) {
                     setState { copy(screenState = state.copy(timerSeconds = seconds)) }
@@ -196,7 +197,7 @@ class WalletViewModel(
                                     balance = cached.balance,
                                     isRefreshing = true,
                                     lastUpdatedMillis = cached.updatedAtMillis,
-                                )
+                                ),
                             )
                         }
                     }

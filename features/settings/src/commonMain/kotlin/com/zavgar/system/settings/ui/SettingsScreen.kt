@@ -80,12 +80,12 @@ import org.koin.compose.viewmodel.koinViewModel
 fun SettingsScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToProfileDetail: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     SettingsLoader(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToProfileDetail = onNavigateToProfileDetail,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -94,7 +94,7 @@ internal fun SettingsLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToProfileDetail: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = koinViewModel()
+    viewModel: SettingsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -120,7 +120,7 @@ internal fun SettingsLoader(
         state = state,
         onIntent = viewModel::handleIntent,
         snackbarHostState = snackbarHostState,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -129,7 +129,7 @@ internal fun SettingsScaffold(
     state: SettingsState,
     onIntent: (SettingsIntent) -> Unit,
     snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
@@ -138,7 +138,7 @@ internal fun SettingsScaffold(
         SettingsContent(
             state = state,
             onIntent = onIntent,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
         )
     }
 }
@@ -469,12 +469,14 @@ private fun DarkModeRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     }
 }
 
+private const val RUSSIAN_PHONE_DIGITS = 10
+
 private fun formatPhoneNomer(phone: String): String {
     val digits = phone.filter { it.isDigit() }.drop(1)
-    return if (digits.length == 10) {
+    return if (digits.length == RUSSIAN_PHONE_DIGITS) {
         digits.replace(
             regex = Regex("(\\d{3})(\\d{3})(\\d{2})(\\d{2})"),
-            replacement = "+7 ($1) $2 $3-$4"
+            replacement = "+7 ($1) $2 $3-$4",
         )
     } else {
         phone
@@ -492,7 +494,7 @@ private fun SettingsScaffoldPreview() {
                         name = "Михаил Иванов",
                         phone = "+7 (999) 123-45-67",
                         balance = 1500,
-                    )
+                    ),
                 ),
                 onIntent = { },
                 snackbarHostState = remember { SnackbarHostState() },

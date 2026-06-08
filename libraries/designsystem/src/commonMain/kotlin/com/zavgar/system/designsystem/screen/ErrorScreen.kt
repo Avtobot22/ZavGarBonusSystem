@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,8 +29,11 @@ import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.danger
+import com.zavgar.system.designsystem.theme.dangerContainer
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundSecondary
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.resources.unknown_error_description

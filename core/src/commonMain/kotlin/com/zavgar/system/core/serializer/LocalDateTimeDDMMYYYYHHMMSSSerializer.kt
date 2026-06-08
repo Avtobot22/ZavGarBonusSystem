@@ -9,12 +9,14 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+// Positional parsing of the dd.MM.yyyy HH:mm:ss layout: the part-count and indices are
+// inherent to the format, not magic constants worth extracting.
+@Suppress("MagicNumber")
 object LocalDateTimeDDMMYYYYHHMMSSSerializer : KSerializer<LocalDateTime> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: LocalDateTime) {
-
         val day = value.day.toString().padStart(2, '0')
         val month = value.month.number.toString().padStart(2, '0')
         val year = value.year.toString()

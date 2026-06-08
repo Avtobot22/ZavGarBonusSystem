@@ -79,12 +79,12 @@ fun CustomSnackbarHost(
                 SnackBar(
                     snackBarData = snackbarData,
                     visuals = visuals,
-                    onAction = onAction
+                    onAction = onAction,
                 )
             } else {
                 Snackbar(snackbarData = snackbarData)
             }
-        }
+        },
     )
 }
 
@@ -110,7 +110,7 @@ private fun SnackBar(
 
     SwipeToDismissBox(
         state = swipeToDismissState,
-        backgroundContent = {}
+        backgroundContent = {},
     ) {
         Surface(
             modifier = modifier
@@ -118,33 +118,33 @@ private fun SnackBar(
                 .fillMaxWidth(),
             shape = SnackbarShape,
             color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 8.dp
+            shadowElevation = 8.dp,
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.Top,
                 ) {
                     Row(
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 14.dp),
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.Top,
                     ) {
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .background(palette.soft),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 imageVector = vectorResource(getSnackbarIcon(visuals.type)),
                                 contentDescription = null,
                                 tint = palette.accent,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(22.dp),
                             )
                         }
 
@@ -159,9 +159,9 @@ private fun SnackBar(
                                     fontSize = 15.sp,
                                     lineHeight = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = (-0.1).sp
+                                    letterSpacing = (-0.1).sp,
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
 
                             if (hasTitle) {
@@ -171,9 +171,9 @@ private fun SnackBar(
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontSize = 13.5.sp,
                                         lineHeight = 19.sp,
-                                        fontWeight = FontWeight.Normal
+                                        fontWeight = FontWeight.Normal,
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
 
@@ -184,7 +184,7 @@ private fun SnackBar(
                                     onClick = {
                                         onAction?.invoke()
                                         snackBarData.performAction()
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -195,7 +195,7 @@ private fun SnackBar(
                                 onClick = {
                                     onDismiss?.invoke()
                                     snackBarData.dismiss()
-                                }
+                                },
                             )
                         }
                     }
@@ -205,7 +205,7 @@ private fun SnackBar(
                     SnackbarProgressBar(
                         accent = palette.accent,
                         durationMillis = durationMillis,
-                        modifier = Modifier.align(Alignment.BottomCenter)
+                        modifier = Modifier.align(Alignment.BottomCenter),
                     )
                 }
             }
@@ -226,7 +226,7 @@ private fun SnackbarActionButton(
             .clip(shape)
             .border(width = 1.5.dp, color = accent, shape = shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 7.dp)
+            .padding(horizontal = 14.dp, vertical = 7.dp),
     ) {
         Text(
             text = label,
@@ -234,8 +234,8 @@ private fun SnackbarActionButton(
             style = MaterialTheme.typography.labelLarge.copy(
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.1).sp
-            )
+                letterSpacing = (-0.1).sp,
+            ),
         )
     }
 }
@@ -247,13 +247,13 @@ private fun SnackbarCloseButton(onClick: () -> Unit) {
             .size(28.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = vectorResource(Res.drawable.ic_dismiss),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(14.dp)
+            modifier = Modifier.size(14.dp),
         )
     }
 }
@@ -268,7 +268,7 @@ private fun SnackbarProgressBar(
     LaunchedEffect(Unit) {
         progress.animateTo(
             targetValue = 0f,
-            animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing)
+            animationSpec = tween(durationMillis = durationMillis, easing = LinearEasing),
         )
     }
 
@@ -276,20 +276,23 @@ private fun SnackbarProgressBar(
         modifier = modifier
             .fillMaxWidth()
             .height(3.dp)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(fraction = progress.value)
                 .fillMaxHeight()
-                .background(accent)
+                .background(accent),
         )
     }
 }
 
+private const val SHORT_DURATION_MILLIS = 4000
+private const val LONG_DURATION_MILLIS = 10000
+
 private fun SnackbarDuration.toMillisOrNull(): Int? = when (this) {
-    SnackbarDuration.Short -> 4000
-    SnackbarDuration.Long -> 10000
+    SnackbarDuration.Short -> SHORT_DURATION_MILLIS
+    SnackbarDuration.Long -> LONG_DURATION_MILLIS
     SnackbarDuration.Indefinite -> null
 }
 

@@ -53,7 +53,7 @@ internal class ProfileRepositoryImpl(
         }
         sessionResult.onFailure { exception ->
             return@withContext AppResult.Error(
-                DeleteError.UnknownError(exception.message ?: "Local storage cleanup failed")
+                DeleteError.UnknownError(exception.message ?: "Local storage cleanup failed"),
             )
         }
         AppResult.Success(Unit)
@@ -92,7 +92,7 @@ internal class ProfileRepositoryImpl(
         }
         sessionResult.onFailure { exception ->
             return@withContext AppResult.Error(
-                LogoutError.UnknownError(exception.message ?: "Local session deletion failed")
+                LogoutError.UnknownError(exception.message ?: "Local session deletion failed"),
             )
         }
 
@@ -101,9 +101,9 @@ internal class ProfileRepositoryImpl(
 
     private fun Throwable.toProfileError(): ProfileError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> ProfileError.ValidationError
-            404 -> ProfileError.UserNotFound
-            429 -> ProfileError.TooManyRequestError
+            HttpStatusCodes.BAD_REQUEST -> ProfileError.ValidationError
+            HttpStatusCodes.NOT_FOUND -> ProfileError.UserNotFound
+            HttpStatusCodes.TOO_MANY_REQUESTS -> ProfileError.TooManyRequestError
             else -> ProfileError.UnknownError(kind.message)
         }
 
@@ -114,7 +114,7 @@ internal class ProfileRepositoryImpl(
 
     private fun Throwable.toDeleteError(): DeleteError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            429 -> DeleteError.TooManyRequestError
+            HttpStatusCodes.TOO_MANY_REQUESTS -> DeleteError.TooManyRequestError
             else -> DeleteError.UnknownError(kind.message)
         }
 
@@ -125,7 +125,7 @@ internal class ProfileRepositoryImpl(
 
     private fun Throwable.toGetBalanceError(): GetBalanceError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            429 -> GetBalanceError.TooManyRequestError
+            HttpStatusCodes.TOO_MANY_REQUESTS -> GetBalanceError.TooManyRequestError
             else -> GetBalanceError.UnknownError(kind.message)
         }
 
@@ -143,7 +143,7 @@ internal class ProfileRepositoryImpl(
 
     private fun Throwable.toLogoutError(): LogoutError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            429 -> LogoutError.TooManyRequestError
+            HttpStatusCodes.TOO_MANY_REQUESTS -> LogoutError.TooManyRequestError
             else -> LogoutError.UnknownError(kind.message)
         }
 

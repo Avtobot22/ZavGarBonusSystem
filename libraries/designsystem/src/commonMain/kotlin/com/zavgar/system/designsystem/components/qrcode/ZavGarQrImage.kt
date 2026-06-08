@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,8 +15,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.card
 import qrgenerator.qrkitpainter.QrKitBallShape
 import qrgenerator.qrkitpainter.QrKitBrush
 import qrgenerator.qrkitpainter.QrKitCodeShape
@@ -35,19 +36,18 @@ fun ZavGarQrImage(
     val colorScheme = MaterialTheme.colorScheme
 
     val painter = rememberQrKitPainter(data = card) {
-
         shapes = QrKitShapes(
             codeShape = QrKitCodeShape.Default,
             ballShape = QrKitBallShape.createRoundCorners(0.25f),
             darkPixelShape = QrKitPixelShape.createRoundCorners(0.25f),
             lightPixelShape = QrKitPixelShape.Default,
-            frameShape = QrKitFrameShape.createRoundCorners(0.25f)
+            frameShape = QrKitFrameShape.createRoundCorners(0.25f),
         )
         colors = QrKitColors(
             darkBrush = QrKitBrush.solidBrush(Color.Black),
             lightBrush = QrKitBrush.solidBrush(Color.White),
             ballBrush = QrKitBrush.solidBrush(colorScheme.accent),
-            frameBrush = QrKitBrush.solidBrush(colorScheme.accent)
+            frameBrush = QrKitBrush.solidBrush(colorScheme.accent),
         )
     }
 
@@ -71,6 +71,6 @@ fun ZavGarQrImage(
 private fun ZavGarQrImagePreview() {
     ZavGarQrImage(
         card = "1234 5678 9012 3456",
-        modifier = Modifier.size(220.dp)
+        modifier = Modifier.size(220.dp),
     )
 }

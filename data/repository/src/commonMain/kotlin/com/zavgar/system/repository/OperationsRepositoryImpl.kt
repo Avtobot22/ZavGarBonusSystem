@@ -24,7 +24,9 @@ internal class OperationsRepositoryImpl(
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : OperationsRepository {
 
-    override suspend fun getOperations(request: TransactionsRequest): AppResult<TransactionsPageResponse, OperationsError> =
+    override suspend fun getOperations(
+        request: TransactionsRequest,
+    ): AppResult<TransactionsPageResponse, OperationsError> =
         withContext(dispatcherProvider.io) {
             loyaltyService.getOperations(
                 NetworkTransactionsRequest(
@@ -32,7 +34,7 @@ internal class OperationsRepositoryImpl(
                     periodEnd = request.periodEnd,
                     cursor = request.cursor,
                     limit = request.limit,
-                )
+                ),
             ).fold(
                 onSuccess = { AppResult.Success(it.toDomain()) },
                 onFailure = { AppResult.Error(it.toOperationsError()) },
@@ -62,9 +64,9 @@ internal class OperationsRepositoryImpl(
 
     private fun Throwable.toOperationsError(): OperationsError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> OperationsError.ValidationError
-            404 -> OperationsError.UserNotFound
-            429 -> OperationsError.TooManyRequestError
+            HttpStatusCodes.BAD_REQUEST -> OperationsError.ValidationError
+            HttpStatusCodes.NOT_FOUND -> OperationsError.UserNotFound
+            HttpStatusCodes.TOO_MANY_REQUESTS -> OperationsError.TooManyRequestError
             else -> OperationsError.UnknownError(kind.message)
         }
 

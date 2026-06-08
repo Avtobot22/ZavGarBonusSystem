@@ -27,7 +27,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.modifiers.shimmerAnimation
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.border
+import com.zavgar.system.designsystem.theme.danger
+import com.zavgar.system.designsystem.theme.dangerContainer
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundSecondary
+import com.zavgar.system.designsystem.theme.success
+import com.zavgar.system.designsystem.theme.successContainer
 import com.zavgar.system.history.model.HistoryItem
 
 @Composable

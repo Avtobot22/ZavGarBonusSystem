@@ -20,7 +20,10 @@ class RegistrationResultMapperTest {
         var called = false
         val source: AppResult<Unit, RegisterError> = AppResult.Success(Unit)
 
-        val result = source.toRegisterResult { called = true; it.asSnackBarMessage() }
+        val result = source.toRegisterResult {
+            called = true
+            it.asSnackBarMessage()
+        }
 
         assertEquals(RegisterResult.Success, result)
         assertTrue(!called)

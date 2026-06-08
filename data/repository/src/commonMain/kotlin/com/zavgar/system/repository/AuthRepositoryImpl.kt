@@ -38,7 +38,7 @@ internal class AuthRepositoryImpl(
         phone: String,
     ): AppResult<Unit, RegisterError> = withContext(dispatcherProvider.io) {
         authService.registerRequest(
-            RegisterRequest(name = name, birthDate = birthDate, phone = phone)
+            RegisterRequest(name = name, birthDate = birthDate, phone = phone),
         ).toAppResult { it.toRegisterError() }
     }
 
@@ -70,9 +70,9 @@ internal class AuthRepositoryImpl(
 
     private fun Throwable.toAuthError(): AuthError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> AuthError.ValidationError
-            404 -> AuthError.UserNotFound
-            429 -> AuthError.TooManyRequestError
+            HttpStatusCodes.BAD_REQUEST -> AuthError.ValidationError
+            HttpStatusCodes.NOT_FOUND -> AuthError.UserNotFound
+            HttpStatusCodes.TOO_MANY_REQUESTS -> AuthError.TooManyRequestError
             else -> AuthError.UnknownError(kind.message)
         }
 
@@ -83,9 +83,9 @@ internal class AuthRepositoryImpl(
 
     private fun Throwable.toRegisterError(): RegisterError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> RegisterError.InvalidFormat
-            409 -> RegisterError.UserAlreadyExists
-            429 -> RegisterError.TooManyRequestError
+            HttpStatusCodes.BAD_REQUEST -> RegisterError.InvalidFormat
+            HttpStatusCodes.CONFLICT -> RegisterError.UserAlreadyExists
+            HttpStatusCodes.TOO_MANY_REQUESTS -> RegisterError.TooManyRequestError
             else -> RegisterError.UnknownError(kind.message)
         }
 
@@ -96,8 +96,8 @@ internal class AuthRepositoryImpl(
 
     private fun Throwable.toConfirmationError(): ConfirmationError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when (kind.statusCode) {
-            400 -> ConfirmationError.InvalidCodeError
-            429 -> ConfirmationError.TooManyRequestError
+            HttpStatusCodes.BAD_REQUEST -> ConfirmationError.InvalidCodeError
+            HttpStatusCodes.TOO_MANY_REQUESTS -> ConfirmationError.TooManyRequestError
             else -> ConfirmationError.UnknownError(kind.message)
         }
 
@@ -109,8 +109,8 @@ internal class AuthRepositoryImpl(
     private fun Throwable.toResendConfirmationError(): ResendConfirmationError =
         when (val kind = classifyNetworkError()) {
             is NetworkErrorKind.Client -> when (kind.statusCode) {
-                400 -> ResendConfirmationError.InvalidPhone
-                429 -> ResendConfirmationError.TooManyRequestError
+                HttpStatusCodes.BAD_REQUEST -> ResendConfirmationError.InvalidPhone
+                HttpStatusCodes.TOO_MANY_REQUESTS -> ResendConfirmationError.TooManyRequestError
                 else -> ResendConfirmationError.UnknownError(kind.message)
             }
 

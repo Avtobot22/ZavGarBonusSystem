@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,8 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.designsystem.components.logo.AppLogo
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.onAccent
 import com.zavgar.system.splash.presentation.SplashEvent
 import com.zavgar.system.splash.presentation.SplashState
 import com.zavgar.system.splash.presentation.SplashViewModel
@@ -30,13 +32,13 @@ fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToWallet: () -> Unit,
     onNavigateToOnboarding: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     SplashLoader(
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToWallet = onNavigateToWallet,
         onNavigateToOnboarding = onNavigateToOnboarding,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -46,7 +48,7 @@ private fun SplashLoader(
     onNavigateToWallet: () -> Unit,
     onNavigateToOnboarding: () -> Unit,
     modifier: Modifier,
-    viewModel: SplashViewModel = koinViewModel()
+    viewModel: SplashViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -60,21 +62,23 @@ private fun SplashLoader(
 
     SplashScaffold(
         state = state,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
 @Composable
 private fun SplashScaffold(
     state: SplashState,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     SplashContent(
         state = state,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
+// `state` is threaded through for UDF symmetry; the splash UI is currently static.
+@Suppress("UnusedParameter")
 @Composable
 private fun SplashContent(state: SplashState, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
@@ -82,7 +86,7 @@ private fun SplashContent(state: SplashState, modifier: Modifier) {
         modifier = modifier
             .fillMaxSize()
             .background(colors.accent),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -107,7 +111,7 @@ private fun SplashScaffoldPreview() {
     ZavGarThemePreview {
         SplashScaffold(
             state = SplashState,
-            modifier = Modifier
+            modifier = Modifier,
         )
     }
 }

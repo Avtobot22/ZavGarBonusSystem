@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,8 +24,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zavgar.system.designsystem.components.header.ZavGarOrangeHeader
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.ZavGarTopSheetShape
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.card
 
 /**
  * Унифицированный каркас для экранов auth-флоу (Login / Register / ResetPassword / Confirmation).
@@ -94,7 +96,7 @@ private fun ColumnScope.AuthSheet(
                 val newMax = if (bounded) constraints.maxHeight + extra else constraints.maxHeight
                 val newMin = (constraints.minHeight + extra).coerceAtMost(newMax)
                 val placeable = measurable.measure(
-                    constraints.copy(minHeight = newMin, maxHeight = newMax)
+                    constraints.copy(minHeight = newMin, maxHeight = newMax),
                 )
                 layout(placeable.width, (placeable.height - extra).coerceAtLeast(0)) {
                     placeable.place(0, -extra)

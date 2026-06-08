@@ -14,7 +14,7 @@ import com.zavgar.system.designsystem.theme.border
 internal fun LoadingHistoryList(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         repeat(3) {
             LoadingHistorySection(colors)

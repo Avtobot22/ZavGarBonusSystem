@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,8 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.qrcode.ZavGarQrImage
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.border
+import com.zavgar.system.designsystem.theme.card
+import com.zavgar.system.designsystem.theme.danger
+import com.zavgar.system.designsystem.theme.dangerContainer
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundSecondary
+import com.zavgar.system.designsystem.theme.onAccent
+import com.zavgar.system.designsystem.theme.success
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.home_top_title_wallet
 import com.zavgar.system.resources.refresh_points
@@ -54,7 +62,7 @@ internal fun WalletContent(
     state: WalletState,
     screenState: WalletState.ScreenState.Content,
     onIntent: (WalletIntent) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
@@ -234,10 +242,13 @@ private fun StaleBanner(updatedAtMillis: Long) {
     }
 }
 
+private const val SECONDS_PER_MINUTE = 60
+private const val THOUSANDS_GROUP_SIZE = 3
+
 /** Форматирует оставшиеся секунды кулдауна как m:ss. */
 private fun formatCooldown(totalSeconds: Int): String {
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
+    val minutes = totalSeconds / SECONDS_PER_MINUTE
+    val seconds = totalSeconds % SECONDS_PER_MINUTE
     return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
@@ -257,11 +268,10 @@ private fun formatBalance(value: Int): String {
     for (i in s.indices.reversed()) {
         sb.append(s[i])
         counter++
-        if (counter == 3 && i != 0) {
+        if (counter == THOUSANDS_GROUP_SIZE && i != 0) {
             sb.append(' ')
             counter = 0
         }
     }
     return sb.reverse().toString()
 }
-

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import com.zavgar.system.confirmation.presentation.ConfirmationEvent
 import com.zavgar.system.confirmation.presentation.ConfirmationIntent
 import com.zavgar.system.confirmation.presentation.ConfirmationState
 import com.zavgar.system.confirmation.presentation.ConfirmationViewModel
+import com.zavgar.system.confirmation.ui.components.OtpTextField
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
@@ -39,18 +41,20 @@ import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.feedback.rememberZavGarHaptics
-import com.zavgar.system.confirmation.ui.components.OtpTextField
-import com.zavgar.system.utils.validation.CODE_LENGTH
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
-import androidx.compose.material3.MaterialTheme
-import com.zavgar.system.designsystem.theme.*
+import com.zavgar.system.designsystem.theme.ZavGarThemePreview
+import com.zavgar.system.designsystem.theme.accent
+import com.zavgar.system.designsystem.theme.foreground
+import com.zavgar.system.designsystem.theme.foregroundSecondary
+import com.zavgar.system.designsystem.theme.success
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_button_text
 import com.zavgar.system.resources.confirmation_default_time
 import com.zavgar.system.resources.confirmation_resend_code
 import com.zavgar.system.resources.confirmation_text
 import com.zavgar.system.resources.confirmation_top_title
+import com.zavgar.system.utils.validation.CODE_LENGTH
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -68,7 +72,7 @@ fun ConfirmationScreen(
         isRegistration = isRegistration,
         onNavigateToLogin = onNavigateToLogin,
         onNavigateToWallet = onNavigateToWallet,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -79,9 +83,8 @@ internal fun ConfirmationLoader(
     onNavigateToLogin: () -> Unit,
     onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ConfirmationViewModel = koinViewModel()
+    viewModel: ConfirmationViewModel = koinViewModel(),
 ) {
-
     val state by viewModel.state.collectAsStateWithLifecycle()
     val errorShakingState = rememberShakingState(power = ShakingState.ShakePower.Low)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -122,7 +125,7 @@ internal fun ConfirmationLoader(
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
         onBackClick = onNavigateToLogin,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -133,7 +136,7 @@ internal fun ConfirmationScaffold(
     onIntent: (ConfirmationIntent) -> Unit,
     errorShakingState: ShakingState,
     onBackClick: () -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -179,7 +182,7 @@ internal fun ConfirmationScaffold(
             onClick = { onIntent(ConfirmationIntent.Submit) },
             enabled = state.isConfirmButtonEnabled,
             isLoading = state.screenState is ConfirmationState.ScreenState.Submitting,
-            shakingState = errorShakingState
+            shakingState = errorShakingState,
         )
 
         Spacer(Modifier.height(20.dp))
@@ -211,11 +214,11 @@ private fun ConfirmDescriptionText(phone: String) {
 @Composable
 private fun ResendConfirmationCodeRow(
     onIntent: (ConfirmationIntent) -> Unit,
-    state: ConfirmationState
+    state: ConfirmationState,
 ) {
     val colors = MaterialTheme.colorScheme
     val canResend = state.timerSeconds <= 0 &&
-            state.screenState !is ConfirmationState.ScreenState.Submitting
+        state.screenState !is ConfirmationState.ScreenState.Submitting
 
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Row(
@@ -223,7 +226,7 @@ private fun ResendConfirmationCodeRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.clickable(enabled = canResend) {
                 onIntent(ConfirmationIntent.ClickResend)
-            }
+            },
         ) {
             Text(
                 text = stringResource(Res.string.confirmation_resend_code),
@@ -250,12 +253,14 @@ private fun ResendConfirmationCodeRow(
     }
 }
 
+private const val RUSSIAN_PHONE_DIGITS = 10
+
 private fun formatPhoneNomer(phone: String): String {
     val digits = phone.filter { it.isDigit() }
-    return if (digits.length == 10) {
+    return if (digits.length == RUSSIAN_PHONE_DIGITS) {
         digits.replace(
             regex = Regex("(\\d{3})(\\d{3})(\\d{2})(\\d{2})"),
-            replacement = "+7 ($1) $2 $3-$4"
+            replacement = "+7 ($1) $2 $3-$4",
         )
     } else {
         phone
@@ -271,7 +276,7 @@ fun ConfirmationScreenNormalPreview() {
                 phone = "+7 999 123 45 67",
                 isRegistration = true,
                 code = "123",
-                timerSeconds = 45
+                timerSeconds = 45,
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },
@@ -292,7 +297,7 @@ fun ConfirmationScreenErrorPreview() {
                 isRegistration = false,
                 code = "1234",
                 codeError = UiText.DynamicString("Неверный код"),
-                timerSeconds = 0
+                timerSeconds = 0,
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onIntent = { },

@@ -37,6 +37,10 @@ import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
+private const val REQUEST_TIMEOUT_MILLIS = 15_000L
+private const val CONNECT_TIMEOUT_MILLIS = 10_000L
+private const val SOCKET_TIMEOUT_MILLIS = 10_000L
+
 val networkModule = module {
 
     single {
@@ -99,12 +103,12 @@ val networkModule = module {
 
                             sessionDataSource.saveTokens(
                                 accessToken = newTokens.accessToken,
-                                refreshToken = newTokens.refreshToken
+                                refreshToken = newTokens.refreshToken,
                             )
 
                             BearerTokens(
                                 accessToken = newTokens.accessToken,
-                                refreshToken = newTokens.refreshToken
+                                refreshToken = newTokens.refreshToken,
                             )
                         } catch (cause: ResponseException) {
                             if (cause.response.status.isAuthFailure()) {
@@ -165,9 +169,9 @@ private fun HttpClientConfig<*>.configureCommon(
     }
 
     install(HttpTimeout) {
-        requestTimeoutMillis = 15_000
-        connectTimeoutMillis = 10_000
-        socketTimeoutMillis = 10_000
+        requestTimeoutMillis = REQUEST_TIMEOUT_MILLIS
+        connectTimeoutMillis = CONNECT_TIMEOUT_MILLIS
+        socketTimeoutMillis = SOCKET_TIMEOUT_MILLIS
     }
 
     install(HttpRequestRetry) {

@@ -15,7 +15,10 @@ class SettingsResultMapperTest {
         var called = false
         val source: AppResult<Unit, LogoutError> = AppResult.Success(Unit)
 
-        val result = source.toLogoutResult { called = true; it.asSnackBarMessage() }
+        val result = source.toLogoutResult {
+            called = true
+            it.asSnackBarMessage()
+        }
 
         assertEquals(LogoutResult.Success, result)
         assertTrue(!called)

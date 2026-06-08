@@ -37,7 +37,7 @@ fun AppTextMain(
         color = color,
         textAlign = textAlign,
         maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
@@ -57,31 +57,30 @@ fun AppTextSecondary(
         color = color,
         textAlign = textAlign,
         maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
 @Preview(showBackground = true, name = "Light Mode", widthDp = 320)
 @Composable
 fun AppTextPreview() {
-
     ZavGarThemePreview {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // 1. Иерархия заголовков
                 Column {
                     AppTextMain(
                         text = "Заголовок экрана",
-                        style = MaterialTheme.typography.headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                     AppTextSecondary(
                         text = "Подзаголовок или описание",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                 }
 
@@ -91,21 +90,21 @@ fun AppTextPreview() {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column {
                         AppTextMain(
                             text = "Магазин 'Пятерочка'",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
                         )
                         AppTextSecondary(
                             text = "10 ноя, 14:30",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                     AppTextMain(
                         text = "- 1 250 ₽",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
 
@@ -115,8 +114,9 @@ fun AppTextPreview() {
                 Column {
                     AppTextMain(text = "Пример длинного текста:")
                     AppTextSecondary(
-                        text = "Это очень длинное описание, которое должно обрезаться в конце, если не влезает в одну строку...",
-                        maxLines = 1
+                        text = "Это очень длинное описание, которое должно обрезаться " +
+                            "в конце, если не влезает в одну строку...",
+                        maxLines = 1,
                     )
                 }
             }

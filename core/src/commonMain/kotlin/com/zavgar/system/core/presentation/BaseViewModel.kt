@@ -46,6 +46,8 @@ abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
         private val tryBlock: suspend CoroutineScope.() -> Unit,
         private val scope: CoroutineScope,
     ) {
+        // Deliberate catch-all for the launch wrapper; CancellationException is rethrown above.
+        @Suppress("TooGenericExceptionCaught")
         infix fun catch(catchBlock: suspend (Exception) -> Unit): Job =
             scope.launch {
                 try {
