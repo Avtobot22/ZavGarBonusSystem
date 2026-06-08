@@ -1,0 +1,119 @@
+# Detekt configuration for ZavGarBonusSystem.
+# Applied on top of detekt's bundled defaults (buildUponDefaultConfig = true),
+# so only project-specific overrides live here. Tuned for a Compose Multiplatform
+# codebase (PascalCase @Composable functions, dp/sp literals, long composables).
+
+build:
+  maxIssues: 0          # strict gate: any finding fails the build
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+comments:
+  active: true
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+
+# KMP test source sets use non-standard names (androidHostTest/commonTest/iosTest), so the
+# default detekt test excludes (**/test/**) miss them. These globs re-add that exclusion for
+# rules that are meant to be relaxed in test code (naming, magic numbers, generic exceptions).
+# Kept inline (not a YAML anchor) for compatibility with detekt's config loader.
+
+complexity:
+  active: true
+  LongMethod:
+    # Composable layouts are legitimately long; keep a generous bound and exempt @Composable.
+    threshold: 80
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 9
+    ignoreAnnotated: ['Composable']
+    ignoreDefaultParameters: true
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+    thresholdInClasses: 20
+    thresholdInInterfaces: 20
+    ignoreAnnotatedFunctions: ['Composable']
+  CyclomaticComplexMethod:
+    threshold: 18
+    ignoreAnnotated: ['Composable']
+
+naming:
+  active: true
+  FunctionNaming:
+    # @Composable functions are PascalCase by convention; test methods use descriptive names.
+    ignoreAnnotated: ['Composable']
+    excludes: ['**/commonTest/**', '**/androidHostTest/**', '**/androidUnitTest/**', '**/iosTest/**', '**/test/**', '**/androidTest/**']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][_A-Za-z0-9]*'
+  MatchingDeclarationName:
+    # The codebase deliberately groups a primary function/composable with its small supporting
+    # type in one file (e.g. ZavGarBottomNavBar.kt holds the nav-bar composable + ZavGarTab enum,
+    # NetworkErrorMapper.kt holds the mapper fns + NetworkErrorKind). This rule clashes with that
+    # convention, so it is disabled project-wide.
+    active: false
+
+style:
+  active: true
+  MagicNumber:
+    ignoreAnnotated: ['Composable', 'Preview']
+    ignoreNumbers: ['-1', '0', '1', '2']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreEnums: true
+    ignoreNamedArgument: true
+    excludes: ['**/commonTest/**', '**/androidHostTest/**', '**/androidUnitTest/**', '**/iosTest/**', '**/test/**', '**/androidTest/**']
+  MaxLineLength:
+    maxLineLength: 120
+    excludeCommentStatements: true
+  ReturnCount:
+    max: 4
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+  ForbiddenComment:
+    active: false      # TODO/FIXME markers are allowed during active development
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    excludes: ['**/commonTest/**', '**/androidHostTest/**', '**/androidUnitTest/**', '**/iosTest/**', '**/test/**', '**/androidTest/**']
+  ThrowingExceptionsWithoutMessageOrCause:
+    excludes: ['**/commonTest/**', '**/androidHostTest/**', '**/androidUnitTest/**', '**/iosTest/**', '**/test/**', '**/androidTest/**']
+
+performance:
+  active: true
+  SpreadOperator:
+    # Forwarding a vararg with the spread operator is idiomatic and unavoidable here; the copy
+    # cost is negligible for the small arrays involved (UiText args, RemoteConfig keys).
+    active: false
+
+formatting:
+  active: true
+  autoCorrect: true
+  Filename:
+    # Test files follow the <Feature>ResultMapperTest convention in a shared file name.
+    excludes: ['**/commonTest/**', '**/androidHostTest/**', '**/androidUnitTest/**', '**/iosTest/**', '**/test/**', '**/androidTest/**']
+  MaximumLineLength:
+    maxLineLength: 120
+  ArgumentListWrapping:
+    active: true
+  Wrapping:
+    active: true
+  TrailingCommaOnCallSite:
+    active: true
+    autoCorrect: true
+    useTrailingCommaOnCallSite: true
+  TrailingCommaOnDeclarationSite:
+    active: true
+    autoCorrect: true
+    useTrailingCommaOnDeclarationSite: true
+  FunctionSignature:
+    active: false      # too noisy with Compose multi-line signatures
