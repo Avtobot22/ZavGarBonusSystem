@@ -24,10 +24,16 @@ android {
     val properties = readProperties(file("../config/signing/signing.properties"))
     signingConfigs {
         create("release") {
-            keyAlias = getSigningKey(properties, "ZAVGAR_KEY_ALIAS", "keyAlias")
-            keyPassword = getSigningKey(properties, "ZAVGAR_KEY_PASSWORD", "keyPassword")
-            storeFile = file(getSigningKey(properties, "ZAVGAR_STORE_PATH", "storePath"))
-            storePassword = getSigningKey(properties, "ZAVGAR_KEY_STORE_PASSWORD", "storePassword")
+            // Release signing is wired only when credentials are available — either the
+            // (git-ignored) signing.properties or the ZAVGAR_* env vars. CI builds debug only,
+            // so a missing signing config must not break project configuration.
+            val storePath = getSigningKey(properties, "ZAVGAR_STORE_PATH", "storePath")
+            if (storePath != null) {
+                keyAlias = getSigningKey(properties, "ZAVGAR_KEY_ALIAS", "keyAlias")
+                keyPassword = getSigningKey(properties, "ZAVGAR_KEY_PASSWORD", "keyPassword")
+                storeFile = file(storePath)
+                storePassword = getSigningKey(properties, "ZAVGAR_KEY_STORE_PASSWORD", "storePassword")
+            }
         }
     }
 
@@ -94,14 +100,13 @@ dependencies {
 }
 
 fun readProperties(propertiesFile: File) = Properties().apply {
-    propertiesFile.inputStream().use { fis ->
-        load(fis)
+    // Optional on CI: the file is git-ignored, so absence must not fail configuration.
+    if (propertiesFile.exists()) {
+        propertiesFile.inputStream().use { fis ->
+            load(fis)
+        }
     }
 }
 
-fun getSigningKey(properties: Properties, secretKey: String, propertyKey: String): String =
-    if (!System.getenv(secretKey).isNullOrEmpty()) {
-        System.getenv(secretKey)
-    } else {
-        properties.getProperty(propertyKey)
-    }
+fun getSigningKey(properties: Properties, secretKey: String, propertyKey: String): String? =
+    System.getenv(secretKey)?.takeIf { it.isNotEmpty() } ?: properties.getProperty(propertyKey)
