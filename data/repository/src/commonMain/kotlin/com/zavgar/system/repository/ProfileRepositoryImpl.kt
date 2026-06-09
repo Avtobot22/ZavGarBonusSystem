@@ -14,6 +14,8 @@ import com.zavgar.system.domain.userinfo.model.UserProfile
 import com.zavgar.system.domain.userinfo.repository.ProfileRepository
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError
+import com.zavgar.system.network.mapper.isTooManyRequests
+import com.zavgar.system.network.model.ApiErrorCode
 import com.zavgar.system.network.model.ProfileRequest
 import com.zavgar.system.network.remote.LoyaltyService
 import com.zavgar.system.network.remote.UserProfileService
@@ -100,21 +102,31 @@ internal class ProfileRepositoryImpl(
     }
 
     private fun Throwable.toProfileError(): ProfileError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.BAD_REQUEST -> ProfileError.ValidationError
-            HttpStatusCodes.NOT_FOUND -> ProfileError.UserNotFound
-            HttpStatusCodes.TOO_MANY_REQUESTS -> ProfileError.TooManyRequestError
-            else -> ProfileError.UnknownError(kind.message)
-        }
-
+        is NetworkErrorKind.Client -> kind.toProfileError()
         is NetworkErrorKind.Server -> ProfileError.ServerError
         is NetworkErrorKind.Network -> ProfileError.NetworkError
         is NetworkErrorKind.Unknown -> ProfileError.UnknownError(kind.message)
     }
 
+    private fun NetworkErrorKind.Client.toProfileError(): ProfileError = when (errorCode) {
+        ApiErrorCode.NOT_FOUND -> ProfileError.UserNotFound
+        ApiErrorCode.TOO_MANY_REQUESTS -> ProfileError.TooManyRequestError(retryAfterSeconds)
+        ApiErrorCode.VALIDATION_ERROR,
+        ApiErrorCode.INVALID_FORMAT,
+        ApiErrorCode.INVALID_ARGUMENT,
+        -> ProfileError.ValidationError
+
+        else -> when (statusCode) {
+            HttpStatusCodes.NOT_FOUND -> ProfileError.UserNotFound
+            HttpStatusCodes.BAD_REQUEST -> ProfileError.ValidationError
+            HttpStatusCodes.TOO_MANY_REQUESTS -> ProfileError.TooManyRequestError(retryAfterSeconds)
+            else -> ProfileError.UnknownError(message)
+        }
+    }
+
     private fun Throwable.toDeleteError(): DeleteError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.TOO_MANY_REQUESTS -> DeleteError.TooManyRequestError
+        is NetworkErrorKind.Client -> when {
+            kind.isTooManyRequests() -> DeleteError.TooManyRequestError(kind.retryAfterSeconds)
             else -> DeleteError.UnknownError(kind.message)
         }
 
@@ -124,8 +136,8 @@ internal class ProfileRepositoryImpl(
     }
 
     private fun Throwable.toGetBalanceError(): GetBalanceError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.TOO_MANY_REQUESTS -> GetBalanceError.TooManyRequestError
+        is NetworkErrorKind.Client -> when {
+            kind.isTooManyRequests() -> GetBalanceError.TooManyRequestError(kind.retryAfterSeconds)
             else -> GetBalanceError.UnknownError(kind.message)
         }
 
@@ -142,8 +154,8 @@ internal class ProfileRepositoryImpl(
     }
 
     private fun Throwable.toLogoutError(): LogoutError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.TOO_MANY_REQUESTS -> LogoutError.TooManyRequestError
+        is NetworkErrorKind.Client -> when {
+            kind.isTooManyRequests() -> LogoutError.TooManyRequestError(kind.retryAfterSeconds)
             else -> LogoutError.UnknownError(kind.message)
         }
 

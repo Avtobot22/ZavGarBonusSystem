@@ -10,6 +10,7 @@ import com.zavgar.system.domain.auth.error.RegisterError
 import com.zavgar.system.domain.auth.error.ResendConfirmationError
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError
+import com.zavgar.system.network.model.ApiErrorCode
 import com.zavgar.system.network.model.ConfirmationRequest
 import com.zavgar.system.network.model.LoginRequest
 import com.zavgar.system.network.model.RegisterRequest
@@ -69,53 +70,94 @@ internal class AuthRepositoryImpl(
         }
 
     private fun Throwable.toAuthError(): AuthError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.BAD_REQUEST -> AuthError.ValidationError
-            HttpStatusCodes.NOT_FOUND -> AuthError.UserNotFound
-            HttpStatusCodes.TOO_MANY_REQUESTS -> AuthError.TooManyRequestError
-            else -> AuthError.UnknownError(kind.message)
-        }
-
+        is NetworkErrorKind.Client -> kind.toAuthError()
         is NetworkErrorKind.Server -> AuthError.ServerError
         is NetworkErrorKind.Network -> AuthError.NetworkError
         is NetworkErrorKind.Unknown -> AuthError.UnknownError(kind.message)
     }
 
-    private fun Throwable.toRegisterError(): RegisterError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.BAD_REQUEST -> RegisterError.InvalidFormat
-            HttpStatusCodes.CONFLICT -> RegisterError.UserAlreadyExists
-            HttpStatusCodes.TOO_MANY_REQUESTS -> RegisterError.TooManyRequestError
-            else -> RegisterError.UnknownError(kind.message)
-        }
+    private fun NetworkErrorKind.Client.toAuthError(): AuthError = when (errorCode) {
+        ApiErrorCode.NOT_FOUND -> AuthError.UserNotFound
+        ApiErrorCode.TOO_MANY_REQUESTS -> AuthError.TooManyRequestError(retryAfterSeconds)
+        ApiErrorCode.VALIDATION_ERROR,
+        ApiErrorCode.INVALID_CREDENTIALS,
+        ApiErrorCode.INVALID_FORMAT,
+        ApiErrorCode.INVALID_ARGUMENT,
+        -> AuthError.ValidationError
 
+        else -> when (statusCode) {
+            HttpStatusCodes.NOT_FOUND -> AuthError.UserNotFound
+            HttpStatusCodes.BAD_REQUEST -> AuthError.ValidationError
+            HttpStatusCodes.TOO_MANY_REQUESTS -> AuthError.TooManyRequestError(retryAfterSeconds)
+            else -> AuthError.UnknownError(message)
+        }
+    }
+
+    private fun Throwable.toRegisterError(): RegisterError = when (val kind = classifyNetworkError()) {
+        is NetworkErrorKind.Client -> kind.toRegisterError()
         is NetworkErrorKind.Server -> RegisterError.ServerError
         is NetworkErrorKind.Network -> RegisterError.NetworkError
         is NetworkErrorKind.Unknown -> RegisterError.UnknownError(kind.message)
     }
 
-    private fun Throwable.toConfirmationError(): ConfirmationError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when (kind.statusCode) {
-            HttpStatusCodes.BAD_REQUEST -> ConfirmationError.InvalidCodeError
-            HttpStatusCodes.TOO_MANY_REQUESTS -> ConfirmationError.TooManyRequestError
-            else -> ConfirmationError.UnknownError(kind.message)
-        }
+    private fun NetworkErrorKind.Client.toRegisterError(): RegisterError = when (errorCode) {
+        ApiErrorCode.ALREADY_EXISTS, ApiErrorCode.DUPLICATE_RESOURCE -> RegisterError.UserAlreadyExists
+        ApiErrorCode.TOO_MANY_REQUESTS -> RegisterError.TooManyRequestError(retryAfterSeconds)
+        ApiErrorCode.VALIDATION_ERROR,
+        ApiErrorCode.INVALID_FORMAT,
+        ApiErrorCode.INVALID_ARGUMENT,
+        -> RegisterError.InvalidFormat
 
+        else -> when (statusCode) {
+            HttpStatusCodes.CONFLICT -> RegisterError.UserAlreadyExists
+            HttpStatusCodes.BAD_REQUEST -> RegisterError.InvalidFormat
+            HttpStatusCodes.TOO_MANY_REQUESTS -> RegisterError.TooManyRequestError(retryAfterSeconds)
+            else -> RegisterError.UnknownError(message)
+        }
+    }
+
+    private fun Throwable.toConfirmationError(): ConfirmationError = when (val kind = classifyNetworkError()) {
+        is NetworkErrorKind.Client -> kind.toConfirmationError()
         is NetworkErrorKind.Server -> ConfirmationError.ServerError
         is NetworkErrorKind.Network -> ConfirmationError.NetworkError
         is NetworkErrorKind.Unknown -> ConfirmationError.UnknownError(kind.message)
     }
 
+    private fun NetworkErrorKind.Client.toConfirmationError(): ConfirmationError = when (errorCode) {
+        ApiErrorCode.INVALID_CONFIRMATION_CODE -> ConfirmationError.InvalidCodeError
+        ApiErrorCode.CONFIRMATION_CODE_EXPIRED -> ConfirmationError.CodeExpired
+        ApiErrorCode.AUTH_SESSION_EXPIRED -> ConfirmationError.SessionExpired
+        ApiErrorCode.CONFIRMATION_ATTEMPTS_EXCEEDED -> ConfirmationError.AttemptsExceeded
+        ApiErrorCode.TOO_MANY_REQUESTS -> ConfirmationError.TooManyRequestError(retryAfterSeconds)
+        else -> when (statusCode) {
+            HttpStatusCodes.BAD_REQUEST -> ConfirmationError.InvalidCodeError
+            HttpStatusCodes.GONE -> ConfirmationError.CodeExpired
+            HttpStatusCodes.TOO_MANY_REQUESTS -> ConfirmationError.TooManyRequestError(retryAfterSeconds)
+            else -> ConfirmationError.UnknownError(message)
+        }
+    }
+
     private fun Throwable.toResendConfirmationError(): ResendConfirmationError =
         when (val kind = classifyNetworkError()) {
-            is NetworkErrorKind.Client -> when (kind.statusCode) {
-                HttpStatusCodes.BAD_REQUEST -> ResendConfirmationError.InvalidPhone
-                HttpStatusCodes.TOO_MANY_REQUESTS -> ResendConfirmationError.TooManyRequestError
-                else -> ResendConfirmationError.UnknownError(kind.message)
-            }
-
+            is NetworkErrorKind.Client -> kind.toResendConfirmationError()
             is NetworkErrorKind.Server -> ResendConfirmationError.ServerError
             is NetworkErrorKind.Network -> ResendConfirmationError.NetworkError
             is NetworkErrorKind.Unknown -> ResendConfirmationError.UnknownError(kind.message)
         }
+
+    private fun NetworkErrorKind.Client.toResendConfirmationError(): ResendConfirmationError = when (errorCode) {
+        ApiErrorCode.AUTH_SESSION_EXPIRED -> ResendConfirmationError.SessionExpired
+        ApiErrorCode.TOO_MANY_REQUESTS -> ResendConfirmationError.TooManyRequestError(retryAfterSeconds)
+        ApiErrorCode.VALIDATION_ERROR,
+        ApiErrorCode.INVALID_FORMAT,
+        ApiErrorCode.INVALID_ARGUMENT,
+        -> ResendConfirmationError.InvalidPhone
+
+        else -> when (statusCode) {
+            HttpStatusCodes.GONE -> ResendConfirmationError.SessionExpired
+            HttpStatusCodes.BAD_REQUEST -> ResendConfirmationError.InvalidPhone
+            HttpStatusCodes.TOO_MANY_REQUESTS -> ResendConfirmationError.TooManyRequestError(retryAfterSeconds)
+            else -> ResendConfirmationError.UnknownError(message)
+        }
+    }
 }
