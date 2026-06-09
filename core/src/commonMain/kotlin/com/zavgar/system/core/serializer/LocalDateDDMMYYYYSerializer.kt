@@ -9,6 +9,14 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+/**
+ * Сериализует [LocalDate] в НЕСТАНДАРТНОМ текстовом формате `dd.MM.yyyy`, которого требует
+ * ZavGar Server API (поля `birthDate`, `periodStart`, `periodEnd` и т.п.).
+ *
+ * ВНИМАНИЕ: это НЕ ISO-8601 (`yyyy-MM-dd`), хотя в OpenAPI-схеме поля помечены как `format: date`.
+ * Контракт задаёт формат текстом в описании полей; при переходе сервера на ISO этот сериализатор
+ * (и парный [LocalDateTimeDDMMYYYYHHMMSSSerializer]) необходимо обновить синхронно.
+ */
 // Positional parsing of the dd.MM.yyyy layout: the part-count and indices are inherent to
 // the format, not magic constants worth extracting.
 @Suppress("MagicNumber")
