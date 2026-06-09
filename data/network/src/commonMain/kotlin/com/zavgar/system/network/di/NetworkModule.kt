@@ -4,6 +4,9 @@ import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.domain.session.LogoutHandler
 import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
+import com.zavgar.system.network.mapper.ApiException
+import com.zavgar.system.network.model.ApiErrorCode
+import com.zavgar.system.network.model.ErrorResponse
 import com.zavgar.system.network.model.LoginResponse
 import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.network.remote.AuthServiceImpl
@@ -16,6 +19,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.auth.Auth
@@ -28,6 +32,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -110,8 +115,8 @@ val networkModule = module {
                                 accessToken = newTokens.accessToken,
                                 refreshToken = newTokens.refreshToken,
                             )
-                        } catch (cause: ResponseException) {
-                            if (cause.response.status.isAuthFailure()) {
+                        } catch (cause: ApiException) {
+                            if (cause.statusCode.isRefreshAuthFailure()) {
                                 triggerLogout(koinScope.get())
                             } else {
                                 null
@@ -143,8 +148,9 @@ private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
     return null
 }
 
-private fun HttpStatusCode.isAuthFailure(): Boolean =
-    this == HttpStatusCode.Unauthorized || this == HttpStatusCode.Forbidden
+// Только 401 на эндпоинте refresh означает, что сессия мертва и пользователя нужно разлогинить.
+// 403 (ACCESS_DENIED, требование мастер-токена) не должен приводить к logout пользователя.
+private fun Int.isRefreshAuthFailure(): Boolean = this == HttpStatusCode.Unauthorized.value
 
 private fun HttpClientConfig<*>.configureCommon(
     json: Json,
@@ -179,4 +185,26 @@ private fun HttpClientConfig<*>.configureCommon(
         retryOnException(maxRetries = 3, retryOnTimeout = false)
         exponentialDelay()
     }
+
+    // Любой неуспешный ответ переводим в ApiException: тело ErrorResponse и заголовок Retry-After
+    // читаются здесь один раз (response уже сохранён дефолтным валидатором expectSuccess),
+    // дальше классификация ошибок остаётся синхронной и ветвится по машиночитаемому code.
+    HttpResponseValidator {
+        handleResponseExceptionWithRequest { exception, _ ->
+            val responseException = exception as? ResponseException ?: return@handleResponseExceptionWithRequest
+            throw responseException.response.toApiException(responseException)
+        }
+    }
+}
+
+private suspend fun HttpResponse.toApiException(cause: ResponseException): ApiException {
+    val retryAfterSeconds = headers[HttpHeaders.RetryAfter]?.toLongOrNull()
+    val errorBody = runCatching { body<ErrorResponse>() }.getOrNull()
+    return ApiException(
+        statusCode = status.value,
+        errorCode = ApiErrorCode.fromRaw(errorBody?.code),
+        retryAfterSeconds = retryAfterSeconds,
+        errorMessage = errorBody?.message ?: cause.message.orEmpty(),
+        cause = cause,
+    )
 }
