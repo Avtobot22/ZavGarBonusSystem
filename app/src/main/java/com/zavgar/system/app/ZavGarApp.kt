@@ -16,6 +16,9 @@ class ZavGarApp : Application() {
 
         initKoin(
             isDebugBuild = BuildConfig.DEBUG,
+            // Управляется build-полем USE_MOCK_SERVER (см. app/build.gradle.kts):
+            // true -> приложение работает на заготовленных ответах без реального бэкенда.
+            useMockServer = BuildConfig.USE_MOCK_SERVER,
             appModule = module {
                 single<Context> { this@ZavGarApp }
             },

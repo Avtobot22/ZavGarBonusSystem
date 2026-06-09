@@ -63,6 +63,28 @@ android {
         }
     }
 
+    // Переключение между реальным бэкендом и in-memory Ktor mock сделано через product
+    // flavor (измерение "server"), а не через Gradle-property. В Android Studio варианты
+    // mockDebug / prodDebug выбираются в Build Variants и запускаются кнопкой Run без
+    // правки аргументов сборки. mock получает свой applicationIdSuffix, поэтому mock- и
+    // prod-сборки уживаются на устройстве одновременно.
+    flavorDimensions += "server"
+    productFlavors {
+        create("prod") {
+            dimension = "server"
+            // Реальный бэкенд: mock-граф в Koin не подмешивается.
+            buildConfigField("boolean", "USE_MOCK_SERVER", "false")
+        }
+
+        create("mock") {
+            dimension = "server"
+            // Offline-режим: сетевой слой работает на заготовленных ответах без бэкенда.
+            applicationIdSuffix = ".mock"
+            versionNameSuffix = "-mock"
+            buildConfigField("boolean", "USE_MOCK_SERVER", "true")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

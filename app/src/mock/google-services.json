@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "266371908550",
+    "project_id": "zavgar-app",
+    "storage_bucket": "zavgar-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:266371908550:android:2474d822b816643e9628c7",
+        "android_client_info": {
+          "package_name": "com.zavgar.system.bonusapp.mock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4aJzH0nW4eLEncF1BckciTEcF1F5EjC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:266371908550:android:625e8263c856d69b9628c7",
+        "android_client_info": {
+          "package_name": "com.zavgar.system.bonusapp.mock.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4aJzH0nW4eLEncF1BckciTEcF1F5EjC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -53,8 +53,11 @@ jobs:
           sarif_file: build/sarif
 
       # --- Build (gate) ---
+      # The app has two product flavors (prod / mock) on the "server" dimension.
+      # `:app:assembleDebug` would build BOTH mockDebug and prodDebug; we only need
+      # the real-backend variant on CI, so build prodDebug explicitly.
       - name: Assemble debug APK
-        run: ./gradlew :app:assembleDebug
+        run: ./gradlew :app:assembleProdDebug
 
       # --- Tests (gate) ---
       - name: Unit tests
