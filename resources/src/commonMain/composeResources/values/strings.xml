@@ -126,6 +126,9 @@
     <string name="error_invalid_login">Неверный номер телефона или пароль, попробуйте еще раз</string>
     <string name="error_invalid_format">Неверный формат входных данных, попробуйте еще раз</string>
     <string name="error_invalid_code">Неверный или истекший код, попробуйте еще раз</string>
+    <string name="error_code_expired">Код подтверждения истёк, запросите новый</string>
+    <string name="error_session_expired">Время сессии истекло, начните процесс заново</string>
+    <string name="error_attempts_exceeded">Слишком много неверных попыток, запросите новый код</string>
     <string name="error_too_many_requests">Слишком много запросов на сервер, повторите попытку позднее</string>
 
     <!--    Snackbar-->
