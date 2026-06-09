@@ -6,6 +6,7 @@ include(":core")
 
 include(":data:datastore")
 include(":data:network")
+include(":data:network-mock")
 include(":data:repository")
 
 include(":domain:session")

@@ -15,6 +15,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.data.datastore)
             implementation(projects.data.network)
+            implementation(projects.data.networkMock)
             implementation(projects.data.repository)
 
             implementation(projects.domain.auth)
