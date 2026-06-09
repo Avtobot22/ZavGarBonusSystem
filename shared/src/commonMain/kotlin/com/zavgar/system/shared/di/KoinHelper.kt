@@ -18,6 +18,7 @@ import com.zavgar.system.firebase.di.firebaseModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule
 import com.zavgar.system.network.di.networkModule
+import com.zavgar.system.networkmock.di.mockNetworkModule
 import com.zavgar.system.onboarding.di.onboardingModule
 import com.zavgar.system.registration.di.registrationModule
 import com.zavgar.system.repository.di.repositoryModule
@@ -41,11 +42,20 @@ fun initKoin() {
  * Initializes the Koin modules.
  *
  * @param isDebugBuild whether the build is a debug build (drives verbose network logging)
+ * @param useMockServer when `true`, the network layer runs on the in-memory Ktor mock
+ *   ([mockNetworkModule]) instead of a real backend — lets the app be exercised offline.
+ *   Works on both Android and iOS because the switch lives in shared Koin wiring, not in
+ *   Android build flavours.
  * @param appModule the app module to be included
  */
-fun initKoin(isDebugBuild: Boolean = isDebugBuildDefault, appModule: Module = module { }) {
+fun initKoin(
+    isDebugBuild: Boolean = isDebugBuildDefault,
+    useMockServer: Boolean = false,
+    appModule: Module = module { },
+) {
+    val transportModules = if (useMockServer) listOf(mockNetworkModule) else emptyList()
     startKoin {
-        modules(appModules + appModule + buildEnvironmentModule(isDebugBuild))
+        modules(appModules + transportModules + appModule + buildEnvironmentModule(isDebugBuild))
     }
 }
 
