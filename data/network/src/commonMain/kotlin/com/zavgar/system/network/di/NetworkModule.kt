@@ -17,6 +17,7 @@ import com.zavgar.system.network.remote.UserProfileServiceImpl
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
@@ -46,6 +47,16 @@ private const val REQUEST_TIMEOUT_MILLIS = 15_000L
 private const val CONNECT_TIMEOUT_MILLIS = 10_000L
 private const val SOCKET_TIMEOUT_MILLIS = 10_000L
 
+/**
+ * Имя Koin-квалификатора для опционального [HttpClientEngine] сетевого слоя.
+ *
+ * Если модуль с этим биндингом подмешан в граф (см. `:data:network-mock`), оба
+ * `HttpClient` собираются на нём — приложение работает на mock-сервере без реального бэкенда.
+ * Если биндинга нет ([Scope.getOrNull] вернёт `null`), используется дефолтный платформенный
+ * движок (OkHttp на Android, Darwin на iOS) — обычный рабочий режим.
+ */
+const val NETWORK_ENGINE: String = "networkEngine"
+
 val networkModule = module {
 
     single {
@@ -63,7 +74,7 @@ val networkModule = module {
         val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
         val baseUrl = get<RemoteConfigService>().baseUrl
 
-        HttpClient {
+        buildHttpClient(getOrNull(named(NETWORK_ENGINE))) {
             configureCommon(get(), baseUrl, isDebugBuild)
         }
     }
@@ -75,7 +86,7 @@ val networkModule = module {
         val baseUrl = get<RemoteConfigService>().baseUrl
         val koinScope = this
 
-        HttpClient {
+        buildHttpClient(getOrNull(named(NETWORK_ENGINE))) {
             configureCommon(get(), baseUrl, isDebugBuild)
 
             install(Auth) {
@@ -151,6 +162,16 @@ private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
 // Только 401 на эндпоинте refresh означает, что сессия мертва и пользователя нужно разлогинить.
 // 403 (ACCESS_DENIED, требование мастер-токена) не должен приводить к logout пользователя.
 private fun Int.isRefreshAuthFailure(): Boolean = this == HttpStatusCode.Unauthorized.value
+
+/**
+ * Создаёт [HttpClient] на переданном [engine], либо на дефолтном платформенном движке,
+ * если [engine] равен `null`. Так сетевой слой остаётся одним и тем же, а подменяется
+ * только транспорт — это и позволяет подключить mock-сервер без изменения сервисов.
+ */
+private fun buildHttpClient(
+    engine: HttpClientEngine?,
+    block: HttpClientConfig<*>.() -> Unit,
+): HttpClient = if (engine != null) HttpClient(engine, block) else HttpClient(block)
 
 private fun HttpClientConfig<*>.configureCommon(
     json: Json,
