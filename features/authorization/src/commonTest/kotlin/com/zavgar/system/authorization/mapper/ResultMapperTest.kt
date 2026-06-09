@@ -62,7 +62,7 @@ class AuthorizationResultMapperTest {
     fun `asSnackBarMessage routes AppError-typed errors through the shared mapper`() {
         assertEquals(SnackBarType.ERROR, AuthError.NetworkError.asSnackBarMessage().type)
         assertEquals(SnackBarType.ERROR, AuthError.ServerError.asSnackBarMessage().type)
-        assertEquals(SnackBarType.WARNING, AuthError.TooManyRequestError.asSnackBarMessage().type)
+        assertEquals(SnackBarType.WARNING, AuthError.TooManyRequestError().asSnackBarMessage().type)
         assertEquals(SnackBarType.ERROR, AuthError.UnknownError("x").asSnackBarMessage().type)
     }
 }

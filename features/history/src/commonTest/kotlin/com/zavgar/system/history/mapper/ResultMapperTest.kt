@@ -64,6 +64,6 @@ class HistoryResultMapperTest {
         // NetworkError implements AppError.Network -> handled by the shared mapAppError branch.
         assertEquals(SnackBarType.ERROR, OperationsError.NetworkError.asSnackBarMessage().type)
         assertEquals(SnackBarType.ERROR, OperationsError.ServerError.asSnackBarMessage().type)
-        assertEquals(SnackBarType.WARNING, OperationsError.TooManyRequestError.asSnackBarMessage().type)
+        assertEquals(SnackBarType.WARNING, OperationsError.TooManyRequestError().asSnackBarMessage().type)
     }
 }

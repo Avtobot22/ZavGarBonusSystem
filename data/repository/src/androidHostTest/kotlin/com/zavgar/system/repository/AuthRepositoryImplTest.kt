@@ -38,7 +38,7 @@ class AuthRepositoryImplTest {
         assertEquals(AppResult.Error(AuthError.UserNotFound), repository.login("x"))
 
         coEvery { authService.loginRequest(any()) } returns Result.failure(clientError(429))
-        assertEquals(AppResult.Error(AuthError.TooManyRequestError), repository.login("x"))
+        assertEquals(AppResult.Error(AuthError.TooManyRequestError()), repository.login("x"))
 
         coEvery { authService.loginRequest(any()) } returns Result.failure(clientError(418, "teapot"))
         assertEquals(AppResult.Error(AuthError.UnknownError("teapot")), repository.login("x"))
@@ -116,7 +116,7 @@ class AuthRepositoryImplTest {
 
         val result = repository.confirmRegistration(phone = "1234567890", code = "1111")
 
-        assertEquals(AppResult.Error(ConfirmationError.TooManyRequestError), result)
+        assertEquals(AppResult.Error(ConfirmationError.TooManyRequestError()), result)
     }
 
     @Test

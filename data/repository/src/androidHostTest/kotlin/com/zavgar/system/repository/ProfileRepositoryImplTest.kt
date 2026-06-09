@@ -89,7 +89,7 @@ class ProfileRepositoryImplTest {
 
         val result = repository.getBalance()
 
-        assertEquals(AppResult.Error(GetBalanceError.TooManyRequestError), result)
+        assertEquals(AppResult.Error(GetBalanceError.TooManyRequestError()), result)
         coVerify(exactly = 0) { balanceCacheDataSource.saveBalance(any()) }
     }
 
@@ -159,7 +159,7 @@ class ProfileRepositoryImplTest {
         coEvery { userProfileService.logout() } returns Result.failure(clientError(429))
         coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
 
-        assertEquals(AppResult.Error(LogoutError.TooManyRequestError), repository.logout())
+        assertEquals(AppResult.Error(LogoutError.TooManyRequestError()), repository.logout())
     }
 
     @Test

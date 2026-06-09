@@ -29,10 +29,10 @@ class ResendCodeUseCaseTest {
     @Test
     fun `forwards a repository error unchanged`() = runTest {
         coEvery { repository.resendCode(any()) } returns
-            AppResult.Error(ResendConfirmationError.TooManyRequestError)
+            AppResult.Error(ResendConfirmationError.TooManyRequestError())
 
         val result = useCase(ResendRequest(phone = "1234567890"))
 
-        assertEquals(AppResult.Error(ResendConfirmationError.TooManyRequestError), result)
+        assertEquals(AppResult.Error(ResendConfirmationError.TooManyRequestError()), result)
     }
 }

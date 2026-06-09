@@ -38,7 +38,7 @@ class ConfirmationResultMapperTest {
             ConfirmationError.InvalidCodeError.asSnackBarMessage(),
         )
         assertEquals(SnackBarType.ERROR, ConfirmationError.NetworkError.asSnackBarMessage().type)
-        assertEquals(SnackBarType.WARNING, ConfirmationError.TooManyRequestError.asSnackBarMessage().type)
+        assertEquals(SnackBarType.WARNING, ConfirmationError.TooManyRequestError().asSnackBarMessage().type)
     }
 
     @Test

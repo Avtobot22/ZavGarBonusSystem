@@ -58,6 +58,6 @@ class RegistrationResultMapperTest {
     fun `asSnackBarMessage routes AppError-typed errors through the shared mapper`() {
         assertEquals(SnackBarType.ERROR, RegisterError.NetworkError.asSnackBarMessage().type)
         assertEquals(SnackBarType.ERROR, RegisterError.ServerError.asSnackBarMessage().type)
-        assertEquals(SnackBarType.WARNING, RegisterError.TooManyRequestError.asSnackBarMessage().type)
+        assertEquals(SnackBarType.WARNING, RegisterError.TooManyRequestError().asSnackBarMessage().type)
     }
 }

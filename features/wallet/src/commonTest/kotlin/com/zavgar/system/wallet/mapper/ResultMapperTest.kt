@@ -39,7 +39,7 @@ class WalletResultMapperTest {
     @Test
     fun `asSnackBarMessage routes every GetBalanceError through the shared mapper`() {
         assertEquals(SnackBarType.ERROR, GetBalanceError.ServerError.asSnackBarMessage().type)
-        assertEquals(SnackBarType.WARNING, GetBalanceError.TooManyRequestError.asSnackBarMessage().type)
+        assertEquals(SnackBarType.WARNING, GetBalanceError.TooManyRequestError().asSnackBarMessage().type)
         assertEquals(SnackBarType.ERROR, GetBalanceError.UnknownError("x").asSnackBarMessage().type)
     }
 }

@@ -37,6 +37,6 @@ class SettingsResultMapperTest {
     @Test
     fun `asSnackBarMessage routes every LogoutError through the shared mapper`() {
         assertEquals(SnackBarType.ERROR, LogoutError.NetworkError.asSnackBarMessage().type)
-        assertEquals(SnackBarType.WARNING, LogoutError.TooManyRequestError.asSnackBarMessage().type)
+        assertEquals(SnackBarType.WARNING, LogoutError.TooManyRequestError().asSnackBarMessage().type)
     }
 }
