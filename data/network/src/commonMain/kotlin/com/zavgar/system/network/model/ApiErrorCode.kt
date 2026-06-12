@@ -1,11 +1,5 @@
 package com.zavgar.system.network.model
 
-/**
- * Стабильные машиночитаемые коды ошибок из каталога Api.yaml (поле `code` в [ErrorResponse]).
- *
- * Клиент ветвит обработку именно по этим кодам. Неизвестные/отсутствующие коды
- * сворачиваются в `null` (см. [fromRaw]) — вызывающий код откатывается на HTTP-статус.
- */
 enum class ApiErrorCode {
     VALIDATION_ERROR,
     INVALID_OPERATION,

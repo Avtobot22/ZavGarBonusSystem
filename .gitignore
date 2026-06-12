@@ -21,3 +21,13 @@ node_modules/
 /config/signing/
 # Claude code reviews (local only)
 .claude/review/
+# Play app-signing key export tool & key material
+/pepk.jar
+# Generated/release artifacts not meant for VCS
+/app/src/release/
+# API spec & design prototypes (kept locally, not versioned here)
+/Api.yaml
+/SnackBarDesign/
+/ZavGar_Bonus_system/
+# IDE run configurations
+/.run/

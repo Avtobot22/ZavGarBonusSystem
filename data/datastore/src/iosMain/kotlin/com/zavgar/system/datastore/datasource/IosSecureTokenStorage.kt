@@ -153,6 +153,7 @@ internal class IosSecureTokenStorage : SecureTokenStorage {
 
     private fun String.toCFData(): CFDataRef {
         val bytes = encodeToByteArray()
+        if (bytes.isEmpty()) return CFDataCreate(null, null, 0)!!
         return bytes.usePinned { pinned ->
             CFDataCreate(null, pinned.addressOf(0).reinterpret(), bytes.size.convert())!!
         }

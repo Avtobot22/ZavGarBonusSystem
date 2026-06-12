@@ -60,8 +60,10 @@ jobs:
         run: ./gradlew :app:assembleProdDebug
 
       # --- Tests (gate) ---
+      # KMP modules run unit tests via testAndroidHostTest; the app module has per-flavor
+      # test tasks, so test the prod variant we build above (mock stays local-dev only).
       - name: Unit tests
-        run: ./gradlew testAndroidHostTest :app:testDebugUnitTest
+        run: ./gradlew testAndroidHostTest :app:testProdDebugUnitTest
 
       - name: Coverage report (Kover)
         if: success() || failure()
