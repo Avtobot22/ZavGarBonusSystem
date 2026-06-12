@@ -32,6 +32,7 @@ class WalletViewModel(
 
     private var fetchJob: Job? = null
     private var cooldownJob: Job? = null
+    private var initJob: Job? = null
 
     companion object {
         private const val COOLDOWN_SECONDS = 10
@@ -59,6 +60,9 @@ class WalletViewModel(
     }
 
     private fun handleRetry() {
+        // Игнорируем повторный Retry, пока инициализация ещё идёт (живой initJob или
+        // экран в состоянии Loading) — иначе спам по кнопке плодит параллельные init-цепочки.
+        if (initJob?.isActive == true || currentState.screenState is WalletState.ScreenState.Loading) return
         setState { copy(screenState = WalletState.ScreenState.Loading) }
         initializeData()
     }
@@ -185,7 +189,8 @@ class WalletViewModel(
     }
 
     private fun initializeData() {
-        launchTry {
+        initJob?.cancel()
+        initJob = launchTry {
             when (val result = getSessionUseCase()) {
                 is AppResult.Success -> {
                     setState { copy(phone = result.data.phone) }
@@ -226,5 +231,6 @@ class WalletViewModel(
         super.onCleared()
         fetchJob?.cancel()
         cooldownJob?.cancel()
+        initJob?.cancel()
     }
 }

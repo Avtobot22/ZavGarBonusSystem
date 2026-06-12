@@ -1,5 +1,6 @@
 package com.zavgar.system.shared
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,9 @@ fun ZavGarMultiplatformApp(
     navEventController: NavEventController = koinInject(),
     observeDarkThemeUseCase: ObserveDarkThemeUseCase = koinInject(),
 ) {
-    val isDarkTheme by observeDarkThemeUseCase().collectAsState(false)
+    // Первый кадр до прихода значения из стора берём из системной темы, чтобы на тёмной
+    // системе не было вспышки светлой темы.
+    val isDarkTheme by observeDarkThemeUseCase().collectAsState(isSystemInDarkTheme())
 
     LaunchedEffect(appEventBus) {
         appEventBus.events.collect { event ->

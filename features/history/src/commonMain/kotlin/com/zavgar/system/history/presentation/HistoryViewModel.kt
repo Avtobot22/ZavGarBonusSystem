@@ -17,6 +17,7 @@ import com.zavgar.system.history.model.TransactionsResult
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_invalid_date_range
 import com.zavgar.system.resources.error_unknown_error
+import kotlinx.coroutines.Job
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -31,6 +32,7 @@ class HistoryViewModel(
     private enum class LoadMode { FIRST_PAGE, REFRESH, NEXT_PAGE }
 
     private var loadedPages: Int = 0
+    private var loadJob: Job? = null
 
     init {
         loadData(LoadMode.FIRST_PAGE)
@@ -93,6 +95,7 @@ class HistoryViewModel(
 
     private fun loadData(mode: LoadMode) {
         if (!canLoad(mode)) return
+        if (mode != LoadMode.NEXT_PAGE) loadJob?.cancel()
         applyLoadingState(mode)
         fetchPage(mode)
     }
@@ -106,7 +109,8 @@ class HistoryViewModel(
             LoadMode.REFRESH -> !isRefreshing
 
             LoadMode.NEXT_PAGE ->
-                !isLoadingNextPage && history.hasMore && history.nextCursor != null
+                loadJob?.isActive != true &&
+                    !isLoadingNextPage && history.hasMore && history.nextCursor != null
         }
     }
 
@@ -133,7 +137,7 @@ class HistoryViewModel(
     }
 
     private fun fetchPage(mode: LoadMode) {
-        launchTry {
+        loadJob = launchTry {
             val result = getOperationsUseCase(buildRequest(mode)).toTransactionsResult()
             applyResult(mode, result)
         } catch {

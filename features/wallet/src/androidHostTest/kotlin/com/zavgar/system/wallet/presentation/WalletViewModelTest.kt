@@ -97,4 +97,20 @@ class WalletViewModelTest {
 
         assertEquals(WalletState.ScreenState.Offline, vm.state.value.screenState)
     }
+
+    @Test
+    fun `Retry is ignored while an initialization is already in flight`() = runTest(dispatcher) {
+        coEvery { getSessionUseCase() } returns AppResult.Success(Session("1234567890", "a", "r"))
+        coEvery { getCachedBalanceUseCase() } returns null
+        coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(500))
+        coEvery { getMonthlyAccrualsUseCase() } returns AppResult.Success(30)
+
+        // initJob от init{} ещё не отработал (StandardTestDispatcher) — спам Retry должен
+        // игнорироваться, чтобы не плодить параллельные init-цепочки.
+        val vm = viewModel()
+        repeat(times = 5) { vm.handleIntent(WalletIntent.Retry) }
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { getSessionUseCase() }
+    }
 }
