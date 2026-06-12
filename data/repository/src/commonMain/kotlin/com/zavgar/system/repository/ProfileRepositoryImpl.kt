@@ -47,13 +47,9 @@ internal class ProfileRepositoryImpl(
         }
 
     override suspend fun delete(): AppResult<Unit, DeleteError> = withContext(dispatcherProvider.io) {
-        val serverResult = userProfileService.delete()
-        val sessionResult = sessionDataSource.deleteSession()
+        userProfileService.delete()
 
-        serverResult.onFailure { serverError ->
-            return@withContext AppResult.Error(serverError.toDeleteError())
-        }
-        sessionResult.onFailure { exception ->
+        sessionDataSource.deleteSession().onFailure { exception ->
             return@withContext AppResult.Error(
                 DeleteError.UnknownError(exception.message ?: "Local storage cleanup failed"),
             )
@@ -86,13 +82,9 @@ internal class ProfileRepositoryImpl(
         }
 
     override suspend fun logout(): AppResult<Unit, LogoutError> = withContext(dispatcherProvider.io) {
-        val serverResult = userProfileService.logout()
-        val sessionResult = sessionDataSource.deleteSession()
+        userProfileService.logout()
 
-        serverResult.onFailure { serverError ->
-            return@withContext AppResult.Error(serverError.toLogoutError())
-        }
-        sessionResult.onFailure { exception ->
+        sessionDataSource.deleteSession().onFailure { exception ->
             return@withContext AppResult.Error(
                 LogoutError.UnknownError(exception.message ?: "Local session deletion failed"),
             )
@@ -124,17 +116,6 @@ internal class ProfileRepositoryImpl(
         }
     }
 
-    private fun Throwable.toDeleteError(): DeleteError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when {
-            kind.isTooManyRequests() -> DeleteError.TooManyRequestError(kind.retryAfterSeconds)
-            else -> DeleteError.UnknownError(kind.message)
-        }
-
-        is NetworkErrorKind.Server -> DeleteError.ServerError
-        is NetworkErrorKind.Network -> DeleteError.NetworkError
-        is NetworkErrorKind.Unknown -> DeleteError.UnknownError(kind.message)
-    }
-
     private fun Throwable.toGetBalanceError(): GetBalanceError = when (val kind = classifyNetworkError()) {
         is NetworkErrorKind.Client -> when {
             kind.isTooManyRequests() -> GetBalanceError.TooManyRequestError(kind.retryAfterSeconds)
@@ -151,16 +132,5 @@ internal class ProfileRepositoryImpl(
         is NetworkErrorKind.Server -> MonthlyAccrualsError.ServerError
         is NetworkErrorKind.Network -> MonthlyAccrualsError.NetworkError
         is NetworkErrorKind.Unknown -> MonthlyAccrualsError.UnknownError(kind.message)
-    }
-
-    private fun Throwable.toLogoutError(): LogoutError = when (val kind = classifyNetworkError()) {
-        is NetworkErrorKind.Client -> when {
-            kind.isTooManyRequests() -> LogoutError.TooManyRequestError(kind.retryAfterSeconds)
-            else -> LogoutError.UnknownError(kind.message)
-        }
-
-        is NetworkErrorKind.Server -> LogoutError.ServerError
-        is NetworkErrorKind.Network -> LogoutError.NetworkError
-        is NetworkErrorKind.Unknown -> LogoutError.UnknownError(kind.message)
     }
 }

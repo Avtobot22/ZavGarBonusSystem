@@ -131,11 +131,13 @@ class ProfileRepositoryImplTest {
     }
 
     @Test
-    fun `delete maps a server failure before clearing the session`() = runTest {
+    fun `delete returns Success and clears the session even when the server fails`() = runTest {
+        // Политика «логаут в любом случае»: серверная ошибка не отменяет локальный выход.
         coEvery { userProfileService.delete() } returns Result.failure(serverError())
         coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
 
-        assertEquals(AppResult.Error(DeleteError.ServerError), repository.delete())
+        assertEquals(AppResult.Success(Unit), repository.delete())
+        coVerify { sessionDataSource.deleteSession() }
     }
 
     @Test
@@ -155,11 +157,13 @@ class ProfileRepositoryImplTest {
     }
 
     @Test
-    fun `logout maps a server failure`() = runTest {
+    fun `logout returns Success and clears the session even when the server fails`() = runTest {
+        // Политика «логаут в любом случае»: серверная ошибка не отменяет локальный выход.
         coEvery { userProfileService.logout() } returns Result.failure(clientError(429))
         coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
 
-        assertEquals(AppResult.Error(LogoutError.TooManyRequestError()), repository.logout())
+        assertEquals(AppResult.Success(Unit), repository.logout())
+        coVerify { sessionDataSource.deleteSession() }
     }
 
     @Test
