@@ -10,7 +10,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.utils.result)
-            implementation(projects.libraries.events)
             implementation(projects.libraries.coroutines)
 
             implementation(libs.koin.core)
