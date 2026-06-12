@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 
 /**
  * Triggers [onLoadMore] when the user scrolls near the end of the list.
@@ -23,13 +24,16 @@ fun Pagination(
     loadThreshold: Int = 5,
     onLoadMore: () -> Unit,
 ) {
+    val currentItemsCount by rememberUpdatedState(itemsCount)
+    val currentOnLoadMore by rememberUpdatedState(onLoadMore)
+
     val shouldLoadMore by remember(loadThreshold) {
         derivedStateOf {
             val lastIndex = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
-            itemsCount > 0 && lastIndex >= itemsCount - loadThreshold
+            currentItemsCount > 0 && lastIndex >= currentItemsCount - loadThreshold
         }
     }
     LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) onLoadMore()
+        if (shouldLoadMore) currentOnLoadMore()
     }
 }

@@ -11,7 +11,9 @@ import kotlin.test.assertEquals
 
 class AppErrorMapperTest {
 
-    private val tooManyRequest = object : AppError.TooManyRequest {}
+    private val tooManyRequest = object : AppError.TooManyRequest {
+        override val retryAfterSeconds: Long? = null
+    }
     private val server = object : AppError.Server {}
     private val network = object : AppError.Network {}
     private val unknown = object : AppError.Unknown {

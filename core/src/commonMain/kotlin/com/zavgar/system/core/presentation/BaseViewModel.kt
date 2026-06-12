@@ -5,13 +5,12 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -23,11 +22,8 @@ abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
     protected val currentState: S
         get() = _state.value
 
-    private val _event = MutableSharedFlow<E>(
-        extraBufferCapacity = 64,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-    val event: SharedFlow<E> = _event.asSharedFlow()
+    private val _event = Channel<E>(Channel.BUFFERED)
+    val event: Flow<E> = _event.receiveAsFlow()
 
     abstract fun handleIntent(intent: I)
 
@@ -36,13 +32,13 @@ abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
     }
 
     protected fun setEvent(builder: () -> E) {
-        _event.tryEmit(builder())
+        _event.trySend(builder())
     }
 
     protected fun launchTry(tryBlock: suspend CoroutineScope.() -> Unit): LaunchBuilder =
         LaunchBuilder(tryBlock, viewModelScope)
 
-    inner class LaunchBuilder(
+    class LaunchBuilder(
         private val tryBlock: suspend CoroutineScope.() -> Unit,
         private val scope: CoroutineScope,
     ) {

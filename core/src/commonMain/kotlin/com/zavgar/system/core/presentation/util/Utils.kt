@@ -11,11 +11,7 @@ fun LocalDate.toDisplayString(): String {
         "$year"
 }
 
-fun LocalDateTime.toDayMonthYearStr(): String {
-    val d = day.toString().padStart(2, '0')
-    val m = month.number.toString().padStart(2, '0')
-    return "$d.$m.$year"
-}
+fun LocalDateTime.toDayMonthYearStr(): String = date.toDisplayString()
 
 fun LocalDateTime.toHourMinuteStr(): String {
     val h = hour.toString().padStart(2, '0')
