@@ -111,12 +111,30 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `confirmRegistration forwards a mapped error`() = runTest {
+    fun `confirmRegistration saves the session and returns Success`() = runTest {
+        coEvery { authService.confirmRegistration(any()) } returns Result.success(
+            LoginResponse(accessToken = "access", accessExpiresIn = 1, refreshToken = "refresh", refreshExpiresIn = 2),
+        )
+        coEvery { sessionDataSource.saveSession(any()) } returns Result.success(Unit)
+
+        val result = repository.confirmRegistration(phone = "1234567890", code = "1111")
+
+        assertEquals(AppResult.Success(Unit), result)
+        coVerify(exactly = 1) {
+            sessionDataSource.saveSession(
+                Session(accessToken = "access", refreshToken = "refresh", phone = "1234567890"),
+            )
+        }
+    }
+
+    @Test
+    fun `confirmRegistration forwards a mapped error and never touches the session`() = runTest {
         coEvery { authService.confirmRegistration(any()) } returns Result.failure(clientError(429))
 
         val result = repository.confirmRegistration(phone = "1234567890", code = "1111")
 
         assertEquals(AppResult.Error(ConfirmationError.TooManyRequestError()), result)
+        coVerify(exactly = 0) { sessionDataSource.saveSession(any()) }
     }
 
     @Test

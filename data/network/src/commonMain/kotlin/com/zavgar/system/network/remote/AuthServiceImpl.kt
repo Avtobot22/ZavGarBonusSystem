@@ -44,7 +44,7 @@ class AuthServiceImpl(
             url { path("auth/confirm/register") }
             setBody(confirmationRequest.copy(phone = withCountryCode(confirmationRequest.phone)))
         }
-        response.body<Unit>()
+        response.body<LoginResponse>()
     }
 
     override suspend fun resendCode(resendRequest: ResendRequest) = runSuspendCatching {
@@ -56,5 +56,12 @@ class AuthServiceImpl(
     }
 
     private fun withCountryCode(phone: String): String =
-        if (phone.startsWith("+")) phone else "+7$phone"
+        if (phone.startsWith("+")) phone else "$COUNTRY_CODE$phone"
+
+    private companion object {
+        // Код страны для текущего рынка (РФ). Это допущение неявно связано с тремя местами:
+        // PHONE_LENGTH = 10 в :utils:validation (длина номера без кода) и маской
+        // "+7 (###) ###-##-##" в MaskVisualTransformation. Менять их нужно согласованно.
+        const val COUNTRY_CODE = "+7"
+    }
 }

@@ -13,7 +13,7 @@ interface AuthService {
 
     suspend fun confirmLogin(confirmationRequest: ConfirmationRequest): Result<LoginResponse>
 
-    suspend fun confirmRegistration(confirmationRequest: ConfirmationRequest): Result<Unit>
+    suspend fun confirmRegistration(confirmationRequest: ConfirmationRequest): Result<LoginResponse>
 
     suspend fun resendCode(resendRequest: ResendRequest): Result<Unit>
 }

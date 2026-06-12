@@ -27,7 +27,7 @@ internal fun createMockEngine(): MockEngine = MockEngine { request ->
         method.isPost(path, "auth/login") -> okEmpty()
         method.isPost(path, "auth/register") -> okEmpty()
         method.isPost(path, "auth/confirm/login") -> okJson(MockResponses.loginResponse)
-        method.isPost(path, "auth/confirm/register") -> okEmpty()
+        method.isPost(path, "auth/confirm/register") -> okJson(MockResponses.loginResponse)
         method.isPost(path, "auth/refresh/code") -> okEmpty()
         method.isPost(path, "auth/refresh/token") -> okJson(MockResponses.loginResponse)
 

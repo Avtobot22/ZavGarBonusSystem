@@ -13,6 +13,7 @@ import com.zavgar.system.network.mapper.classifyNetworkError
 import com.zavgar.system.network.model.ApiErrorCode
 import com.zavgar.system.network.model.ConfirmationRequest
 import com.zavgar.system.network.model.LoginRequest
+import com.zavgar.system.network.model.LoginResponse
 import com.zavgar.system.network.model.RegisterRequest
 import com.zavgar.system.network.model.ResendRequest
 import com.zavgar.system.network.remote.AuthService
@@ -45,23 +46,32 @@ internal class AuthRepositoryImpl(
 
     override suspend fun confirmLogin(phone: String, code: String): AppResult<Unit, ConfirmationError> =
         withContext(dispatcherProvider.io) {
-            val response = authService.confirmLogin(ConfirmationRequest(phone = phone, code = code))
-                .fold(
-                    onSuccess = { it },
-                    onFailure = { return@withContext AppResult.Error(it.toConfirmationError()) },
-                )
-            val saved = sessionDataSource.saveSession(Session(response.accessToken, response.refreshToken, phone))
-            saved.fold(
-                onSuccess = { AppResult.Success(Unit) },
-                onFailure = { AppResult.Error(ConfirmationError.UnknownError(it.message ?: "Storage Error")) },
-            )
+            saveConfirmedSession(phone) {
+                authService.confirmLogin(ConfirmationRequest(phone = phone, code = code))
+            }
         }
 
     override suspend fun confirmRegistration(phone: String, code: String): AppResult<Unit, ConfirmationError> =
         withContext(dispatcherProvider.io) {
-            authService.confirmRegistration(ConfirmationRequest(phone = phone, code = code))
-                .toAppResult { it.toConfirmationError() }
+            saveConfirmedSession(phone) {
+                authService.confirmRegistration(ConfirmationRequest(phone = phone, code = code))
+            }
         }
+
+    private suspend inline fun saveConfirmedSession(
+        phone: String,
+        confirm: () -> Result<LoginResponse>,
+    ): AppResult<Unit, ConfirmationError> {
+        val response = confirm().fold(
+            onSuccess = { it },
+            onFailure = { return AppResult.Error(it.toConfirmationError()) },
+        )
+        val saved = sessionDataSource.saveSession(Session(response.accessToken, response.refreshToken, phone))
+        return saved.fold(
+            onSuccess = { AppResult.Success(Unit) },
+            onFailure = { AppResult.Error(ConfirmationError.UnknownError(it.message ?: "Storage Error")) },
+        )
+    }
 
     override suspend fun resendCode(phone: String): AppResult<Unit, ResendConfirmationError> =
         withContext(dispatcherProvider.io) {
