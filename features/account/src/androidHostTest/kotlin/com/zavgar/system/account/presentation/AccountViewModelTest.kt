@@ -16,6 +16,7 @@ import com.zavgar.system.utils.validation.ValidateNameUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -106,6 +107,43 @@ class AccountViewModelTest {
             assertTrue(awaitItem() is AccountEvent.ShowSnackbar)
             cancelAndIgnoreRemainingEvents()
         }
+        coVerify(exactly = 1) { updateProfileUseCase(any()) }
+    }
+
+    @Test
+    fun `Submit enters Submitting while updating and returns to Content afterwards`() = runTest(dispatcher) {
+        coEvery { getProfileUseCase() } returns AppResult.Success(profile)
+        // Удерживаем обновление «в полёте» через deferred, чтобы наблюдать Submitting.
+        val gate = CompletableDeferred<AppResult<Unit, ProfileError>>()
+        coEvery { updateProfileUseCase(any()) } coAnswers { gate.await() }
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.handleIntent(AccountIntent.Submit)
+        advanceUntilIdle()
+        assertEquals(AccountState.ScreenState.Submitting, vm.state.value.screenState)
+        assertTrue(vm.state.value.isSubmitting)
+
+        gate.complete(AppResult.Success(Unit))
+        advanceUntilIdle()
+        assertEquals(AccountState.ScreenState.Content, vm.state.value.screenState)
+    }
+
+    @Test
+    fun `Submit is ignored while a submit is already in flight`() = runTest(dispatcher) {
+        coEvery { getProfileUseCase() } returns AppResult.Success(profile)
+        val gate = CompletableDeferred<AppResult<Unit, ProfileError>>()
+        coEvery { updateProfileUseCase(any()) } coAnswers { gate.await() }
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.handleIntent(AccountIntent.Submit)
+        advanceUntilIdle() // VM теперь в Submitting (update удерживается deferred)
+        vm.handleIntent(AccountIntent.Submit) // повтор должен игнорироваться
+        advanceUntilIdle()
+
+        gate.complete(AppResult.Success(Unit))
+        advanceUntilIdle()
         coVerify(exactly = 1) { updateProfileUseCase(any()) }
     }
 

@@ -15,7 +15,7 @@ kotlin {
             implementation(projects.domain.session)
             implementation(projects.libraries.events)
             implementation(projects.libraries.coroutines)
-            implementation(projects.libraries.firebase)
+            implementation(projects.libraries.configApi)
             implementation(projects.utils.result)
 
             implementation(libs.ktor.client.core)

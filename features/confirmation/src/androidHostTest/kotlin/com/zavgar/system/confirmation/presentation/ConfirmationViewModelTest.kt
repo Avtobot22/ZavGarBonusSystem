@@ -4,10 +4,11 @@ package com.zavgar.system.confirmation.presentation
 
 import app.cash.turbine.test
 import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.config.AppConfig
 import com.zavgar.system.domain.auth.error.ConfirmationError
+import com.zavgar.system.domain.auth.error.ResendConfirmationError
 import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
-import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import io.mockk.coEvery
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
@@ -30,7 +32,7 @@ class ConfirmationViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val confirmationUseCase = mockk<ConfirmationUseCase>()
     private val resendCodeUseCase = mockk<ResendCodeUseCase>()
-    private val remoteConfigService = mockk<RemoteConfigService>(relaxed = true)
+    private val appConfig = mockk<AppConfig>(relaxed = true)
     private val analyticsTracker = mockk<AnalyticsTracker>(relaxed = true)
 
     @BeforeTest
@@ -43,7 +45,7 @@ class ConfirmationViewModelTest {
         ValidateCodeUseCase(),
         confirmationUseCase,
         resendCodeUseCase,
-        remoteConfigService,
+        appConfig,
         analyticsTracker,
     )
 
@@ -123,5 +125,52 @@ class ConfirmationViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 0) { resendCodeUseCase(any()) }
+    }
+
+    @Test
+    fun `resend restarts the timer on success`() = runTest(dispatcher) {
+        coEvery { resendCodeUseCase(any()) } returns AppResult.Success(Unit)
+        val vm = viewModel()
+        advanceUntilIdle() // let the initial timer run down to 0
+
+        vm.handleIntent(ConfirmationIntent.ClickResend)
+        // runCurrent выполняет тело resend (и startTimer) до первого delay таймера,
+        // поэтому видим перезапущенный таймер на полной длительности, не дожидаясь обратного отсчёта.
+        runCurrent()
+        assertEquals(TIMER_DURATION_SECONDS, vm.state.value.timerSeconds)
+
+        advanceUntilIdle()
+        coVerify { resendCodeUseCase(any()) }
+    }
+
+    @Test
+    fun `resend does not start the timer on a generic error`() = runTest(dispatcher) {
+        coEvery { resendCodeUseCase(any()) } returns AppResult.Error(ResendConfirmationError.ServerError)
+        val vm = viewModel()
+        advanceUntilIdle() // initial timer down to 0
+
+        vm.handleIntent(ConfirmationIntent.ClickResend)
+        advanceUntilIdle()
+
+        assertEquals(0, vm.state.value.timerSeconds)
+    }
+
+    @Test
+    fun `resend starts the timer with retryAfterSeconds on TooManyRequest`() = runTest(dispatcher) {
+        coEvery { resendCodeUseCase(any()) } returns
+            AppResult.Error(ResendConfirmationError.TooManyRequestError(retryAfterSeconds = 30L))
+        val vm = viewModel()
+        advanceUntilIdle() // initial timer down to 0
+
+        vm.handleIntent(ConfirmationIntent.ClickResend)
+        runCurrent()
+
+        assertEquals(RETRY_AFTER_SECONDS, vm.state.value.timerSeconds)
+        advanceUntilIdle()
+    }
+
+    private companion object {
+        const val TIMER_DURATION_SECONDS = 60
+        const val RETRY_AFTER_SECONDS = 30
     }
 }

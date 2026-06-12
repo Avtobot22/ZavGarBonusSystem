@@ -3,13 +3,14 @@ package com.zavgar.system.registration.presentation
 import com.zavgar.system.analytics.AnalyticsEvent
 import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.analytics.AuthFlow
+import com.zavgar.system.config.AppConfig
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.asUiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.auth.model.RegisterRequest
 import com.zavgar.system.domain.auth.usecase.RegisterUseCase
-import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.registration.mapper.asSnackBarMessage
 import com.zavgar.system.registration.mapper.toRegisterResult
 import com.zavgar.system.registration.model.RegisterResult
@@ -19,7 +20,6 @@ import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
 import com.zavgar.system.utils.validation.ValidationResult
-import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.sanitizePhone
 import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.datetime.LocalDate
@@ -29,12 +29,12 @@ class RegisterViewModel(
     private val validateBirthDateUseCase: ValidateBirthDateUseCase,
     private val validatePhoneUseCase: ValidatePhoneUseCase,
     private val registerUseCase: RegisterUseCase,
-    private val remoteConfigService: RemoteConfigService,
+    private val appConfig: AppConfig,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<RegisterState, RegisterIntent, RegisterEvent>(RegisterState()) {
 
     init {
-        setState { copy(privacyPolicyUrl = remoteConfigService.privacyPolicyUrl) }
+        setState { copy(privacyPolicyUrl = appConfig.privacyPolicyUrl) }
     }
 
     override fun handleIntent(intent: RegisterIntent) {

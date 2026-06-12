@@ -9,13 +9,13 @@ import com.zavgar.system.authorization.model.LoginResult
 import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.asUiText
 import com.zavgar.system.domain.auth.model.LoginRequest
 import com.zavgar.system.domain.auth.usecase.LoginUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.utils.validation.ValidatePhoneUseCase
 import com.zavgar.system.utils.validation.ValidationResult
-import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.sanitizePhone
 import com.zavgar.system.utils.validation.toPresentation
 

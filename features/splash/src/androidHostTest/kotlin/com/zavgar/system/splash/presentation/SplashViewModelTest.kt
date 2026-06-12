@@ -3,11 +3,11 @@
 package com.zavgar.system.splash.presentation
 
 import app.cash.turbine.test
+import com.zavgar.system.config.AppConfig
 import com.zavgar.system.domain.onboarding.usecase.ObserveOnboardingCompletedUseCase
 import com.zavgar.system.domain.session.error.SessionError
 import com.zavgar.system.domain.session.model.Session
 import com.zavgar.system.domain.session.usecase.GetSessionUseCase
-import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.coEvery
 import io.mockk.every
@@ -27,7 +27,7 @@ import kotlin.test.assertEquals
 class SplashViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
-    private val remoteConfigService = mockk<RemoteConfigService>(relaxed = true)
+    private val appConfig = mockk<AppConfig>(relaxed = true)
     private val getSessionUseCase = mockk<GetSessionUseCase>()
     private val observeOnboardingCompletedUseCase = mockk<ObserveOnboardingCompletedUseCase>()
 
@@ -38,7 +38,7 @@ class SplashViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel() = SplashViewModel(
-        remoteConfigService,
+        appConfig,
         getSessionUseCase,
         observeOnboardingCompletedUseCase,
     )
@@ -82,11 +82,26 @@ class SplashViewModelTest {
 
     @Test
     fun `falls back to login when initialization throws`() = runTest(dispatcher) {
-        coEvery { remoteConfigService.activate() } throws RuntimeException("config down")
+        coEvery { appConfig.activate() } throws RuntimeException("config down")
+        every { observeOnboardingCompletedUseCase() } returns flowOf(true)
 
         viewModel().event.test {
             advanceUntilIdle()
             assertEquals(SplashEvent.NavigateToLogin, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `navigates to wallet even when reading onboarding fails after a valid session`() = runTest(dispatcher) {
+        coEvery { getSessionUseCase() } returns
+            AppResult.Success(Session("1234567890", "access", "refresh"))
+        // Ошибка ПОСЛЕ успешной сессии не должна выкидывать на Login.
+        every { observeOnboardingCompletedUseCase() } throws RuntimeException("prefs down")
+
+        viewModel().event.test {
+            advanceUntilIdle()
+            assertEquals(SplashEvent.NavigateToWallet, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

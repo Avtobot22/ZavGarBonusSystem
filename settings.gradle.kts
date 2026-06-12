@@ -36,6 +36,7 @@ include(":libraries:designsystem")
 include(":libraries:events")
 include(":libraries:navigation-contracts")
 include(":libraries:analytics-api")
+include(":libraries:config-api")
 
 include(":shared")
 include(":utils:validation")

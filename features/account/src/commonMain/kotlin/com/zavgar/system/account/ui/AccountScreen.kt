@@ -190,7 +190,9 @@ internal fun AccountScaffold(
                     onBack = { onIntent(AccountIntent.ClickBack) },
                 )
 
-                AccountState.ScreenState.Content -> AccountContent(
+                AccountState.ScreenState.Content,
+                AccountState.ScreenState.Submitting,
+                -> AccountContent(
                     state = state,
                     onIntent = onIntent,
                     modifier = Modifier,
@@ -241,7 +243,7 @@ internal fun AccountContent(
             placeholder = stringResource(Res.string.register_name_placeholder),
             isError = state.nameError != null,
             errorMessage = state.nameError?.asString(),
-            enabled = !state.isLoading,
+            enabled = !state.isSubmitting,
         )
 
         AppDatePickerField(
@@ -251,7 +253,7 @@ internal fun AccountContent(
             placeholder = stringResource(Res.string.birth_date_placeholder),
             isError = state.birthDateError != null,
             errorMessage = state.birthDateError?.asString(),
-            enabled = !state.isLoading,
+            enabled = !state.isSubmitting,
         )
 
         Spacer(Modifier.height(8.dp))
@@ -262,8 +264,8 @@ internal fun AccountContent(
                 focusManager.clearFocus()
                 onIntent(AccountIntent.Submit)
             },
-            enabled = !state.isLoading,
-            isLoading = state.isLoading,
+            enabled = !state.isSubmitting,
+            isLoading = state.isSubmitting,
         )
     }
 }
@@ -646,7 +648,6 @@ fun AccountScreenPreview() {
         birthDateText = "15.05.1990",
         nameError = null,
         birthDateError = null,
-        isLoading = false,
         isDatePickerOpen = false,
     )
     ZavGarThemePreview {
@@ -673,7 +674,6 @@ fun AccountScreenWithErrorsPreview() {
         birthDateText = "",
         nameError = UiText.Resource(Res.string.register_name_placeholder),
         birthDateError = UiText.Resource(Res.string.birth_date_placeholder),
-        isLoading = false,
         isDatePickerOpen = false,
     )
     ZavGarThemePreview {

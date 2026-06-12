@@ -1,9 +1,9 @@
 package com.zavgar.system.network.di
 
+import com.zavgar.system.config.AppConfig
+import com.zavgar.system.config.IS_DEBUG_BUILD
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.domain.session.LogoutHandler
-import com.zavgar.system.firebase.config.RemoteConfigService
-import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
 import com.zavgar.system.network.mapper.ApiException
 import com.zavgar.system.network.model.ApiErrorCode
 import com.zavgar.system.network.model.ErrorResponse
@@ -20,6 +20,7 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.ResponseException
@@ -36,9 +37,11 @@ import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -46,6 +49,8 @@ import org.koin.dsl.module
 private const val REQUEST_TIMEOUT_MILLIS = 15_000L
 private const val CONNECT_TIMEOUT_MILLIS = 10_000L
 private const val SOCKET_TIMEOUT_MILLIS = 10_000L
+private const val MAX_RETRIES = 3
+private const val SERVER_ERROR_RANGE_END = 599
 
 /**
  * Имя Koin-квалификатора для опционального [HttpClientEngine] сетевого слоя.
@@ -72,10 +77,10 @@ val networkModule = module {
 
     single(named("publicClient")) {
         val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
-        val baseUrl = get<RemoteConfigService>().baseUrl
+        val appConfig = get<AppConfig>()
 
         buildHttpClient(getOrNull(named(NETWORK_ENGINE))) {
-            configureCommon(get(), baseUrl, isDebugBuild)
+            configureCommon(get(), appConfig::baseUrl, isDebugBuild)
         }
     }
 
@@ -83,11 +88,11 @@ val networkModule = module {
         val sessionDataSource = get<SessionDataSource>()
         val publicClient = get<HttpClient>(named("publicClient"))
         val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
-        val baseUrl = get<RemoteConfigService>().baseUrl
+        val appConfig = get<AppConfig>()
         val koinScope = this
 
         buildHttpClient(getOrNull(named(NETWORK_ENGINE))) {
-            configureCommon(get(), baseUrl, isDebugBuild)
+            configureCommon(get(), appConfig::baseUrl, isDebugBuild)
 
             install(Auth) {
                 bearer {
@@ -159,8 +164,6 @@ private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
     return null
 }
 
-// Только 401 на эндпоинте refresh означает, что сессия мертва и пользователя нужно разлогинить.
-// 403 (ACCESS_DENIED, требование мастер-токена) не должен приводить к logout пользователя.
 private fun Int.isRefreshAuthFailure(): Boolean = this == HttpStatusCode.Unauthorized.value
 
 /**
@@ -175,7 +178,7 @@ private fun buildHttpClient(
 
 private fun HttpClientConfig<*>.configureCommon(
     json: Json,
-    baseUrl: String,
+    baseUrlProvider: () -> String,
     isDebugBuild: Boolean,
 ) {
     expectSuccess = true
@@ -185,7 +188,7 @@ private fun HttpClientConfig<*>.configureCommon(
     }
 
     install(DefaultRequest) {
-        url(baseUrl)
+        url(baseUrlProvider())
         contentType(ContentType.Application.Json)
     }
 
@@ -202,14 +205,19 @@ private fun HttpClientConfig<*>.configureCommon(
     }
 
     install(HttpRequestRetry) {
-        retryOnServerErrors(maxRetries = 3)
-        retryOnException(maxRetries = 3, retryOnTimeout = false)
+        maxRetries = MAX_RETRIES
+        retryIf { request, response ->
+            request.method == HttpMethod.Get &&
+                response.status.value in HttpStatusCode.InternalServerError.value..SERVER_ERROR_RANGE_END
+        }
+        retryOnExceptionIf { request, cause ->
+            request.method == HttpMethod.Get &&
+                cause !is HttpRequestTimeoutException &&
+                cause !is CancellationException
+        }
         exponentialDelay()
     }
 
-    // Любой неуспешный ответ переводим в ApiException: тело ErrorResponse и заголовок Retry-After
-    // читаются здесь один раз (response уже сохранён дефолтным валидатором expectSuccess),
-    // дальше классификация ошибок остаётся синхронной и ветвится по машиночитаемому code.
     HttpResponseValidator {
         handleResponseExceptionWithRequest { exception, _ ->
             val responseException = exception as? ResponseException ?: return@handleResponseExceptionWithRequest

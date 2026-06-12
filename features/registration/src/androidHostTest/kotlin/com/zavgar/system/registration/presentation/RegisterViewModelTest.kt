@@ -4,10 +4,10 @@ package com.zavgar.system.registration.presentation
 
 import app.cash.turbine.test
 import com.zavgar.system.analytics.AnalyticsTracker
+import com.zavgar.system.config.AppConfig
 import com.zavgar.system.domain.auth.error.RegisterError
 import com.zavgar.system.domain.auth.model.RegisterRequest
 import com.zavgar.system.domain.auth.usecase.RegisterUseCase
-import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
@@ -33,7 +33,7 @@ class RegisterViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
     private val registerUseCase = mockk<RegisterUseCase>()
-    private val remoteConfigService = mockk<RemoteConfigService>(relaxed = true)
+    private val appConfig = mockk<AppConfig>(relaxed = true)
     private val analyticsTracker = mockk<AnalyticsTracker>(relaxed = true)
 
     @BeforeTest
@@ -47,7 +47,7 @@ class RegisterViewModelTest {
         ValidateBirthDateUseCase(),
         ValidatePhoneUseCase(),
         registerUseCase,
-        remoteConfigService,
+        appConfig,
         analyticsTracker,
     )
 
@@ -59,7 +59,7 @@ class RegisterViewModelTest {
 
     @Test
     fun `init seeds the privacy policy url from remote config`() {
-        every { remoteConfigService.privacyPolicyUrl } returns "https://policy"
+        every { appConfig.privacyPolicyUrl } returns "https://policy"
 
         assertEquals("https://policy", viewModel().state.value.privacyPolicyUrl)
     }

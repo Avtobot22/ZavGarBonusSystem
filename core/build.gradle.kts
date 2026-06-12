@@ -17,6 +17,7 @@ kotlin {
             implementation(libs.compose.components.resources)
             implementation(projects.resources)
             implementation(projects.utils.result)
+            implementation(projects.utils.validation)
             implementation(libs.compose.material3)
             implementation(libs.koin.compose)
             implementation(libs.androidx.lifecycle.viewmodel)

@@ -3,6 +3,7 @@ package com.zavgar.system.confirmation.presentation
 import com.zavgar.system.analytics.AnalyticsEvent
 import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.analytics.AuthFlow
+import com.zavgar.system.config.AppConfig
 import com.zavgar.system.confirmation.mapper.asSnackBarMessage
 import com.zavgar.system.confirmation.mapper.toConfirmationResult
 import com.zavgar.system.confirmation.mapper.toResendConfirmationResult
@@ -12,26 +13,28 @@ import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.asUiText
 import com.zavgar.system.domain.auth.model.ConfirmationRequest
 import com.zavgar.system.domain.auth.model.ResendRequest
 import com.zavgar.system.domain.auth.usecase.ConfirmationUseCase
 import com.zavgar.system.domain.auth.usecase.ResendCodeUseCase
-import com.zavgar.system.firebase.config.RemoteConfigService
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_resend_success
 import com.zavgar.system.resources.error_unknown_error
+import com.zavgar.system.utils.result.AppError
+import com.zavgar.system.utils.result.AppResult
 import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.utils.validation.ValidationResult
-import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class ConfirmationViewModel(
     private val validateCodeUseCase: ValidateCodeUseCase,
     private val confirmationUseCase: ConfirmationUseCase,
     private val resendCodeUseCase: ResendCodeUseCase,
-    private val remoteConfigService: RemoteConfigService,
+    private val appConfig: AppConfig,
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<ConfirmationState, ConfirmationIntent, ConfirmationEvent>(ConfirmationState()) {
 
@@ -74,10 +77,10 @@ class ConfirmationViewModel(
      * подставляет тестовый OTP и автоматически отправляет его (автопрохождение верификации).
      */
     private fun autofillTestCodeIfNeeded(phone: String) {
-        if (!remoteConfigService.testAccountEnabled) return
-        if (!phonesMatch(phone, remoteConfigService.testPhoneNumber)) return
+        if (!appConfig.testAccountEnabled) return
+        if (!phonesMatch(phone, appConfig.testPhoneNumber)) return
 
-        val testCode = remoteConfigService.testOtpCode
+        val testCode = appConfig.testOtpCode
         if (testCode.isBlank()) return
 
         setState { copy(code = testCode, codeError = null) }
@@ -116,13 +119,19 @@ class ConfirmationViewModel(
         launchTry {
             analyticsTracker.log(AnalyticsEvent.OtpResend(authFlow))
 
-            val result =
-                resendCodeUseCase(ResendRequest(currentState.phone))
-                    .toResendConfirmationResult { it.asSnackBarMessage() }
+            val appResult = resendCodeUseCase(ResendRequest(currentState.phone))
 
-            startTimer()
+            when (appResult) {
+                is AppResult.Success -> startTimer()
+                is AppResult.Error -> {
+                    val error = appResult.error
+                    if (error is AppError.TooManyRequest) {
+                        startTimer(error.retryAfterSeconds?.toInt()?.takeIf { it > 0 } ?: TIMER_DURATION_SECONDS)
+                    }
+                }
+            }
 
-            when (result) {
+            when (val result = appResult.toResendConfirmationResult { it.asSnackBarMessage() }) {
                 is ResendConfirmationResult.Success -> setEvent {
                     ConfirmationEvent.ShowSnackbar(
                         SnackBarMessage(
@@ -165,6 +174,7 @@ class ConfirmationViewModel(
                         }
                     }
                 }
+
                 is ConfirmationResult.Error -> {
                     analyticsTracker.log(
                         AnalyticsEvent.OtpVerifyError(authFlow, errorType = "verify_failed"),
@@ -184,12 +194,12 @@ class ConfirmationViewModel(
         }
     }
 
-    private fun startTimer() {
+    private fun startTimer(durationSeconds: Int = TIMER_DURATION_SECONDS) {
         timerJob?.cancel()
-        setState { copy(timerSeconds = TIMER_DURATION_SECONDS) }
+        setState { copy(timerSeconds = durationSeconds) }
         timerJob = launchTry {
-            for (seconds in (TIMER_DURATION_SECONDS - 1) downTo 0) {
-                delay(SECOND_MILLIS)
+            for (seconds in (durationSeconds - 1) downTo 0) {
+                delay(SECOND_MILLIS.milliseconds)
                 setState { copy(timerSeconds = seconds) }
             }
         } catch {

@@ -1,5 +1,6 @@
 package com.zavgar.system.firebase.config
 
+import com.zavgar.system.config.AppConfig
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.remoteconfig.FirebaseRemoteConfig
 import dev.gitlive.firebase.remoteconfig.get
@@ -9,9 +10,12 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Firebase Remote Config-реализация [AppConfig].
+ */
 internal class RemoteConfigServiceImpl(
     private val isDebugBuild: Boolean,
-) : RemoteConfigService {
+) : AppConfig {
 
     private val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
 

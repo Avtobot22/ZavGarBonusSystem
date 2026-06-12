@@ -2,6 +2,7 @@ package com.zavgar.system.shared.di
 
 import com.zavgar.system.account.di.accountModule
 import com.zavgar.system.authorization.di.authorizationModule
+import com.zavgar.system.config.IS_DEBUG_BUILD
 import com.zavgar.system.confirmation.di.confirmationModule
 import com.zavgar.system.coroutines.di.coroutinesModule
 import com.zavgar.system.datastore.di.dataStoreModule
@@ -13,7 +14,6 @@ import com.zavgar.system.domain.session.di.sessionModule
 import com.zavgar.system.domain.theme.di.themeDomainModule
 import com.zavgar.system.domain.userinfo.di.userInfoDomainModule
 import com.zavgar.system.events.di.eventsModule
-import com.zavgar.system.firebase.di.IS_DEBUG_BUILD
 import com.zavgar.system.firebase.di.firebaseModule
 import com.zavgar.system.history.di.historyModule
 import com.zavgar.system.navigation.di.navigationModule

@@ -12,6 +12,7 @@ import com.zavgar.system.core.presentation.BaseViewModel
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
+import com.zavgar.system.core.presentation.util.asUiText
 import com.zavgar.system.core.presentation.util.toDisplayString
 import com.zavgar.system.domain.userinfo.model.UpdateProfileRequest
 import com.zavgar.system.domain.userinfo.usecase.DeleteUserProfileUseCase
@@ -24,7 +25,6 @@ import com.zavgar.system.resources.profile_update_success
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidationResult
-import com.zavgar.system.utils.validation.asUiText
 import com.zavgar.system.utils.validation.toPresentation
 import kotlinx.datetime.LocalDate
 
@@ -59,10 +59,9 @@ class AccountViewModel(
 
     private fun initProfile() {
         launchTry {
-            setState { copy(screenState = AccountState.ScreenState.Loading, isLoading = true) }
+            setState { copy(screenState = AccountState.ScreenState.Loading) }
 
             val appResult = getProfileUseCase()
-            setState { copy(isLoading = false) }
 
             when (val result = appResult.toProfileGetResult()) {
                 is ProfileGetResult.Success ->
@@ -82,7 +81,7 @@ class AccountViewModel(
                 }
             }
         } catch {
-            setState { copy(isLoading = false, screenState = AccountState.ScreenState.Error) }
+            setState { copy(screenState = AccountState.ScreenState.Error) }
             setEvent {
                 AccountEvent.ShowSnackbar(
                     SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
@@ -124,13 +123,12 @@ class AccountViewModel(
     private fun handleDismissDeleteAccountDialog() = setState { copy(confirmDeleteDialog = false) }
 
     private fun handleConfirmDeleteAccount() {
-        if (currentState.isLoading) return
+        if (currentState.isSubmitting) return
 
         launchTry {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = AccountState.ScreenState.Submitting) }
 
             val appResult = deleteProfileUseCase()
-            setState { copy(isLoading = false) }
 
             when (val result = appResult.toDeleteResult()) {
                 is DeleteResult.Success -> {
@@ -146,10 +144,13 @@ class AccountViewModel(
                     }
                 }
 
-                is DeleteResult.Error -> setEvent { AccountEvent.ShowSnackbar(result.message) }
+                is DeleteResult.Error -> {
+                    setState { copy(screenState = AccountState.ScreenState.Content) }
+                    setEvent { AccountEvent.ShowSnackbar(result.message) }
+                }
             }
         } catch {
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = AccountState.ScreenState.Content) }
             setEvent {
                 AccountEvent.ShowSnackbar(
                     SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
@@ -159,7 +160,7 @@ class AccountViewModel(
     }
 
     private fun handleSubmit() {
-        if (currentState.isLoading) return
+        if (currentState.isSubmitting) return
 
         val state = currentState
 
@@ -187,10 +188,10 @@ class AccountViewModel(
 
     private fun performUpdate(profileRequest: UpdateProfileRequest) {
         launchTry {
-            setState { copy(isLoading = true) }
+            setState { copy(screenState = AccountState.ScreenState.Submitting) }
 
             val appResult = updateProfileUseCase(profileRequest)
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = AccountState.ScreenState.Content) }
 
             when (val result = appResult.toProfileUpdateResult()) {
                 is ProfileUpdateResult.Success -> setEvent {
@@ -207,7 +208,7 @@ class AccountViewModel(
                 }
             }
         } catch {
-            setState { copy(isLoading = false) }
+            setState { copy(screenState = AccountState.ScreenState.Content) }
             setEvent {
                 AccountEvent.ShowSnackbar(
                     SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
