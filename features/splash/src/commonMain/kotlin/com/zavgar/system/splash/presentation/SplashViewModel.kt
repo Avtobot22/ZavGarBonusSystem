@@ -23,14 +23,11 @@ class SplashViewModel(
         launchTry {
             appConfig.activate()
 
-            // Валидная сессия — сразу в кошелёк. Ошибки ПОСЛЕ успешного чтения сессии
-            // (например, чтение onboarding-флага) не должны выкидывать на Login.
             when (getSessionUseCase()) {
                 is AppResult.Success -> setEvent { SplashEvent.NavigateToWallet }
                 is AppResult.Error -> routeUnauthenticated()
             }
         } catch {
-            // Сюда попадаем при сбое до/во время получения сессии (нет валидной сессии).
             routeUnauthenticated()
         }
     }
@@ -42,7 +39,6 @@ class SplashViewModel(
                 if (isOnboardingCompleted) SplashEvent.NavigateToLogin else SplashEvent.NavigateToOnboarding
             }
         } catch {
-            // Не смогли прочитать onboarding-флаг — безопасный дефолт: на Login.
             setEvent { SplashEvent.NavigateToLogin }
         }
     }

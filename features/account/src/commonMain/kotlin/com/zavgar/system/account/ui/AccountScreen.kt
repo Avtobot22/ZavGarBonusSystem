@@ -95,6 +95,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
 
@@ -135,7 +136,7 @@ internal fun AccountLoader(
                             withDismissAction = true,
                         )
                     }
-                    delay(DELETE_SUCCESS_VISIBLE_MILLIS)
+                    delay(DELETE_SUCCESS_VISIBLE_MILLIS.milliseconds)
                     shown.cancel()
                     onNavigateToLogin()
                 }
@@ -174,7 +175,6 @@ internal fun AccountScaffold(
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
-        applyStatusBarsPadding = false,
     ) { paddingValues ->
         AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (state.screenState) {
@@ -186,13 +186,13 @@ internal fun AccountScaffold(
 
                 AccountState.ScreenState.Initial,
                 AccountState.ScreenState.Loading,
-                -> AccountLoading(
+                    -> AccountLoading(
                     onBack = { onIntent(AccountIntent.ClickBack) },
                 )
 
                 AccountState.ScreenState.Content,
                 AccountState.ScreenState.Submitting,
-                -> AccountContent(
+                    -> AccountContent(
                     state = state,
                     onIntent = onIntent,
                     modifier = Modifier,
