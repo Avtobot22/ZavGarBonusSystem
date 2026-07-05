@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:266371908550:android:2474d822b816643e9628c7",
+        "mobilesdk_app_id": "1:266371908550:android:111ef0417e9b3c3b9628c7",
         "android_client_info": {
-          "package_name": "com.zavgar.system.bonusapp"
+          "package_name": "com.zavgar.system.app"
         }
       },
       "oauth_client": [],
@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:266371908550:android:625e8263c856d69b9628c7",
+        "mobilesdk_app_id": "1:266371908550:android:c1957683065e9dc39628c7",
         "android_client_info": {
-          "package_name": "com.zavgar.system.bonusapp.dev"
+          "package_name": "com.zavgar.system.app.dev"
         }
       },
       "oauth_client": [],

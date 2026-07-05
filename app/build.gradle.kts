@@ -10,7 +10,7 @@ plugins {
 
 android {
     defaultConfig {
-        applicationId = "com.zavgar.system.bonusapp"
+        applicationId = "com.zavgar.system.app"
         versionCode = Integer.parseInt(libs.versions.version.code.get())
         versionName = libs.versions.version.name.get()
         compileSdk = Integer.parseInt(libs.versions.android.sdk.compile.get())
@@ -18,7 +18,7 @@ android {
         targetSdk = Integer.parseInt(libs.versions.android.sdk.target.get())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        base.archivesName.set("${parent?.name}-$versionName")
+        base.archivesName.set("ZavGar-$versionName-$versionCode")
     }
 
     val properties = readProperties(file("../config/signing/signing.properties"))
