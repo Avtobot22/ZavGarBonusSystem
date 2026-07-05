@@ -6,7 +6,7 @@ sealed interface RegisterEvent {
 
     data class NavigateToConfirm(val phone: String) : RegisterEvent
 
-    data object NavigateToLogin : RegisterEvent
+    data object NavigateToWallet : RegisterEvent
 
     data class ShowSnackbar(val message: SnackBarMessage) : RegisterEvent
 }

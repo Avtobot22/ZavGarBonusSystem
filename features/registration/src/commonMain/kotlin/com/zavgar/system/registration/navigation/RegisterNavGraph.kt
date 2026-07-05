@@ -16,12 +16,12 @@ internal class RegisterNavGraph : NavGraph {
         { navEventController ->
             entry<AuthDestination.Register>(
                 metadata = NavDisplay.transitionSpec { AuthEnterTransition } +
-                    NavDisplay.popTransitionSpec { AuthPopTransition } +
-                    NavDisplay.predictivePopTransitionSpec { AuthPopTransition },
+                        NavDisplay.popTransitionSpec { AuthPopTransition } +
+                        NavDisplay.predictivePopTransitionSpec { AuthPopTransition },
             ) {
                 RegisterScreen(
-                    onNavigateToLogin = {
-                        navEventController.sendEvent(AuthEvent.ToLogin)
+                    onNavigateToWallet = {
+                        navEventController.sendEvent(AuthEvent.ConfirmLoginSuccess)
                     },
                     onNavigateToConfirm = { phone ->
                         navEventController.sendEvent(AuthEvent.RegisterSubmit(phone))

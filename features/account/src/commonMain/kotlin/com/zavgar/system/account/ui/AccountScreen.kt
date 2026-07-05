@@ -175,6 +175,7 @@ internal fun AccountScaffold(
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
+        applyStatusBarsPadding = false,
     ) { paddingValues ->
         AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
             when (state.screenState) {

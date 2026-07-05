@@ -86,7 +86,7 @@ class RegisterViewModel(
 
     private fun handleClickLogin() {
         analyticsTracker.log(AnalyticsEvent.AuthLinkClick(AuthFlow.LOGIN))
-        setEvent { RegisterEvent.NavigateToLogin }
+        setEvent { RegisterEvent.NavigateToWallet }
     }
 
     private fun handleSubmit() {

@@ -1,6 +1,6 @@
 [versions]
 # Project
-version_code = "30402"
+version_code = "30403"
 version_name = "1.0.0"
 android_gradle_plugin = "9.2.0"
 kotlin = "2.3.21"

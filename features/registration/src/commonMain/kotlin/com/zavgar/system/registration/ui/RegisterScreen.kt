@@ -68,12 +68,12 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RegisterScreen(
-    onNavigateToLogin: () -> Unit,
+    onNavigateToWallet: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     RegisterLoader(
-        onNavigateToLogin = onNavigateToLogin,
+        onNavigateToWallet = onNavigateToWallet,
         onNavigateToConfirm = onNavigateToConfirm,
         modifier = modifier,
     )
@@ -81,7 +81,7 @@ fun RegisterScreen(
 
 @Composable
 internal fun RegisterLoader(
-    onNavigateToLogin: () -> Unit,
+    onNavigateToWallet: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegisterViewModel = koinViewModel(),
@@ -93,7 +93,7 @@ internal fun RegisterLoader(
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
-            is RegisterEvent.NavigateToLogin -> onNavigateToLogin()
+            is RegisterEvent.NavigateToWallet -> onNavigateToWallet()
             is RegisterEvent.NavigateToConfirm -> onNavigateToConfirm(event.phone)
             is RegisterEvent.ShowSnackbar -> {
                 scope.launch { errorShakingState.shake() }
