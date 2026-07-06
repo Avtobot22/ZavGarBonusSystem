@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -14,12 +15,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,7 +42,16 @@ fun OtpTextField(
     errorMessage: String? = null,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    autoFocus: Boolean = true,
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    if (autoFocus) {
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
+    }
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,6 +64,7 @@ fun OtpTextField(
                 }
             },
             enabled = enabled,
+            singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             decorationBox = {
                 Row(
@@ -62,7 +76,11 @@ fun OtpTextField(
                             index < value.length -> value[index].toString()
                             else -> ""
                         }
-                        val isFocused = index == value.length && enabled
+
+                        val isFocused = enabled && (
+                                index == value.length ||
+                                        (value.length == length && index == length - 1)
+                                )
 
                         OtpCell(
                             char = char,
@@ -74,7 +92,9 @@ fun OtpTextField(
                 }
             },
             cursorBrush = SolidColor(Color.Transparent),
-            modifier = Modifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
         )
 
         if (isError && !errorMessage.isNullOrBlank()) {
@@ -155,6 +175,7 @@ fun OtpTextFieldPreview() {
                 value = otpValue,
                 onValueChange = { otpValue = it },
                 length = 4,
+                autoFocus = false,
             )
 
             // Состояние с ошибкой
@@ -165,22 +186,25 @@ fun OtpTextFieldPreview() {
                 isError = true,
                 errorMessage = "Поле не может быть пустым",
                 modifier = Modifier,
+                autoFocus = false,
             )
 
-//            // Отключенное состояние
-//            OtpTextField(
-//                value = "12345",
-//                onValueChange = { },
-//                length = 6,
-//                enabled = false
-//            )
-//
-//            // Полностью заполненное поле
-//            OtpTextField(
-//                value = "123456",
-//                onValueChange = { },
-//                length = 6
-//            )
+            // Отключенное состояние
+            OtpTextField(
+                value = "12345",
+                onValueChange = { },
+                length = 6,
+                enabled = false,
+                autoFocus = false,
+            )
+
+            // Полностью заполненное поле
+            OtpTextField(
+                value = "123456",
+                onValueChange = { },
+                length = 6,
+                autoFocus = false,
+            )
         }
     }
 }
