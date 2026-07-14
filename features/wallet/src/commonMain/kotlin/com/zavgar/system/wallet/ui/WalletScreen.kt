@@ -2,6 +2,8 @@ package com.zavgar.system.wallet.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -90,24 +92,25 @@ internal fun WalletScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier,
 ) {
+    val isRefreshing =
+        (state.screenState as? WalletState.ScreenState.Content)?.isRefreshing == true
+
     ZavGarBaseScaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { CustomSnackbarHost(snackbarHostState = snackbarHostState) },
     ) { paddingValues ->
-        AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
-            when (val screenState = state.screenState) {
-                WalletState.ScreenState.Initial,
-                WalletState.ScreenState.Loading,
-                -> WalletLoading(
-                    modifier = Modifier.padding(paddingValues),
-                )
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { onIntent(WalletIntent.PullToRefresh) },
+            modifier = Modifier.padding(paddingValues),
+        ) {
+            AnimatedState(targetState = state, contentKey = { it.screenState::class }) { state ->
+                when (val screenState = state.screenState) {
+                    WalletState.ScreenState.Initial,
+                    WalletState.ScreenState.Loading,
+                    -> WalletLoading(modifier = Modifier)
 
-                is WalletState.ScreenState.Content -> {
-                    PullToRefreshBox(
-                        isRefreshing = screenState.isRefreshing,
-                        onRefresh = { onIntent(WalletIntent.PullToRefresh) },
-                        modifier = Modifier.padding(paddingValues),
-                    ) {
+                    is WalletState.ScreenState.Content -> {
                         WalletContent(
                             state = state,
                             screenState = screenState,
@@ -115,20 +118,14 @@ internal fun WalletScaffold(
                             modifier = Modifier,
                         )
                     }
-                }
 
-                WalletState.ScreenState.Error -> ErrorScreen(
-                    onRetry = { onIntent(WalletIntent.Retry) },
-                    modifier = Modifier.padding(paddingValues),
-                    shakingState = errorShakingState,
-                )
+                    WalletState.ScreenState.Error -> ErrorScreen(
+                        onRetry = { onIntent(WalletIntent.Retry) },
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        shakingState = errorShakingState,
+                    )
 
-                WalletState.ScreenState.Offline -> {
-                    PullToRefreshBox(
-                        isRefreshing = false,
-                        onRefresh = { onIntent(WalletIntent.PullToRefresh) },
-                        modifier = Modifier.padding(paddingValues),
-                    ) {
+                    WalletState.ScreenState.Offline -> {
                         WalletOfflineContent(
                             phone = state.phone,
                             modifier = Modifier.fillMaxSize(),

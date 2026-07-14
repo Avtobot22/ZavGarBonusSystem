@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zavgar.system.designsystem.components.text.AppTextMain
 import com.zavgar.system.designsystem.components.text.AppTextSecondary
@@ -46,11 +47,13 @@ internal fun EmptyHistoryContent(
                 text = stringResource(Res.string.history_empty_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
             AppTextSecondary(
                 text = stringResource(Res.string.history_empty_description),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
         }
     }

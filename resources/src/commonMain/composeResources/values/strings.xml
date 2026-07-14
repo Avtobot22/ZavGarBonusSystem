@@ -15,7 +15,7 @@
     <string name="birth_date_placeholder">DD.MM.YYYY</string>
 
     <!--    Date dialog-->
-    <string name="dialog_picker_confirm">Подвердить</string>
+    <string name="dialog_picker_confirm">Подтвердить</string>
     <string name="dialog_picker_cancel">Отмена</string>
 
     <!--    History-->

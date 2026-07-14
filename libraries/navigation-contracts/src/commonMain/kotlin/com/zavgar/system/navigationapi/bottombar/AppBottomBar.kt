@@ -37,7 +37,7 @@ fun AppBottomBar(
         NavigationBar(
             modifier = Modifier
                 .navigationBarsPadding()
-                .height(60.dp),
+                .height(65.dp),
             containerColor = Color.Transparent,
             windowInsets = WindowInsets(),
         ) {

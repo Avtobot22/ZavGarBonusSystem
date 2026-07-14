@@ -31,6 +31,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -45,6 +47,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -96,6 +101,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
@@ -192,13 +198,13 @@ internal fun AccountScaffold(
 
                 AccountState.ScreenState.Initial,
                 AccountState.ScreenState.Loading,
-                    -> AccountLoading(
+                -> AccountLoading(
                     onBack = { onIntent(AccountIntent.ClickBack) },
                 )
 
                 AccountState.ScreenState.Content,
                 AccountState.ScreenState.Submitting,
-                    -> AccountContent(
+                -> AccountContent(
                     state = state,
                     onIntent = onIntent,
                     modifier = Modifier,
@@ -227,11 +233,19 @@ internal fun AccountContent(
 
     AccountScrollContainer(
         modifier = modifier,
-        hero = {
+        hero = { heroModifier ->
             AccountHeroSection(
                 name = state.name,
                 onBack = { onIntent(AccountIntent.ClickBack) },
                 onDelete = { onIntent(AccountIntent.ClickDelete) },
+                modifier = heroModifier,
+            )
+        },
+        pinnedHeader = {
+            AccountTopBarRow(
+                onBack = { onIntent(AccountIntent.ClickBack) },
+                action = { HeroDeleteButton(onClick = { onIntent(AccountIntent.ClickDelete) }) },
+                modifier = Modifier.statusBarsPadding(),
             )
         },
     ) {
@@ -326,37 +340,88 @@ private fun HeroContainer(
 }
 
 private val SheetOverlap = 20.dp
+private val CollapsedHeroHeight = 112.dp
 
 /**
  * Скроллируемый каркас экрана: оранжевая шапка [hero] и карточка контента под ней.
  *
- * Скроллится экран целиком — при открытии клавиатуры шапка уезжает вверх.
+ * Карточка скроллится только при переполнении экрана. При сворачивании шапки
+ * [pinnedHeader] остаётся поверх неё и сохраняет доступными основные действия.
  * Карточка приподнята на [SheetOverlap], чтобы её скруглённые углы перекрыли
  * шапку, и растянута минимум до низа экрана (без зазора под ней).
  */
 @Composable
 private fun AccountScrollContainer(
-    hero: @Composable () -> Unit,
+    hero: @Composable (Modifier) -> Unit,
+    pinnedHeader: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    val overlapPx = with(LocalDensity.current) { SheetOverlap.roundToPx() }
-    var heroHeightPx by remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    val overlapPx = with(density) { SheetOverlap.roundToPx() }
+    val collapsedHeroHeightPx = with(density) { CollapsedHeroHeight.roundToPx() }
+    val scrollState = rememberScrollState()
+    var expandedHeroHeightPx by remember { mutableStateOf(0) }
+    val heroOffsetPx = remember { mutableFloatStateOf(0f) }
+    val collapseRangePx = (expandedHeroHeightPx - collapsedHeroHeightPx).coerceAtLeast(0)
+    val nestedScrollConnection = remember(collapseRangePx) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y >= 0f || collapseRangePx == 0 || scrollState.maxValue == 0) {
+                    return Offset.Zero
+                }
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+                val previousOffset = heroOffsetPx.floatValue
+                val newOffset = (previousOffset + available.y)
+                    .coerceIn(-collapseRangePx.toFloat(), 0f)
+                heroOffsetPx.floatValue = newOffset
+                return Offset(x = 0f, y = newOffset - previousOffset)
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (available.y <= 0f || collapseRangePx == 0) return Offset.Zero
+
+                val previousOffset = heroOffsetPx.floatValue
+                val newOffset = (previousOffset + available.y).coerceIn(-collapseRangePx.toFloat(), 0f)
+                heroOffsetPx.floatValue = newOffset
+                return Offset(x = 0f, y = newOffset - previousOffset)
+            }
+        }
+    }
+
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(nestedScrollConnection),
+    ) {
         val viewportPx = constraints.maxHeight
-        val sheetMinHeightPx = (viewportPx - heroHeightPx + overlapPx).coerceAtLeast(0)
+        val visibleHeroHeightPx = if (expandedHeroHeightPx == 0) {
+            0
+        } else {
+            (expandedHeroHeightPx + heroOffsetPx.floatValue.roundToInt())
+                .coerceIn(collapsedHeroHeightPx, expandedHeroHeightPx)
+        }
+        val sheetMinHeightPx = (viewportPx - visibleHeroHeightPx + overlapPx).coerceAtLeast(0)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(
+                    state = scrollState,
+                    enabled = scrollState.maxValue > 0,
+                )
                 .imePadding(),
         ) {
-            Box(modifier = Modifier.onSizeChanged { heroHeightPx = it.height }) {
-                hero()
-            }
+            Spacer(
+                modifier = Modifier.height(
+                    with(density) { visibleHeroHeightPx.toDp() },
+                ),
+            )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -385,6 +450,51 @@ private fun AccountScrollContainer(
                 )
             }
         }
+
+        hero(
+            Modifier
+                .fillMaxWidth()
+                .then(
+                    if (expandedHeroHeightPx == 0) {
+                        Modifier
+                    } else {
+                        Modifier
+                            .height(with(density) { visibleHeroHeightPx.toDp() })
+                            .clipToBounds()
+                    },
+                )
+                .onSizeChanged { size ->
+                    expandedHeroHeightPx = maxOf(expandedHeroHeightPx, size.height)
+                },
+        )
+
+        if (heroOffsetPx.floatValue < 0f) {
+            pinnedHeader()
+        }
+    }
+}
+
+@Composable
+private fun AccountTopBarRow(
+    onBack: () -> Unit,
+    action: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        GlassBackButton(onClick = onBack)
+        Text(
+            text = stringResource(Res.string.account_top_title),
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        action()
     }
 }
 
@@ -396,22 +506,10 @@ private fun AccountHeroSection(
     modifier: Modifier = Modifier,
 ) {
     HeroContainer(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            GlassBackButton(onClick = onBack)
-            Text(
-                text = stringResource(Res.string.account_top_title),
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            HeroDeleteButton(onClick = onDelete)
-        }
+        AccountTopBarRow(
+            onBack = onBack,
+            action = { HeroDeleteButton(onClick = onDelete) },
+        )
 
         Spacer(Modifier.height(12.dp))
 
@@ -546,31 +644,12 @@ internal fun AccountLoading(
 
     AccountScrollContainer(
         modifier = modifier,
-        hero = {
-            HeroContainer {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    GlassBackButton(onClick = onBack)
-                    Text(
-                        text = stringResource(Res.string.account_top_title),
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                Color.White.copy(alpha = 0.18f),
-                                RoundedCornerShape(12.dp),
-                            ),
-                    )
-                }
+        hero = { heroModifier ->
+            HeroContainer(modifier = heroModifier) {
+                AccountTopBarRow(
+                    onBack = onBack,
+                    action = { LoadingTopBarAction() },
+                )
 
                 Spacer(Modifier.height(12.dp))
 
@@ -603,6 +682,13 @@ internal fun AccountLoading(
                 Spacer(Modifier.height(8.dp))
             }
         },
+        pinnedHeader = {
+            AccountTopBarRow(
+                onBack = onBack,
+                action = { LoadingTopBarAction() },
+                modifier = Modifier.statusBarsPadding(),
+            )
+        },
     ) {
         Text(
             text = stringResource(Res.string.account_personal_data),
@@ -623,6 +709,18 @@ internal fun AccountLoading(
                 .shimmerAnimation(RoundedCornerShape(16.dp)),
         )
     }
+}
+
+@Composable
+private fun LoadingTopBarAction() {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .background(
+                Color.White.copy(alpha = 0.18f),
+                RoundedCornerShape(12.dp),
+            ),
+    )
 }
 
 @Composable

@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -157,61 +158,67 @@ internal fun SettingsContent(
     val colors = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 24.dp)
-            .padding(top = 4.dp, bottom = 24.dp),
+    PullToRefreshBox(
+        isRefreshing = state.profileState is SettingsState.ProfileState.Loading,
+        onRefresh = { onIntent(SettingsIntent.Retry) },
+        modifier = modifier.fillMaxSize(),
     ) {
-        Text(
-            text = stringResource(Res.string.home_title_setting),
-            color = colors.foreground,
-            fontSize = 34.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = 24.dp)
+                .padding(top = 4.dp, bottom = 24.dp),
+        ) {
+            Text(
+                text = stringResource(Res.string.home_title_setting),
+                color = colors.foreground,
+                fontSize = 34.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+            )
 
-        AnimatedState(
-            targetState = state.profileState,
-            contentKey = { it::class },
-        ) { profileState ->
-            when (profileState) {
-                is SettingsState.ProfileState.Content -> ProfileCard(
-                    name = profileState.name,
-                    phone = profileState.phone,
-                    balance = profileState.balance,
+            AnimatedState(
+                targetState = state.profileState,
+                contentKey = { it::class },
+            ) { profileState ->
+                when (profileState) {
+                    is SettingsState.ProfileState.Content -> ProfileCard(
+                        name = profileState.name,
+                        phone = profileState.phone,
+                        balance = profileState.balance,
+                    )
+
+                    is SettingsState.ProfileState.Loading -> ProfileCardSkeleton()
+
+                    is SettingsState.ProfileState.Error -> ProfileCardError(
+                        onRetry = { onIntent(SettingsIntent.Retry) },
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                SettingRow(
+                    icon = Icons.Default.Person,
+                    title = stringResource(Res.string.settings_profil_details_button),
+                    onClick = { onIntent(SettingsIntent.ToProfileDetail) },
                 )
-
-                is SettingsState.ProfileState.Loading -> ProfileCardSkeleton()
-
-                is SettingsState.ProfileState.Error -> ProfileCardError(
-                    onRetry = { onIntent(SettingsIntent.Retry) },
+                DarkModeRow(
+                    checked = state.isDarkTheme,
+                    onCheckedChange = { onIntent(SettingsIntent.ToggleDarkMode(it)) },
+                )
+                SettingRow(
+                    icon = Icons.AutoMirrored.Filled.ExitToApp,
+                    title = stringResource(Res.string.settings_logout_button),
+                    onClick = { onIntent(SettingsIntent.Logout) },
+                    destructive = true,
+                    showChevron = false,
+                    isLoading = state.isLoggingOut,
                 )
             }
-        }
-
-        Spacer(Modifier.height(14.dp))
-
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            SettingRow(
-                icon = Icons.Default.Person,
-                title = stringResource(Res.string.settings_profil_details_button),
-                onClick = { onIntent(SettingsIntent.ToProfileDetail) },
-            )
-            DarkModeRow(
-                checked = state.isDarkTheme,
-                onCheckedChange = { onIntent(SettingsIntent.ToggleDarkMode(it)) },
-            )
-            SettingRow(
-                icon = Icons.AutoMirrored.Filled.ExitToApp,
-                title = stringResource(Res.string.settings_logout_button),
-                onClick = { onIntent(SettingsIntent.Logout) },
-                destructive = true,
-                showChevron = false,
-                isLoading = state.isLoggingOut,
-            )
         }
     }
 }

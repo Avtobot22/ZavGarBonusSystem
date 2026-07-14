@@ -8,6 +8,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -277,20 +278,23 @@ private fun HistoryHeader(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
         )
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(
+                space = 24.dp,
+                alignment = Alignment.CenterHorizontally,
+            ),
         ) {
             DatePill(
                 label = stringResource(Res.string.history_period_start),
                 value = state.periodStartText,
                 onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.START)) },
-                modifier = Modifier.weight(1f),
             )
             DatePill(
                 label = stringResource(Res.string.history_period_end),
                 value = state.periodEndText,
                 onClick = { onIntent(HistoryIntent.OpenDatePicker(DatePickerType.END)) },
-                modifier = Modifier.weight(1f),
             )
         }
 
@@ -334,7 +338,7 @@ private fun DatePill(
             color = colors.foreground,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f),
+            maxLines = 1,
         )
         Icon(
             imageVector = Icons.Outlined.CalendarMonth,
