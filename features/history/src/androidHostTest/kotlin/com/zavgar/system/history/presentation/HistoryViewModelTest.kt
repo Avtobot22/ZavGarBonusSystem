@@ -13,8 +13,10 @@ import com.zavgar.system.domain.operations.usecase.GetOperationsUseCase
 import com.zavgar.system.history.model.DatePickerType
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -65,10 +67,14 @@ class HistoryViewModelTest {
     )
 
     @Test
-    fun `init loads the first page into Content`() = runTest(dispatcher) {
+    fun `ScreenEntered loads the first page into Content`() = runTest(dispatcher) {
         coEvery { getOperationsUseCase(any()) } returns AppResult.Success(page())
 
         val vm = viewModel()
+        advanceUntilIdle()
+        coVerify(exactly = 0) { getOperationsUseCase(any()) }
+
+        vm.handleIntent(HistoryIntent.ScreenEntered)
         advanceUntilIdle()
 
         val state = vm.state.value
@@ -77,10 +83,40 @@ class HistoryViewModelTest {
     }
 
     @Test
-    fun `init shows the error state when the first page fails and nothing is loaded`() = runTest(dispatcher) {
+    fun `ScreenEntered shows the error state when the first page fails and nothing is loaded`() = runTest(dispatcher) {
         coEvery { getOperationsUseCase(any()) } returns AppResult.Error(OperationsError.ServerError)
 
         val vm = viewModel()
+        vm.handleIntent(HistoryIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        assertEquals(HistoryState.ScreenState.Error, vm.state.value.screenState)
+    }
+
+    @Test
+    fun `fresh ScreenEntered is skipped while Refresh forces reload`() = runTest(dispatcher) {
+        coEvery { getOperationsUseCase(any()) } returns AppResult.Success(page())
+        val vm = viewModel()
+
+        vm.handleIntent(HistoryIntent.ScreenEntered)
+        advanceUntilIdle()
+        vm.handleIntent(HistoryIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { getOperationsUseCase(any()) }
+
+        vm.handleIntent(HistoryIntent.Refresh)
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { getOperationsUseCase(any()) }
+    }
+
+    @Test
+    fun `first page timeout leaves the error state instead of loading forever`() = runTest(dispatcher) {
+        coEvery { getOperationsUseCase(any()) } coAnswers { awaitCancellation() }
+        val vm = viewModel()
+
+        vm.handleIntent(HistoryIntent.ScreenEntered)
         advanceUntilIdle()
 
         assertEquals(HistoryState.ScreenState.Error, vm.state.value.screenState)
@@ -91,7 +127,6 @@ class HistoryViewModelTest {
         coEvery { getOperationsUseCase(any()) } returns AppResult.Success(page())
 
         val vm = viewModel()
-        advanceUntilIdle()
 
         val state = vm.state.value
         assertEquals(LocalDate(2026, 5, 1), state.periodStart)
@@ -102,7 +137,6 @@ class HistoryViewModelTest {
     fun `closing the start picker after the end date warns and keeps the picker closed`() = runTest(dispatcher) {
         coEvery { getOperationsUseCase(any()) } returns AppResult.Success(page())
         val vm = viewModel()
-        advanceUntilIdle()
 
         vm.event.test {
             // Start (2026-05-20) is after end (2026-05-15) -> invalid range.

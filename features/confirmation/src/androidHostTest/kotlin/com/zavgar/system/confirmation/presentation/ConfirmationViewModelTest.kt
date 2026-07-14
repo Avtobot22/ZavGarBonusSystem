@@ -16,6 +16,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
@@ -119,7 +120,8 @@ class ConfirmationViewModelTest {
 
     @Test
     fun `ClickResend is ignored while the resend timer is still running`() = runTest(dispatcher) {
-        val vm = viewModel() // init starts the 60s timer
+        val vm = viewModel()
+        vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = false))
 
         vm.handleIntent(ConfirmationIntent.ClickResend)
         advanceUntilIdle()
@@ -131,7 +133,8 @@ class ConfirmationViewModelTest {
     fun `resend restarts the timer on success`() = runTest(dispatcher) {
         coEvery { resendCodeUseCase(any()) } returns AppResult.Success(Unit)
         val vm = viewModel()
-        advanceUntilIdle() // let the initial timer run down to 0
+        vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = false))
+        advanceUntilIdle() // let the entry timer run down to 0
 
         vm.handleIntent(ConfirmationIntent.ClickResend)
         // runCurrent выполняет тело resend (и startTimer) до первого delay таймера,
@@ -147,7 +150,8 @@ class ConfirmationViewModelTest {
     fun `resend does not start the timer on a generic error`() = runTest(dispatcher) {
         coEvery { resendCodeUseCase(any()) } returns AppResult.Error(ResendConfirmationError.ServerError)
         val vm = viewModel()
-        advanceUntilIdle() // initial timer down to 0
+        vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = false))
+        advanceUntilIdle() // entry timer down to 0
 
         vm.handleIntent(ConfirmationIntent.ClickResend)
         advanceUntilIdle()
@@ -160,13 +164,28 @@ class ConfirmationViewModelTest {
         coEvery { resendCodeUseCase(any()) } returns
             AppResult.Error(ResendConfirmationError.TooManyRequestError(retryAfterSeconds = 30L))
         val vm = viewModel()
-        advanceUntilIdle() // initial timer down to 0
+        vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = false))
+        advanceUntilIdle() // entry timer down to 0
 
         vm.handleIntent(ConfirmationIntent.ClickResend)
         runCurrent()
 
         assertEquals(RETRY_AFTER_SECONDS, vm.state.value.timerSeconds)
         advanceUntilIdle()
+    }
+
+    @Test
+    fun `repeated Initialize does not restart the timer`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = false))
+        runCurrent()
+        advanceTimeBy(1000)
+        runCurrent()
+        assertEquals(TIMER_DURATION_SECONDS - 1, vm.state.value.timerSeconds)
+
+        vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = false))
+
+        assertEquals(TIMER_DURATION_SECONDS - 1, vm.state.value.timerSeconds)
     }
 
     private companion object {

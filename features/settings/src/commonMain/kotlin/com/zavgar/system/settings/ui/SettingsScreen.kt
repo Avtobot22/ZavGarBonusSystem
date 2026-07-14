@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
@@ -99,6 +100,10 @@ internal fun SettingsLoader(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    ScreenEntryEffect(viewModel) {
+        viewModel.handleIntent(SettingsIntent.ScreenEntered)
+    }
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {

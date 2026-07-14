@@ -41,11 +41,8 @@ class ConfirmationViewModel(
     private val authFlow: AuthFlow
         get() = if (currentState.isRegistration) AuthFlow.REGISTRATION else AuthFlow.LOGIN
 
-    init {
-        startTimer()
-    }
-
     private var timerJob: Job? = null
+    private var isInitialized = false
 
     companion object {
         private const val TIMER_DURATION_SECONDS = 60
@@ -69,6 +66,10 @@ class ConfirmationViewModel(
                 isRegistration = isRegistration,
             )
         }
+        if (isInitialized) return
+
+        isInitialized = true
+        startTimer()
         autofillTestCodeIfNeeded(phone)
     }
 

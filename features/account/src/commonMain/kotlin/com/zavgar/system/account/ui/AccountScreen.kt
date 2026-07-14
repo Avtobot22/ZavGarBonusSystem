@@ -61,6 +61,7 @@ import com.zavgar.system.account.presentation.AccountState
 import com.zavgar.system.account.presentation.AccountViewModel
 import com.zavgar.system.account.ui.components.DeleteAccountDialog
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.button.ZavGarBackButton
@@ -123,6 +124,10 @@ internal fun AccountLoader(
     val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    ScreenEntryEffect(viewModel) {
+        viewModel.handleIntent(AccountIntent.ScreenEntered)
+    }
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {

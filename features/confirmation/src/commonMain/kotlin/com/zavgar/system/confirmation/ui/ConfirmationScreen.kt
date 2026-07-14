@@ -13,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +33,7 @@ import com.zavgar.system.confirmation.presentation.ConfirmationState
 import com.zavgar.system.confirmation.presentation.ConfirmationViewModel
 import com.zavgar.system.confirmation.ui.components.OtpTextField
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.button.ZavGarBackButton
@@ -91,7 +91,7 @@ internal fun ConfirmationLoader(
     val scope = rememberCoroutineScope()
     val haptics = rememberZavGarHaptics()
 
-    LaunchedEffect(phone, isRegistration) {
+    ScreenEntryEffect(viewModel) {
         viewModel.handleIntent(ConfirmationIntent.Initialize(phone, isRegistration))
     }
 

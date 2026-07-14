@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
@@ -49,6 +50,10 @@ internal fun WalletLoader(
     val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    ScreenEntryEffect(viewModel) {
+        viewModel.handleIntent(WalletIntent.ScreenEntered)
+    }
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {

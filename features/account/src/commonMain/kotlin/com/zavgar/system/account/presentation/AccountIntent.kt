@@ -4,6 +4,8 @@ import kotlinx.datetime.LocalDate
 
 sealed interface AccountIntent {
 
+    data object ScreenEntered : AccountIntent
+
     data class EnterName(val name: String) : AccountIntent
 
     data class EnterBirthDate(val birthDate: LocalDate) : AccountIntent

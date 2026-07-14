@@ -10,6 +10,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -32,6 +33,17 @@ class OnboardingViewModelTest {
 
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
+
+    @Test
+    fun `ScreenEntered logs onboarding start once`() {
+        val viewModel = OnboardingViewModel(completeOnboardingUseCase, analyticsTracker)
+        verify(exactly = 0) { analyticsTracker.log(any()) }
+
+        viewModel.handleIntent(OnboardingIntent.ScreenEntered)
+        viewModel.handleIntent(OnboardingIntent.ScreenEntered)
+
+        verify(exactly = 1) { analyticsTracker.log(any()) }
+    }
 
     @Test
     fun `Finish completes onboarding and navigates to login`() = runTest(dispatcher) {

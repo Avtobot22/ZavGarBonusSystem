@@ -18,6 +18,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -56,10 +57,14 @@ class AccountViewModelTest {
     )
 
     @Test
-    fun `init populates the form from the loaded profile`() = runTest(dispatcher) {
+    fun `ScreenEntered populates the form from the loaded profile`() = runTest(dispatcher) {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
 
         val vm = viewModel()
+        advanceUntilIdle()
+        coVerify(exactly = 0) { getProfileUseCase() }
+
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         val state = vm.state.value
@@ -71,10 +76,40 @@ class AccountViewModelTest {
     }
 
     @Test
-    fun `init shows the error state when loading the profile fails`() = runTest(dispatcher) {
+    fun `ScreenEntered shows the error state when loading the profile fails`() = runTest(dispatcher) {
         coEvery { getProfileUseCase() } returns AppResult.Error(ProfileError.ServerError)
 
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        assertEquals(AccountState.ScreenState.Error, vm.state.value.screenState)
+    }
+
+    @Test
+    fun `fresh ScreenEntered is skipped while Retry forces reload`() = runTest(dispatcher) {
+        coEvery { getProfileUseCase() } returns AppResult.Success(profile)
+        val vm = viewModel()
+
+        vm.handleIntent(AccountIntent.ScreenEntered)
+        advanceUntilIdle()
+        vm.handleIntent(AccountIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { getProfileUseCase() }
+
+        vm.handleIntent(AccountIntent.Retry)
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { getProfileUseCase() }
+    }
+
+    @Test
+    fun `profile timeout leaves the error state instead of loading forever`() = runTest(dispatcher) {
+        coEvery { getProfileUseCase() } coAnswers { awaitCancellation() }
+        val vm = viewModel()
+
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         assertEquals(AccountState.ScreenState.Error, vm.state.value.screenState)
@@ -84,6 +119,7 @@ class AccountViewModelTest {
     fun `Submit with a blank name sets an error and does not update`() = runTest(dispatcher) {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
         vm.handleIntent(AccountIntent.EnterName(""))
 
@@ -99,6 +135,7 @@ class AccountViewModelTest {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         coEvery { updateProfileUseCase(any()) } returns AppResult.Success(Unit)
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.event.test {
@@ -117,6 +154,7 @@ class AccountViewModelTest {
         val gate = CompletableDeferred<AppResult<Unit, ProfileError>>()
         coEvery { updateProfileUseCase(any()) } coAnswers { gate.await() }
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.handleIntent(AccountIntent.Submit)
@@ -135,6 +173,7 @@ class AccountViewModelTest {
         val gate = CompletableDeferred<AppResult<Unit, ProfileError>>()
         coEvery { updateProfileUseCase(any()) } coAnswers { gate.await() }
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.handleIntent(AccountIntent.Submit)
@@ -151,6 +190,7 @@ class AccountViewModelTest {
     fun `ClickDelete opens the confirmation dialog`() = runTest(dispatcher) {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.handleIntent(AccountIntent.ClickDelete)
@@ -163,6 +203,7 @@ class AccountViewModelTest {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         coEvery { deleteProfileUseCase() } returns AppResult.Success(Unit)
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.event.test {
@@ -178,6 +219,7 @@ class AccountViewModelTest {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         coEvery { deleteProfileUseCase() } returns AppResult.Error(DeleteError.ServerError)
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.event.test {
@@ -192,6 +234,7 @@ class AccountViewModelTest {
     fun `ClickBack emits a navigate-back event`() = runTest(dispatcher) {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         val vm = viewModel()
+        vm.handleIntent(AccountIntent.ScreenEntered)
         advanceUntilIdle()
 
         vm.event.test {

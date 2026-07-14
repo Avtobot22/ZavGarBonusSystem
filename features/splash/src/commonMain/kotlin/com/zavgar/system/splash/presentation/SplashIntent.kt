@@ -1,3 +1,5 @@
 package com.zavgar.system.splash.presentation
 
-interface SplashIntent
+sealed interface SplashIntent {
+    data object ScreenEntered : SplashIntent
+}

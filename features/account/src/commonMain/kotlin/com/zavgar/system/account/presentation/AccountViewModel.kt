@@ -9,6 +9,8 @@ import com.zavgar.system.account.model.ProfileUpdateResult
 import com.zavgar.system.analytics.AnalyticsEvent
 import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.loading.ScreenLoadExecutionResult
+import com.zavgar.system.core.presentation.loading.ScreenLoadPolicy
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
@@ -26,6 +28,7 @@ import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.toPresentation
+import kotlinx.coroutines.Job
 import kotlinx.datetime.LocalDate
 
 class AccountViewModel(
@@ -37,12 +40,12 @@ class AccountViewModel(
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<AccountState, AccountIntent, AccountEvent>(AccountState()) {
 
-    init {
-        initProfile()
-    }
+    private var loadJob: Job? = null
+    private val loadPolicy = ScreenLoadPolicy()
 
     override fun handleIntent(intent: AccountIntent) {
         when (intent) {
+            is AccountIntent.ScreenEntered -> loadProfile(force = false)
             is AccountIntent.EnterName -> handleEnterName(intent.name)
             is AccountIntent.EnterBirthDate -> handleEnterBirthDate(intent.birthDate)
             is AccountIntent.ClickBack -> handleClickBack()
@@ -57,41 +60,55 @@ class AccountViewModel(
         }
     }
 
-    private fun initProfile() {
-        launchTry {
-            setState { copy(screenState = AccountState.ScreenState.Loading) }
+    private fun loadProfile(force: Boolean) {
+        val canStart = if (force) {
+            loadPolicy.canStartForcedLoad(loadJob)
+        } else {
+            loadPolicy.canStartAutomaticLoad(loadJob)
+        }
+        if (!canStart) return
 
-            val appResult = getProfileUseCase()
+        loadJob = launchTry {
+            if (currentState.screenState !is AccountState.ScreenState.Content) {
+                setState { copy(screenState = AccountState.ScreenState.Loading) }
+            }
 
-            when (val result = appResult.toProfileGetResult()) {
-                is ProfileGetResult.Success ->
-                    setState {
-                        copy(
-                            screenState = AccountState.ScreenState.Content,
-                            name = result.profile.name,
-                            phone = result.profile.phone,
-                            birthDate = result.profile.birthDate,
-                            birthDateText = result.profile.birthDate.toDisplayString(),
-                        )
+            when (val execution = loadPolicy.executeWithTimeout { getProfileUseCase() }) {
+                is ScreenLoadExecutionResult.Completed -> {
+                    when (val result = execution.value.toProfileGetResult()) {
+                        is ProfileGetResult.Success -> {
+                            loadPolicy.markSuccessfulLoad()
+                            setState {
+                                copy(
+                                    screenState = AccountState.ScreenState.Content,
+                                    name = result.profile.name,
+                                    phone = result.profile.phone,
+                                    birthDate = result.profile.birthDate,
+                                    birthDateText = result.profile.birthDate.toDisplayString(),
+                                )
+                            }
+                        }
+
+                        is ProfileGetResult.Error -> handleLoadFailure(result.message)
                     }
-
-                is ProfileGetResult.Error -> {
-                    setState { copy(screenState = AccountState.ScreenState.Error) }
-                    setEvent { AccountEvent.ShowSnackbar(result.message) }
                 }
+
+                ScreenLoadExecutionResult.TimedOut -> handleLoadFailure(unknownErrorMessage())
             }
         } catch {
-            setState { copy(screenState = AccountState.ScreenState.Error) }
-            setEvent {
-                AccountEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
-                )
-            }
+            handleLoadFailure(unknownErrorMessage())
         }
     }
 
     private fun handleRetry() {
-        initProfile()
+        loadProfile(force = true)
+    }
+
+    private fun handleLoadFailure(message: SnackBarMessage) {
+        if (currentState.screenState !is AccountState.ScreenState.Content) {
+            setState { copy(screenState = AccountState.ScreenState.Error) }
+        }
+        setEvent { AccountEvent.ShowSnackbar(message) }
     }
 
     private fun handleEnterName(name: String) = setState {
@@ -194,13 +211,16 @@ class AccountViewModel(
             setState { copy(screenState = AccountState.ScreenState.Content) }
 
             when (val result = appResult.toProfileUpdateResult()) {
-                is ProfileUpdateResult.Success -> setEvent {
-                    AccountEvent.ShowSnackbar(
-                        SnackBarMessage(
-                            message = UiText.Resource(Res.string.profile_update_success),
-                            type = SnackBarType.SUCCESS,
-                        ),
-                    )
+                is ProfileUpdateResult.Success -> {
+                    loadPolicy.markSuccessfulLoad()
+                    setEvent {
+                        AccountEvent.ShowSnackbar(
+                            SnackBarMessage(
+                                message = UiText.Resource(Res.string.profile_update_success),
+                                type = SnackBarType.SUCCESS,
+                            ),
+                        )
+                    }
                 }
 
                 is ProfileUpdateResult.Error -> setEvent {
@@ -220,4 +240,7 @@ class AccountViewModel(
     private fun ValidationResult<UiText>.errorOrNull(): UiText? {
         return (this as? ValidationResult.Invalid)?.error
     }
+
+    private fun unknownErrorMessage(): SnackBarMessage =
+        SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error))
 }

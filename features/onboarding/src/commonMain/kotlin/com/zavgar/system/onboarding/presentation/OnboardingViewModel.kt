@@ -10,14 +10,19 @@ class OnboardingViewModel(
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<OnboardingState, OnboardingIntent, OnboardingEvent>(OnboardingState) {
 
-    init {
-        analyticsTracker.log(AnalyticsEvent.OnboardingStart)
-    }
+    private var isScreenEntryLogged = false
 
     override fun handleIntent(intent: OnboardingIntent) {
         when (intent) {
+            is OnboardingIntent.ScreenEntered -> handleScreenEntered()
             is OnboardingIntent.Finish -> finishOnboarding()
         }
+    }
+
+    private fun handleScreenEntered() {
+        if (isScreenEntryLogged) return
+        isScreenEntryLogged = true
+        analyticsTracker.log(AnalyticsEvent.OnboardingStart)
     }
 
     private fun finishOnboarding() {

@@ -2,6 +2,8 @@ package com.zavgar.system.settings.presentation
 
 sealed interface SettingsIntent {
 
+    data object ScreenEntered : SettingsIntent
+
     data object Logout : SettingsIntent
 
     data object ToProfileDetail : SettingsIntent

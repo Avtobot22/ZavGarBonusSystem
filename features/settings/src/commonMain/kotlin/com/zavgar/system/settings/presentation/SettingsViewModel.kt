@@ -3,6 +3,8 @@ package com.zavgar.system.settings.presentation
 import com.zavgar.system.analytics.AnalyticsEvent
 import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.loading.ScreenLoadExecutionResult
+import com.zavgar.system.core.presentation.loading.ScreenLoadPolicy
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.domain.theme.usecase.ObserveDarkThemeUseCase
@@ -16,6 +18,7 @@ import com.zavgar.system.settings.mapper.asSnackBarMessage
 import com.zavgar.system.settings.mapper.toLogoutResult
 import com.zavgar.system.settings.model.LogoutResult
 import com.zavgar.system.utils.result.AppResult
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -29,34 +32,53 @@ class SettingsViewModel(
     private val analyticsTracker: AnalyticsTracker,
 ) : BaseViewModel<SettingsState, SettingsIntent, SettingsEvent>(SettingsState()) {
 
-    init {
-        loadData()
-    }
+    private var loadJob: Job? = null
+    private val loadPolicy = ScreenLoadPolicy()
 
     override fun handleIntent(intent: SettingsIntent) {
         when (intent) {
+            is SettingsIntent.ScreenEntered -> loadData(force = false)
             is SettingsIntent.ToProfileDetail -> handleToProfileDetail()
             is SettingsIntent.Logout -> handleLogout()
-            is SettingsIntent.Retry -> loadData()
+            is SettingsIntent.Retry -> retryData()
             is SettingsIntent.ToggleDarkMode -> handleToggleDarkMode(intent.isDark)
         }
     }
 
-    private fun loadData() {
-        launchTry {
-            setState { copy(profileState = SettingsState.ProfileState.Loading) }
-            coroutineScope {
-                val profileDeferred = async { getUserProfileUseCase() }
-                val balanceDeferred = async { getUserBalanceUseCase() }
+    private fun retryData() {
+        loadData(force = true)
+    }
 
-                val isDarkTheme = observeDarkThemeUseCase().first()
-                setState { copy(isDarkTheme = isDarkTheme) }
+    private fun loadData(force: Boolean) {
+        val canStart = if (force) {
+            loadPolicy.canStartForcedLoad(loadJob)
+        } else {
+            loadPolicy.canStartAutomaticLoad(loadJob)
+        }
+        if (!canStart) return
 
-                val profileResult = profileDeferred.await()
-                val balanceResult = balanceDeferred.await()
+        loadJob = launchTry {
+            val hadContent = currentState.profileState is SettingsState.ProfileState.Content
+            if (!hadContent) setState { copy(profileState = SettingsState.ProfileState.Loading) }
 
-                when {
-                    profileResult is AppResult.Success && balanceResult is AppResult.Success -> {
+            when (
+                val execution = loadPolicy.executeWithTimeout {
+                    coroutineScope {
+                        val profileDeferred = async { getUserProfileUseCase() }
+                        val balanceDeferred = async { getUserBalanceUseCase() }
+                        Triple(
+                            profileDeferred.await(),
+                            balanceDeferred.await(),
+                            observeDarkThemeUseCase().first(),
+                        )
+                    }
+                }
+            ) {
+                is ScreenLoadExecutionResult.Completed -> {
+                    val (profileResult, balanceResult, isDarkTheme) = execution.value
+                    setState { copy(isDarkTheme = isDarkTheme) }
+                    if (profileResult is AppResult.Success && balanceResult is AppResult.Success) {
+                        loadPolicy.markSuccessfulLoad()
                         setState {
                             copy(
                                 profileState = SettingsState.ProfileState.Content(
@@ -66,18 +88,24 @@ class SettingsViewModel(
                                 ),
                             )
                         }
+                    } else if (!hadContent) {
+                        setState { copy(profileState = SettingsState.ProfileState.Error) }
                     }
-
-                    else -> setState { copy(profileState = SettingsState.ProfileState.Error) }
                 }
+
+                ScreenLoadExecutionResult.TimedOut -> handleLoadFailure(hadContent)
             }
         } catch {
-            setState { copy(profileState = SettingsState.ProfileState.Error) }
-            setEvent {
-                SettingsEvent.ShowSnackbar(
-                    SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
-                )
-            }
+            handleLoadFailure(currentState.profileState is SettingsState.ProfileState.Content)
+        }
+    }
+
+    private fun handleLoadFailure(hadContent: Boolean) {
+        if (!hadContent) setState { copy(profileState = SettingsState.ProfileState.Error) }
+        setEvent {
+            SettingsEvent.ShowSnackbar(
+                SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
+            )
         }
     }
 

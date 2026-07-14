@@ -3,6 +3,8 @@ package com.zavgar.system.history.presentation
 import com.zavgar.system.analytics.AnalyticsEvent
 import com.zavgar.system.analytics.AnalyticsTracker
 import com.zavgar.system.core.presentation.BaseViewModel
+import com.zavgar.system.core.presentation.loading.ScreenLoadExecutionResult
+import com.zavgar.system.core.presentation.loading.ScreenLoadPolicy
 import com.zavgar.system.core.presentation.util.SnackBarMessage
 import com.zavgar.system.core.presentation.util.SnackBarType
 import com.zavgar.system.core.presentation.util.UiText
@@ -33,20 +35,27 @@ class HistoryViewModel(
 
     private var loadedPages: Int = 0
     private var loadJob: Job? = null
-
-    init {
-        loadData(LoadMode.FIRST_PAGE)
-    }
+    private val loadPolicy = ScreenLoadPolicy()
 
     override fun handleIntent(intent: HistoryIntent) {
         when (intent) {
+            is HistoryIntent.ScreenEntered -> handleScreenEntered()
             is HistoryIntent.OpenDatePicker -> handleOpenDatePicker(intent.type)
             is HistoryIntent.CloseDatePicker -> handleCloseDatePicker(intent.type, intent.date)
             is HistoryIntent.DismissDatePicker -> handleDismissDatePicker()
-            is HistoryIntent.Refresh -> loadData(LoadMode.REFRESH)
-            is HistoryIntent.LoadNextPage -> loadData(LoadMode.NEXT_PAGE)
-            is HistoryIntent.Retry -> loadData(LoadMode.FIRST_PAGE)
+            is HistoryIntent.Refresh -> loadData(LoadMode.REFRESH, force = true)
+            is HistoryIntent.LoadNextPage -> loadData(LoadMode.NEXT_PAGE, force = true)
+            is HistoryIntent.Retry -> loadData(LoadMode.FIRST_PAGE, force = true)
         }
+    }
+
+    private fun handleScreenEntered() {
+        val mode = if (currentState.screenState is HistoryState.ScreenState.Content) {
+            LoadMode.REFRESH
+        } else {
+            LoadMode.FIRST_PAGE
+        }
+        loadData(mode, force = false)
     }
 
     private fun handleOpenDatePicker(type: DatePickerType) = setState {
@@ -90,12 +99,17 @@ class HistoryViewModel(
             }
         }
 
-        loadData(LoadMode.FIRST_PAGE)
+        loadData(LoadMode.FIRST_PAGE, force = true)
     }
 
-    private fun loadData(mode: LoadMode) {
+    private fun loadData(mode: LoadMode, force: Boolean) {
+        val canStart = if (force) {
+            loadPolicy.canStartForcedLoad(loadJob)
+        } else {
+            loadPolicy.canStartAutomaticLoad(loadJob)
+        }
+        if (!canStart) return
         if (!canLoad(mode)) return
-        if (mode != LoadMode.NEXT_PAGE) loadJob?.cancel()
         applyLoadingState(mode)
         fetchPage(mode)
     }
@@ -138,8 +152,20 @@ class HistoryViewModel(
 
     private fun fetchPage(mode: LoadMode) {
         loadJob = launchTry {
-            val result = getOperationsUseCase(buildRequest(mode)).toTransactionsResult()
-            applyResult(mode, result)
+            when (
+                val execution = loadPolicy.executeWithTimeout {
+                    getOperationsUseCase(buildRequest(mode))
+                }
+            ) {
+                is ScreenLoadExecutionResult.Completed ->
+                    applyResult(mode, execution.value.toTransactionsResult())
+
+                ScreenLoadExecutionResult.TimedOut ->
+                    applyError(
+                        mode,
+                        SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)),
+                    )
+            }
         } catch {
             applyError(mode, SnackBarMessage.error(UiText.Resource(Res.string.error_unknown_error)))
         }
@@ -171,6 +197,7 @@ class HistoryViewModel(
                     analyticsTracker.log(AnalyticsEvent.HistoryLoadMore(page = loadedPages))
                 } else {
                     loadedPages = 0
+                    loadPolicy.markSuccessfulLoad()
                     analyticsTracker.log(
                         AnalyticsEvent.HistoryViewed(itemsCount = currentState.history.transactions.size),
                     )

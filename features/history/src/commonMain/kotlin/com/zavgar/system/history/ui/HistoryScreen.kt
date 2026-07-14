@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.compose.Pagination
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
@@ -103,6 +104,10 @@ internal fun HistoryLoader(
     val errorShakingState = rememberShakingState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    ScreenEntryEffect(viewModel) {
+        viewModel.handleIntent(HistoryIntent.ScreenEntered)
+    }
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {

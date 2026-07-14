@@ -21,6 +21,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -62,12 +63,17 @@ class SettingsViewModelTest {
     )
 
     @Test
-    fun `init loads profile, balance and theme into Content`() = runTest(dispatcher) {
+    fun `ScreenEntered loads profile, balance and theme into Content`() = runTest(dispatcher) {
         coEvery { getUserProfileUseCase() } returns AppResult.Success(profile)
         coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(900))
         every { observeDarkThemeUseCase() } returns flowOf(true)
 
         val vm = viewModel()
+        advanceUntilIdle()
+        coVerify(exactly = 0) { getUserProfileUseCase() }
+        coVerify(exactly = 0) { getUserBalanceUseCase() }
+
+        vm.handleIntent(SettingsIntent.ScreenEntered)
         advanceUntilIdle()
 
         val state = vm.state.value
@@ -79,12 +85,59 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `init shows the error profile state when the profile request fails`() = runTest(dispatcher) {
+    fun `ScreenEntered shows the error profile state when the profile request fails`() = runTest(dispatcher) {
         coEvery { getUserProfileUseCase() } returns AppResult.Error(ProfileError.ServerError)
         coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(0))
         every { observeDarkThemeUseCase() } returns flowOf(false)
 
         val vm = viewModel()
+        vm.handleIntent(SettingsIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        assertEquals(SettingsState.ProfileState.Error, vm.state.value.profileState)
+    }
+
+    @Test
+    fun `Retry reloads the profile and balance`() = runTest(dispatcher) {
+        coEvery { getUserProfileUseCase() } returns AppResult.Success(profile)
+        coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(900))
+        every { observeDarkThemeUseCase() } returns flowOf(false)
+        val vm = viewModel()
+        vm.handleIntent(SettingsIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        vm.handleIntent(SettingsIntent.Retry)
+        advanceUntilIdle()
+
+        assertTrue(vm.state.value.profileState is SettingsState.ProfileState.Content)
+        coVerify(exactly = 2) { getUserProfileUseCase() }
+        coVerify(exactly = 2) { getUserBalanceUseCase() }
+    }
+
+    @Test
+    fun `fresh ScreenEntered does not reload profile and balance`() = runTest(dispatcher) {
+        coEvery { getUserProfileUseCase() } returns AppResult.Success(profile)
+        coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(900))
+        every { observeDarkThemeUseCase() } returns flowOf(false)
+        val vm = viewModel()
+
+        vm.handleIntent(SettingsIntent.ScreenEntered)
+        advanceUntilIdle()
+        vm.handleIntent(SettingsIntent.ScreenEntered)
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { getUserProfileUseCase() }
+        coVerify(exactly = 1) { getUserBalanceUseCase() }
+    }
+
+    @Test
+    fun `profile timeout leaves the error state instead of loading forever`() = runTest(dispatcher) {
+        coEvery { getUserProfileUseCase() } coAnswers { awaitCancellation() }
+        coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(900))
+        every { observeDarkThemeUseCase() } returns flowOf(false)
+        val vm = viewModel()
+
+        vm.handleIntent(SettingsIntent.ScreenEntered)
         advanceUntilIdle()
 
         assertEquals(SettingsState.ProfileState.Error, vm.state.value.profileState)
@@ -97,7 +150,6 @@ class SettingsViewModelTest {
         every { observeDarkThemeUseCase() } returns flowOf(false)
         coEvery { setDarkThemeUseCase(any()) } just Runs
         val vm = viewModel()
-        advanceUntilIdle()
 
         vm.handleIntent(SettingsIntent.ToggleDarkMode(isDark = true))
         advanceUntilIdle()
@@ -113,7 +165,6 @@ class SettingsViewModelTest {
         every { observeDarkThemeUseCase() } returns flowOf(false)
         coEvery { logoutUseCase() } returns AppResult.Success(Unit)
         val vm = viewModel()
-        advanceUntilIdle()
 
         vm.event.test {
             vm.handleIntent(SettingsIntent.Logout)
@@ -130,7 +181,6 @@ class SettingsViewModelTest {
         every { observeDarkThemeUseCase() } returns flowOf(false)
         coEvery { logoutUseCase() } returns AppResult.Error(LogoutError.ServerError)
         val vm = viewModel()
-        advanceUntilIdle()
 
         vm.event.test {
             vm.handleIntent(SettingsIntent.Logout)
@@ -147,7 +197,6 @@ class SettingsViewModelTest {
         coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(0))
         every { observeDarkThemeUseCase() } returns flowOf(false)
         val vm = viewModel()
-        advanceUntilIdle()
 
         vm.event.test {
             vm.handleIntent(SettingsIntent.ToProfileDetail)

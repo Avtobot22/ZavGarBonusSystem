@@ -18,11 +18,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.designsystem.components.logo.AppLogo
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.designsystem.theme.accent
 import com.zavgar.system.designsystem.theme.onAccent
 import com.zavgar.system.splash.presentation.SplashEvent
+import com.zavgar.system.splash.presentation.SplashIntent
 import com.zavgar.system.splash.presentation.SplashState
 import com.zavgar.system.splash.presentation.SplashViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -51,6 +53,10 @@ private fun SplashLoader(
     viewModel: SplashViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ScreenEntryEffect(viewModel) {
+        viewModel.handleIntent(SplashIntent.ScreenEntered)
+    }
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {

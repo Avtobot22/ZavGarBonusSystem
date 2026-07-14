@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.core.presentation.ObserveAsEvents
+import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.designsystem.theme.accent
 import com.zavgar.system.onboarding.model.OnboardingPage
@@ -70,6 +71,10 @@ private fun OnboardingLoader(
     modifier: Modifier,
     viewModel: OnboardingViewModel = koinViewModel(),
 ) {
+    ScreenEntryEffect(viewModel) {
+        viewModel.handleIntent(OnboardingIntent.ScreenEntered)
+    }
+
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is OnboardingEvent.NavigateToLogin -> onNavigateToLogin()

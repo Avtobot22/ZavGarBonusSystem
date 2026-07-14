@@ -10,6 +10,7 @@ import com.zavgar.system.domain.session.model.Session
 import com.zavgar.system.domain.session.usecase.GetSessionUseCase
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,12 @@ class SplashViewModelTest {
             AppResult.Success(Session("1234567890", "access", "refresh"))
         every { observeOnboardingCompletedUseCase() } returns flowOf(true)
 
-        viewModel().event.test {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        coVerify(exactly = 0) { getSessionUseCase() }
+
+        viewModel.event.test {
+            viewModel.handleIntent(SplashIntent.ScreenEntered)
             advanceUntilIdle()
             assertEquals(SplashEvent.NavigateToWallet, awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -61,7 +67,9 @@ class SplashViewModelTest {
         coEvery { getSessionUseCase() } returns AppResult.Error(SessionError.NotFound)
         every { observeOnboardingCompletedUseCase() } returns flowOf(true)
 
-        viewModel().event.test {
+        val viewModel = viewModel()
+        viewModel.event.test {
+            viewModel.handleIntent(SplashIntent.ScreenEntered)
             advanceUntilIdle()
             assertEquals(SplashEvent.NavigateToLogin, awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -73,7 +81,9 @@ class SplashViewModelTest {
         coEvery { getSessionUseCase() } returns AppResult.Error(SessionError.NotFound)
         every { observeOnboardingCompletedUseCase() } returns flowOf(false)
 
-        viewModel().event.test {
+        val viewModel = viewModel()
+        viewModel.event.test {
+            viewModel.handleIntent(SplashIntent.ScreenEntered)
             advanceUntilIdle()
             assertEquals(SplashEvent.NavigateToOnboarding, awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -85,7 +95,9 @@ class SplashViewModelTest {
         coEvery { appConfig.activate() } throws RuntimeException("config down")
         every { observeOnboardingCompletedUseCase() } returns flowOf(true)
 
-        viewModel().event.test {
+        val viewModel = viewModel()
+        viewModel.event.test {
+            viewModel.handleIntent(SplashIntent.ScreenEntered)
             advanceUntilIdle()
             assertEquals(SplashEvent.NavigateToLogin, awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -99,7 +111,9 @@ class SplashViewModelTest {
         // Ошибка ПОСЛЕ успешной сессии не должна выкидывать на Login.
         every { observeOnboardingCompletedUseCase() } throws RuntimeException("prefs down")
 
-        viewModel().event.test {
+        val viewModel = viewModel()
+        viewModel.event.test {
+            viewModel.handleIntent(SplashIntent.ScreenEntered)
             advanceUntilIdle()
             assertEquals(SplashEvent.NavigateToWallet, awaitItem())
             cancelAndIgnoreRemainingEvents()
