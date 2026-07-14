@@ -28,6 +28,7 @@ kotlin {
             implementation(libs.koin.compose)
 
             api(libs.compose.navigation.ui)
+            implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
             implementation(libs.kotlinx.serialization)
         }
