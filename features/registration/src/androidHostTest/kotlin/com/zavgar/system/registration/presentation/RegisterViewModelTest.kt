@@ -124,7 +124,7 @@ class RegisterViewModelTest {
 
         vm.event.test {
             vm.handleIntent(RegisterIntent.ClickLogin)
-            assertEquals(RegisterEvent.NavigateToWallet, awaitItem())
+            assertEquals(RegisterEvent.NavigateBack, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

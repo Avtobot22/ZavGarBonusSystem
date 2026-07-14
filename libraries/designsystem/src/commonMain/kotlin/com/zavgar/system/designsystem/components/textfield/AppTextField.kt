@@ -1,6 +1,7 @@
 package com.zavgar.system.designsystem.components.textfield
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,11 +32,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zavgar.system.core.presentation.compose.MaskVisualTransformation
 import com.zavgar.system.designsystem.components.text.AppTextMain
 import com.zavgar.system.designsystem.components.text.AppTextSecondary
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.icon_check
+import com.zavgar.system.resources.phone_label
+import com.zavgar.system.resources.phone_placeholder
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 
 @Composable
@@ -50,6 +56,7 @@ fun AppTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     trailingIcon: @Composable (() -> Unit)? = null,
+    prefix: @Composable (() -> Unit)? = null,
     readOnly: Boolean = false,
     interactionSource: MutableInteractionSource? = null,
 ) {
@@ -94,6 +101,7 @@ fun AppTextField(
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             trailingIcon = trailingIcon,
+            prefix = prefix,
             readOnly = readOnly,
             interactionSource = interactionSource ?: remember { MutableInteractionSource() },
         )
@@ -168,6 +176,8 @@ fun AppValidatedTextField(
     errorMessage: String? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    prefix: @Composable (() -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
 ) {
     AppTextField(
         value = value,
@@ -180,6 +190,8 @@ fun AppValidatedTextField(
         errorMessage = errorMessage,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
+        prefix = prefix,
+        interactionSource = interactionSource,
         trailingIcon = if (isValid && !isError) {
             {
                 Icon(
@@ -191,6 +203,46 @@ fun AppValidatedTextField(
         } else {
             null
         },
+    )
+}
+
+@Composable
+fun AppPhoneTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    isValid: Boolean,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val isPhonePrefixVisible = isFocused && value.isEmpty()
+
+    AppValidatedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        isValid = isValid,
+        label = stringResource(Res.string.phone_label),
+        placeholder = if (isPhonePrefixVisible) "" else stringResource(Res.string.phone_placeholder),
+        modifier = modifier,
+        enabled = enabled,
+        isError = isError,
+        errorMessage = errorMessage,
+        visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        prefix = if (isPhonePrefixVisible) {
+            {
+                Text(
+                    text = MaskVisualTransformation.DEFAULT_PHONE_PREFIX,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        } else {
+            null
+        },
+        interactionSource = interactionSource,
     )
 }
 

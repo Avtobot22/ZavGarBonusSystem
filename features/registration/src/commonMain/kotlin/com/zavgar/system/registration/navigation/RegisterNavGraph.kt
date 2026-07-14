@@ -6,6 +6,7 @@ import com.zavgar.system.navigationapi.controller.NavEventController
 import com.zavgar.system.navigationapi.destination.AuthDestination
 import com.zavgar.system.navigationapi.destination.Destination
 import com.zavgar.system.navigationapi.event.AuthEvent
+import com.zavgar.system.navigationapi.event.Event
 import com.zavgar.system.navigationapi.provider.NavGraph
 import com.zavgar.system.navigationapi.transition.AuthEnterTransition
 import com.zavgar.system.navigationapi.transition.AuthPopTransition
@@ -16,12 +17,12 @@ internal class RegisterNavGraph : NavGraph {
         { navEventController ->
             entry<AuthDestination.Register>(
                 metadata = NavDisplay.transitionSpec { AuthEnterTransition } +
-                        NavDisplay.popTransitionSpec { AuthPopTransition } +
-                        NavDisplay.predictivePopTransitionSpec { AuthPopTransition },
+                    NavDisplay.popTransitionSpec { AuthPopTransition } +
+                    NavDisplay.predictivePopTransitionSpec { AuthPopTransition },
             ) {
                 RegisterScreen(
-                    onNavigateToWallet = {
-                        navEventController.sendEvent(AuthEvent.ConfirmLoginSuccess)
+                    onNavigateBack = {
+                        navEventController.sendEvent(Event.OnBack)
                     },
                     onNavigateToConfirm = { phone ->
                         navEventController.sendEvent(AuthEvent.RegisterSubmit(phone))

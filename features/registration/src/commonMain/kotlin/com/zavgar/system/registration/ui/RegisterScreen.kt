@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.HorizontalDivider
@@ -25,13 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zavgar.system.core.presentation.ObserveAsEvents
-import com.zavgar.system.core.presentation.compose.MaskVisualTransformation
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
 import com.zavgar.system.designsystem.components.button.ZavGarBackButton
@@ -40,8 +37,8 @@ import com.zavgar.system.designsystem.components.scaffold.ZavGarAuthScaffold
 import com.zavgar.system.designsystem.components.snackbar.CustomSnackbarHost
 import com.zavgar.system.designsystem.components.snackbar.showCustomSnackbar
 import com.zavgar.system.designsystem.components.textfield.AppDatePickerField
+import com.zavgar.system.designsystem.components.textfield.AppPhoneTextField
 import com.zavgar.system.designsystem.components.textfield.AppTextField
-import com.zavgar.system.designsystem.components.textfield.AppValidatedTextField
 import com.zavgar.system.designsystem.modifiers.ShakingState
 import com.zavgar.system.designsystem.modifiers.rememberShakingState
 import com.zavgar.system.designsystem.theme.ZavGarThemePreview
@@ -57,8 +54,6 @@ import com.zavgar.system.resources.birth_date_label
 import com.zavgar.system.resources.birth_date_placeholder
 import com.zavgar.system.resources.login_button_text
 import com.zavgar.system.resources.login_sms_hint
-import com.zavgar.system.resources.phone_label
-import com.zavgar.system.resources.phone_placeholder
 import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
 import com.zavgar.system.resources.register_top_title
@@ -68,12 +63,12 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun RegisterScreen(
-    onNavigateToWallet: () -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     RegisterLoader(
-        onNavigateToWallet = onNavigateToWallet,
+        onNavigateBack = onNavigateBack,
         onNavigateToConfirm = onNavigateToConfirm,
         modifier = modifier,
     )
@@ -81,7 +76,7 @@ fun RegisterScreen(
 
 @Composable
 internal fun RegisterLoader(
-    onNavigateToWallet: () -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateToConfirm: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegisterViewModel = koinViewModel(),
@@ -93,7 +88,7 @@ internal fun RegisterLoader(
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
-            is RegisterEvent.NavigateToWallet -> onNavigateToWallet()
+            is RegisterEvent.NavigateBack -> onNavigateBack()
             is RegisterEvent.NavigateToConfirm -> onNavigateToConfirm(event.phone)
             is RegisterEvent.ShowSnackbar -> {
                 scope.launch { errorShakingState.shake() }
@@ -210,16 +205,12 @@ private fun RegisterForm(
             enabled = state.screenState is RegisterState.ScreenState.Idle,
         )
 
-        AppValidatedTextField(
+        AppPhoneTextField(
             value = state.phone,
             onValueChange = { onIntent(RegisterIntent.EnterPhone(it)) },
             isValid = state.isPhoneValid,
-            label = stringResource(Res.string.phone_label),
-            placeholder = stringResource(Res.string.phone_placeholder),
             isError = state.phoneError != null,
             errorMessage = state.phoneError?.asString(),
-            visualTransformation = MaskVisualTransformation.DEFAULT_PHONE_MASK,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             enabled = state.screenState is RegisterState.ScreenState.Idle,
         )
     }

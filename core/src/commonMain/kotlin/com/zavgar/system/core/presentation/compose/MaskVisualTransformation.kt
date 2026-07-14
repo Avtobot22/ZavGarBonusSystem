@@ -59,6 +59,8 @@ class MaskVisualTransformation(
     }
 
     companion object {
-        val DEFAULT_PHONE_MASK = MaskVisualTransformation("+7 (###) ### ##-##")
+        const val DEFAULT_PHONE_PREFIX = "+7"
+
+        val DEFAULT_PHONE_MASK = MaskVisualTransformation("$DEFAULT_PHONE_PREFIX (###) ### ##-##")
     }
 }
