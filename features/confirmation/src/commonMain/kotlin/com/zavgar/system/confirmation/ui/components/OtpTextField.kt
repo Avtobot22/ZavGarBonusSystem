@@ -67,27 +67,32 @@ fun OtpTextField(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             decorationBox = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    repeat(length) { index ->
-                        val char = when {
-                            index < value.length -> value[index].toString()
-                            else -> ""
-                        }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        repeat(length) { index ->
+                            val char = when {
+                                index < value.length -> value[index].toString()
+                                else -> ""
+                            }
 
-                        val isFocused = enabled && (
+                            val isFocused = enabled && (
                                 index == value.length ||
-                                        (value.length == length && index == length - 1)
+                                    (value.length == length && index == length - 1)
                                 )
 
-                        OtpCell(
-                            char = char,
-                            isFocused = isFocused,
-                            isError = isError,
-                            enabled = enabled,
-                        )
+                            OtpCell(
+                                char = char,
+                                isFocused = isFocused,
+                                isError = isError,
+                                enabled = enabled,
+                            )
+                        }
                     }
                 }
             },
