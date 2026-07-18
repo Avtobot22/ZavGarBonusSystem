@@ -8,8 +8,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,6 +95,7 @@ internal fun WalletScaffold(
     errorShakingState: ShakingState,
     modifier: Modifier,
 ) {
+    var expandedQrCard by rememberSaveable { mutableStateOf<String?>(null) }
     val isRefreshing =
         (state.screenState as? WalletState.ScreenState.Content)?.isRefreshing == true
 
@@ -115,6 +119,7 @@ internal fun WalletScaffold(
                             state = state,
                             screenState = screenState,
                             onIntent = onIntent,
+                            onQrClick = { expandedQrCard = state.phone },
                             modifier = Modifier,
                         )
                     }
@@ -128,12 +133,20 @@ internal fun WalletScaffold(
                     WalletState.ScreenState.Offline -> {
                         WalletOfflineContent(
                             phone = state.phone,
+                            onQrClick = { expandedQrCard = state.phone },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
                 }
             }
         }
+    }
+
+    expandedQrCard?.takeIf(String::isNotBlank)?.let { card ->
+        WalletQrDialog(
+            card = card,
+            onDismissRequest = { expandedQrCard = null },
+        )
     }
 }
 

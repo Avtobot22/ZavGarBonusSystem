@@ -31,6 +31,7 @@ import qrgenerator.qrkitpainter.solidBrush
 @Composable
 fun ZavGarQrImage(
     card: String,
+    contentDescription: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -60,7 +61,7 @@ fun ZavGarQrImage(
     ) {
         Image(
             painter = painter,
-            contentDescription = "QR код для карты $card",
+            contentDescription = contentDescription,
             modifier = Modifier.fillMaxSize(),
         )
     }

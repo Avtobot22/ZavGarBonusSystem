@@ -75,6 +75,11 @@
     <string name="refresh_points">Обновить баллы</string>
     <string name="wallet_refresh_cooldown">Обновить через %1$s</string>
     <string name="wallet_stale_banner">Данные могут быть устаревшими · обновлено %1$s</string>
+    <string name="wallet_qr_enlarge">Нажмите, чтобы увеличить</string>
+    <string name="wallet_qr_dialog_title">Ваш QR-код</string>
+    <string name="wallet_qr_dialog_description">Покажите этот код кассиру</string>
+    <string name="wallet_qr_content_description">QR-код бонусной карты</string>
+    <string name="wallet_qr_close">Закрыть</string>
     <string name="info_offline_mode">Для получения остатка бонусов подключитесь к сети</string>
 
     <!--    Settings-->

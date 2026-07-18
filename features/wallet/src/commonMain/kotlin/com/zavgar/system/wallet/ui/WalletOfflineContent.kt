@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zavgar.system.designsystem.components.qrcode.ZavGarQrImage
 import com.zavgar.system.designsystem.theme.border
 import com.zavgar.system.designsystem.theme.card
 import com.zavgar.system.designsystem.theme.danger
@@ -41,6 +40,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun WalletOfflineContent(
     phone: String,
+    onQrClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -76,8 +76,9 @@ internal fun WalletOfflineContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (phone.isNotEmpty()) {
-                ZavGarQrImage(
+                WalletQrCode(
                     card = phone,
+                    onClick = onQrClick,
                     modifier = Modifier.size(220.dp),
                 )
             } else {

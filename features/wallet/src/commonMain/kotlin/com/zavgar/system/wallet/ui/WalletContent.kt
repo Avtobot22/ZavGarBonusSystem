@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
-import com.zavgar.system.designsystem.components.qrcode.ZavGarQrImage
 import com.zavgar.system.designsystem.theme.accent
 import com.zavgar.system.designsystem.theme.border
 import com.zavgar.system.designsystem.theme.card
@@ -62,6 +61,7 @@ internal fun WalletContent(
     state: WalletState,
     screenState: WalletState.ScreenState.Content,
     onIntent: (WalletIntent) -> Unit,
+    onQrClick: () -> Unit,
     modifier: Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -87,7 +87,11 @@ internal fun WalletContent(
             modifier = Modifier.padding(bottom = 24.dp),
         )
 
-        QrCard(card = state.phone, balance = screenState.balance)
+        QrCard(
+            card = state.phone,
+            balance = screenState.balance,
+            onQrClick = onQrClick,
+        )
 
         if (screenState.isStale && screenState.lastUpdatedMillis != null) {
             Spacer(Modifier.height(12.dp))
@@ -122,7 +126,11 @@ internal fun WalletContent(
 }
 
 @Composable
-private fun QrCard(card: String, balance: Int) {
+private fun QrCard(
+    card: String,
+    balance: Int,
+    onQrClick: () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
@@ -133,8 +141,9 @@ private fun QrCard(card: String, balance: Int) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ZavGarQrImage(
+        WalletQrCode(
             card = card,
+            onClick = onQrClick,
             modifier = Modifier.size(220.dp),
         )
         Box(
