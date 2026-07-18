@@ -33,8 +33,8 @@ internal actual fun MaximumScreenBrightnessEffect() {
     }
 }
 
-private tailrec fun Context.findActivity(): Activity? = when {
-    this is Activity -> this
-    this is ContextWrapper && baseContext !== this -> baseContext.findActivity()
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper if baseContext !== this -> baseContext.findActivity()
     else -> null
 }

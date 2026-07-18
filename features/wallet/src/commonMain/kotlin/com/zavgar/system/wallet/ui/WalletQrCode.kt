@@ -74,6 +74,11 @@ internal fun WalletQrCode(
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
+            modifier = Modifier.clickable(
+                role = Role.Button,
+                onClickLabel = enlargeLabel,
+                onClick = onClick,
+            ),
         )
     }
 }
