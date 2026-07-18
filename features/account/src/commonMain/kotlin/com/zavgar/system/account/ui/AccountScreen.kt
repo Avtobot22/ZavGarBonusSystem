@@ -1,5 +1,8 @@
 package com.zavgar.system.account.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,20 +12,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.Icon
@@ -30,12 +39,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +57,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -69,7 +81,6 @@ import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.core.presentation.util.UiText
 import com.zavgar.system.designsystem.components.button.AppPrimaryButton
-import com.zavgar.system.designsystem.components.button.ZavGarBackButton
 import com.zavgar.system.designsystem.components.content.AnimatedState
 import com.zavgar.system.designsystem.components.datepicker.AppDatePicker
 import com.zavgar.system.designsystem.components.scaffold.ZavGarBaseScaffold
@@ -96,7 +107,10 @@ import com.zavgar.system.resources.birth_date_label
 import com.zavgar.system.resources.birth_date_placeholder
 import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
@@ -105,6 +119,9 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
+private const val IME_HEADER_COLLAPSE_DURATION_MILLIS = 250
+private const val PROFILE_FADE_MULTIPLIER = 1.6f
+private const val PROFILE_COLLAPSED_SCALE_DELTA = 0.04f
 
 @Composable
 fun AccountScreen(
@@ -221,7 +238,10 @@ internal fun AccountContent(
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
+    val density = LocalDensity.current
     val colors = MaterialTheme.colorScheme
+    val isImeVisible = WindowInsets.ime.getBottom(density) > 0
+    val nameFieldBringIntoViewRequester = remember { BringIntoViewRequester() }
 
     DeleteAccountDialog(state = state, onIntent = onIntent)
     AppDatePicker(
@@ -233,19 +253,15 @@ internal fun AccountContent(
 
     AccountScrollContainer(
         modifier = modifier,
-        hero = { heroModifier ->
+        collapseForIme = isImeVisible,
+        imeBringIntoViewRequester = nameFieldBringIntoViewRequester,
+        hero = { heroModifier, collapseFraction ->
             AccountHeroSection(
                 name = state.name,
                 onBack = { onIntent(AccountIntent.ClickBack) },
                 onDelete = { onIntent(AccountIntent.ClickDelete) },
+                collapseFraction = collapseFraction,
                 modifier = heroModifier,
-            )
-        },
-        pinnedHeader = {
-            AccountTopBarRow(
-                onBack = { onIntent(AccountIntent.ClickBack) },
-                action = { HeroDeleteButton(onClick = { onIntent(AccountIntent.ClickDelete) }) },
-                modifier = Modifier.statusBarsPadding(),
             )
         },
     ) {
@@ -261,6 +277,7 @@ internal fun AccountContent(
             onValueChange = { onIntent(AccountIntent.EnterName(it)) },
             label = stringResource(Res.string.register_name_label),
             placeholder = stringResource(Res.string.register_name_placeholder),
+            modifier = Modifier.bringIntoViewRequester(nameFieldBringIntoViewRequester),
             isError = state.nameError != null,
             errorMessage = state.nameError?.asString(),
             enabled = !state.isSubmitting,
@@ -340,35 +357,70 @@ private fun HeroContainer(
 }
 
 private val SheetOverlap = 20.dp
-private val CollapsedHeroHeight = 112.dp
+private val AccountTopBarHeight = 72.dp
+private val CollapsedToolbarBottomClearance = 16.dp
 
 /**
  * Скроллируемый каркас экрана: оранжевая шапка [hero] и карточка контента под ней.
  *
- * Карточка скроллится только при переполнении экрана. При сворачивании шапки
- * [pinnedHeader] остаётся поверх неё и сохраняет доступными основные действия.
- * Карточка приподнята на [SheetOverlap], чтобы её скруглённые углы перекрыли
- * шапку, и растянута минимум до низа экрана (без зазора под ней).
+ * Верхняя строка является частью единственной шапки и остаётся на месте, пока
+ * её профильная часть плавно скрывается. Благодаря этому во время перехода нет
+ * второго заголовка или второго набора действий. Карточка приподнята на
+ * [SheetOverlap] и растянута минимум до низа экрана.
  */
 @Composable
 private fun AccountScrollContainer(
-    hero: @Composable (Modifier) -> Unit,
-    pinnedHeader: @Composable () -> Unit,
+    hero: @Composable (Modifier, collapseFraction: Float) -> Unit,
     modifier: Modifier = Modifier,
+    collapseForIme: Boolean = false,
+    imeBringIntoViewRequester: BringIntoViewRequester? = null,
     sheetContent: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val density = LocalDensity.current
     val overlapPx = with(density) { SheetOverlap.roundToPx() }
-    val collapsedHeroHeightPx = with(density) { CollapsedHeroHeight.roundToPx() }
+    val collapsedHeroHeightPx = WindowInsets.statusBars.getTop(density) + with(density) {
+        (AccountTopBarHeight + SheetOverlap + CollapsedToolbarBottomClearance).roundToPx()
+    }
     val scrollState = rememberScrollState()
     var expandedHeroHeightPx by remember { mutableStateOf(0) }
     val heroOffsetPx = remember { mutableFloatStateOf(0f) }
+    val imeCollapseAnimationJob = remember { mutableStateOf<Job?>(null) }
     val collapseRangePx = (expandedHeroHeightPx - collapsedHeroHeightPx).coerceAtLeast(0)
+
+    LaunchedEffect(collapseForIme, collapseRangePx) {
+        if (collapseForIme && collapseRangePx > 0) {
+            val animationJob = currentCoroutineContext().job
+            imeCollapseAnimationJob.value = animationJob
+
+            try {
+                animate(
+                    initialValue = heroOffsetPx.floatValue,
+                    targetValue = -collapseRangePx.toFloat(),
+                    animationSpec = tween(
+                        durationMillis = IME_HEADER_COLLAPSE_DURATION_MILLIS,
+                        easing = FastOutSlowInEasing,
+                    ),
+                ) { value, _ ->
+                    heroOffsetPx.floatValue = value
+                }
+                withFrameNanos { }
+                imeBringIntoViewRequester?.bringIntoView()
+            } finally {
+                if (imeCollapseAnimationJob.value === animationJob) {
+                    imeCollapseAnimationJob.value = null
+                }
+            }
+        }
+    }
+
     val nestedScrollConnection = remember(collapseRangePx) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (available.y >= 0f || collapseRangePx == 0 || scrollState.maxValue == 0) {
+                if (source == NestedScrollSource.UserInput) {
+                    imeCollapseAnimationJob.value?.cancel()
+                }
+                if (available.y >= 0f || collapseRangePx == 0) {
                     return Offset.Zero
                 }
 
@@ -406,16 +458,18 @@ private fun AccountScrollContainer(
             (expandedHeroHeightPx + heroOffsetPx.floatValue.roundToInt())
                 .coerceIn(collapsedHeroHeightPx, expandedHeroHeightPx)
         }
+        val collapseFraction = if (collapseRangePx == 0) {
+            0f
+        } else {
+            (-heroOffsetPx.floatValue / collapseRangePx).coerceIn(0f, 1f)
+        }
         val sheetMinHeightPx = (viewportPx - visibleHeroHeightPx + overlapPx).coerceAtLeast(0)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(
-                    state = scrollState,
-                    enabled = scrollState.maxValue > 0,
-                )
-                .imePadding(),
+                .imePadding()
+                .verticalScroll(state = scrollState),
         ) {
             Spacer(
                 modifier = Modifier.height(
@@ -466,11 +520,8 @@ private fun AccountScrollContainer(
                 .onSizeChanged { size ->
                     expandedHeroHeightPx = maxOf(expandedHeroHeightPx, size.height)
                 },
+            collapseFraction,
         )
-
-        if (heroOffsetPx.floatValue < 0f) {
-            pinnedHeader()
-        }
     }
 }
 
@@ -503,6 +554,7 @@ private fun AccountHeroSection(
     name: String,
     onBack: () -> Unit,
     onDelete: () -> Unit,
+    collapseFraction: Float,
     modifier: Modifier = Modifier,
 ) {
     HeroContainer(modifier = modifier) {
@@ -511,41 +563,56 @@ private fun AccountHeroSection(
             action = { HeroDeleteButton(onClick = onDelete) },
         )
 
-        Spacer(Modifier.height(12.dp))
+        Column(
+            modifier = Modifier.collapsingProfileGraphics(collapseFraction),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.height(12.dp))
 
-        val firstLetter = name.firstOrNull()?.uppercase() ?: ""
-        DashedAvatarRing {
-            Box(
-                modifier = Modifier
-                    .size(104.dp)
-                    .background(Color.White, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = firstLetter,
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.accent,
-                )
+            val firstLetter = name.firstOrNull()?.uppercase() ?: ""
+            DashedAvatarRing {
+                Box(
+                    modifier = Modifier
+                        .size(104.dp)
+                        .background(Color.White, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = firstLetter,
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.accent,
+                    )
+                }
             }
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = name,
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            ProfileConfirmedBadge()
+
+            Spacer(Modifier.height(8.dp))
         }
-
-        Spacer(Modifier.height(12.dp))
-
-        Text(
-            text = name,
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        ProfileConfirmedBadge()
-
-        Spacer(Modifier.height(8.dp))
     }
 }
+
+private fun Modifier.collapsingProfileGraphics(collapseFraction: Float): Modifier =
+    graphicsLayer {
+        val progress = collapseFraction.coerceIn(0f, 1f)
+        alpha = (1f - progress * PROFILE_FADE_MULTIPLIER).coerceIn(0f, 1f)
+        translationY = -24.dp.toPx() * progress
+        val scale = 1f - PROFILE_COLLAPSED_SCALE_DELTA * progress
+        scaleX = scale
+        scaleY = scale
+    }
 
 @Composable
 private fun DashedAvatarRing(content: @Composable () -> Unit) {
@@ -584,9 +651,11 @@ private fun GlassBackButton(onClick: () -> Unit) {
             .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        ZavGarBackButton(
-            onClick = onClick,
-            modifier = Modifier.size(40.dp),
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Назад",
+            tint = Color.White,
+            modifier = Modifier.size(20.dp),
         )
     }
 }
@@ -644,50 +713,48 @@ internal fun AccountLoading(
 
     AccountScrollContainer(
         modifier = modifier,
-        hero = { heroModifier ->
+        hero = { heroModifier, collapseFraction ->
             HeroContainer(modifier = heroModifier) {
                 AccountTopBarRow(
                     onBack = onBack,
                     action = { LoadingTopBarAction() },
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier.collapsingProfileGraphics(collapseFraction),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(Modifier.height(12.dp))
 
-                DashedAvatarRing {
+                    DashedAvatarRing {
+                        Box(
+                            modifier = Modifier
+                                .size(104.dp)
+                                .background(placeholderColor, CircleShape),
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
                     Box(
                         modifier = Modifier
-                            .size(104.dp)
-                            .background(placeholderColor, CircleShape),
+                            .width(150.dp)
+                            .height(20.dp)
+                            .background(placeholderColor, RoundedCornerShape(8.dp)),
                     )
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .width(130.dp)
+                            .height(26.dp)
+                            .background(placeholderColor, RoundedCornerShape(20.dp)),
+                    )
+
+                    Spacer(Modifier.height(8.dp))
                 }
-
-                Spacer(Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .width(150.dp)
-                        .height(20.dp)
-                        .background(placeholderColor, RoundedCornerShape(8.dp)),
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                Box(
-                    modifier = Modifier
-                        .width(130.dp)
-                        .height(26.dp)
-                        .background(placeholderColor, RoundedCornerShape(20.dp)),
-                )
-
-                Spacer(Modifier.height(8.dp))
             }
-        },
-        pinnedHeader = {
-            AccountTopBarRow(
-                onBack = onBack,
-                action = { LoadingTopBarAction() },
-                modifier = Modifier.statusBarsPadding(),
-            )
         },
     ) {
         Text(
