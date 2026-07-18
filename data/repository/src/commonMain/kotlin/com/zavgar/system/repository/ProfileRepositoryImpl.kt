@@ -2,7 +2,8 @@ package com.zavgar.system.repository
 
 import com.zavgar.system.coroutines.CoroutineDispatcherProvider
 import com.zavgar.system.datastore.datasource.BalanceCacheDataSource
-import com.zavgar.system.datastore.datasource.SessionDataSource
+import com.zavgar.system.domain.session.error.SessionError
+import com.zavgar.system.domain.session.repository.SessionRepository
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.GetBalanceError
 import com.zavgar.system.domain.userinfo.error.LogoutError
@@ -26,7 +27,7 @@ import kotlinx.datetime.LocalDate
 internal class ProfileRepositoryImpl(
     private val userProfileService: UserProfileService,
     private val loyaltyService: LoyaltyService,
-    private val sessionDataSource: SessionDataSource,
+    private val sessionRepository: SessionRepository,
     private val balanceCacheDataSource: BalanceCacheDataSource,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : ProfileRepository {
@@ -49,18 +50,21 @@ internal class ProfileRepositoryImpl(
     override suspend fun delete(): AppResult<Unit, DeleteError> = withContext(dispatcherProvider.io) {
         userProfileService.delete()
 
-        sessionDataSource.deleteSession().onFailure { exception ->
-            return@withContext AppResult.Error(
-                DeleteError.UnknownError(exception.message ?: "Local storage cleanup failed"),
+        when (val cleanup = sessionRepository.deleteSession()) {
+            is AppResult.Success -> AppResult.Success(Unit)
+            is AppResult.Error -> AppResult.Error(
+                DeleteError.UnknownError(cleanup.error.messageOr("Local storage cleanup failed")),
             )
         }
-        AppResult.Success(Unit)
     }
 
     override suspend fun getBalance(): AppResult<Balance, GetBalanceError> = withContext(dispatcherProvider.io) {
+        val owner = currentSessionOwner()
         loyaltyService.getBalance().fold(
             onSuccess = {
-                balanceCacheDataSource.saveBalance(it.balance)
+                if (owner != null && currentSessionOwner() == owner) {
+                    balanceCacheDataSource.saveBalance(owner = owner, balance = it.balance)
+                }
                 AppResult.Success(Balance(balance = it.balance))
             },
             onFailure = { AppResult.Error(it.toGetBalanceError()) },
@@ -68,7 +72,8 @@ internal class ProfileRepositoryImpl(
     }
 
     override suspend fun getCachedBalance(): CachedBalance? = withContext(dispatcherProvider.io) {
-        balanceCacheDataSource.getCachedBalance()?.let {
+        val owner = currentSessionOwner() ?: return@withContext null
+        balanceCacheDataSource.getCachedBalance(owner)?.let {
             CachedBalance(balance = it.balance, updatedAtMillis = it.updatedAtMillis)
         }
     }
@@ -84,13 +89,20 @@ internal class ProfileRepositoryImpl(
     override suspend fun logout(): AppResult<Unit, LogoutError> = withContext(dispatcherProvider.io) {
         userProfileService.logout()
 
-        sessionDataSource.deleteSession().onFailure { exception ->
-            return@withContext AppResult.Error(
-                LogoutError.UnknownError(exception.message ?: "Local session deletion failed"),
+        when (val cleanup = sessionRepository.deleteSession()) {
+            is AppResult.Success -> AppResult.Success(Unit)
+            is AppResult.Error -> AppResult.Error(
+                LogoutError.UnknownError(cleanup.error.messageOr("Local session deletion failed")),
             )
         }
+    }
 
-        AppResult.Success(Unit)
+    private suspend fun currentSessionOwner(): String? =
+        (sessionRepository.getSession() as? AppResult.Success)?.data?.phone
+
+    private fun SessionError.messageOr(fallback: String): String = when (this) {
+        SessionError.NotFound -> fallback
+        is SessionError.UnknownError -> message
     }
 
     private fun Throwable.toProfileError(): ProfileError = when (val kind = classifyNetworkError()) {

@@ -8,11 +8,17 @@ interface SessionDataSource {
 
     suspend fun getSession(): Result<Session>
 
-    suspend fun saveTokens(accessToken: String, refreshToken: String): Result<Unit>
+    suspend fun saveTokensIfRefreshTokenMatches(
+        expectedRefreshToken: String,
+        accessToken: String,
+        refreshToken: String,
+    ): Result<Boolean>
 
     suspend fun getRefreshToken(): Result<String>
 
     suspend fun getAccessToken(): Result<String>
 
     suspend fun deleteSession(): Result<Unit>
+
+    suspend fun deleteSessionIfRefreshTokenMatches(expectedRefreshToken: String): Result<Boolean>
 }

@@ -1,6 +1,8 @@
 package com.zavgar.system.repository
 
 import com.zavgar.system.coroutines.CoroutineDispatcherProvider
+import com.zavgar.system.coroutines.runSuspendCatching
+import com.zavgar.system.datastore.datasource.BalanceCacheDataSource
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.datastore.model.Session
 import com.zavgar.system.domain.auth.AuthRepository
@@ -8,6 +10,7 @@ import com.zavgar.system.domain.auth.error.AuthError
 import com.zavgar.system.domain.auth.error.ConfirmationError
 import com.zavgar.system.domain.auth.error.RegisterError
 import com.zavgar.system.domain.auth.error.ResendConfirmationError
+import com.zavgar.system.network.auth.AuthTokenCache
 import com.zavgar.system.network.mapper.NetworkErrorKind
 import com.zavgar.system.network.mapper.classifyNetworkError
 import com.zavgar.system.network.model.ApiErrorCode
@@ -25,6 +28,8 @@ import kotlinx.datetime.LocalDate
 internal class AuthRepositoryImpl(
     private val authService: AuthService,
     private val sessionDataSource: SessionDataSource,
+    private val balanceCacheDataSource: BalanceCacheDataSource,
+    private val authTokenCache: AuthTokenCache,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : AuthRepository {
 
@@ -66,9 +71,16 @@ internal class AuthRepositoryImpl(
             onSuccess = { it },
             onFailure = { return AppResult.Error(it.toConfirmationError()) },
         )
+        runSuspendCatching {
+            balanceCacheDataSource.clearBalance()
+        }
+
         val saved = sessionDataSource.saveSession(Session(response.accessToken, response.refreshToken, phone))
         return saved.fold(
-            onSuccess = { AppResult.Success(Unit) },
+            onSuccess = {
+                authTokenCache.clear()
+                AppResult.Success(Unit)
+            },
             onFailure = { AppResult.Error(ConfirmationError.UnknownError(it.message ?: "Storage Error")) },
         )
     }

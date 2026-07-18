@@ -1,7 +1,9 @@
 package com.zavgar.system.repository
 
 import com.zavgar.system.datastore.datasource.BalanceCacheDataSource
-import com.zavgar.system.datastore.datasource.SessionDataSource
+import com.zavgar.system.domain.session.error.SessionError
+import com.zavgar.system.domain.session.model.Session
+import com.zavgar.system.domain.session.repository.SessionRepository
 import com.zavgar.system.domain.userinfo.error.DeleteError
 import com.zavgar.system.domain.userinfo.error.GetBalanceError
 import com.zavgar.system.domain.userinfo.error.LogoutError
@@ -32,12 +34,12 @@ class ProfileRepositoryImplTest {
 
     private val userProfileService = mockk<UserProfileService>()
     private val loyaltyService = mockk<LoyaltyService>()
-    private val sessionDataSource = mockk<SessionDataSource>()
+    private val sessionRepository = mockk<SessionRepository>()
     private val balanceCacheDataSource = mockk<BalanceCacheDataSource>()
     private val repository = ProfileRepositoryImpl(
         userProfileService,
         loyaltyService,
-        sessionDataSource,
+        sessionRepository,
         balanceCacheDataSource,
         TestDispatcherProvider(),
     )
@@ -74,28 +76,31 @@ class ProfileRepositoryImplTest {
 
     @Test
     fun `getBalance caches the value and returns it on success`() = runTest {
+        stubSession()
         coEvery { loyaltyService.getBalance() } returns Result.success(BalanceResponse(balance = 750))
-        coEvery { balanceCacheDataSource.saveBalance(any()) } just Runs
+        coEvery { balanceCacheDataSource.saveBalance(any(), any()) } just Runs
 
         val result = repository.getBalance()
 
         assertEquals(AppResult.Success(Balance(750)), result)
-        coVerify(exactly = 1) { balanceCacheDataSource.saveBalance(750) }
+        coVerify(exactly = 1) { balanceCacheDataSource.saveBalance("1234567890", 750) }
     }
 
     @Test
     fun `getBalance maps a 429 to TooManyRequest and does not cache`() = runTest {
+        stubSession()
         coEvery { loyaltyService.getBalance() } returns Result.failure(clientError(429))
 
         val result = repository.getBalance()
 
         assertEquals(AppResult.Error(GetBalanceError.TooManyRequestError()), result)
-        coVerify(exactly = 0) { balanceCacheDataSource.saveBalance(any()) }
+        coVerify(exactly = 0) { balanceCacheDataSource.saveBalance(any(), any()) }
     }
 
     @Test
     fun `getCachedBalance maps a stored balance to the domain model`() = runTest {
-        coEvery { balanceCacheDataSource.getCachedBalance() } returns
+        stubSession()
+        coEvery { balanceCacheDataSource.getCachedBalance("1234567890") } returns
             StoredBalance(balance = 320, updatedAtMillis = 1_700_000_000_000)
 
         assertEquals(CachedBalance(balance = 320, updatedAtMillis = 1_700_000_000_000), repository.getCachedBalance())
@@ -103,7 +108,8 @@ class ProfileRepositoryImplTest {
 
     @Test
     fun `getCachedBalance returns null when nothing is stored`() = runTest {
-        coEvery { balanceCacheDataSource.getCachedBalance() } returns null
+        stubSession()
+        coEvery { balanceCacheDataSource.getCachedBalance("1234567890") } returns null
 
         assertNull(repository.getCachedBalance())
     }
@@ -125,7 +131,7 @@ class ProfileRepositoryImplTest {
     @Test
     fun `delete returns Success when both the server and the session are cleared`() = runTest {
         coEvery { userProfileService.delete() } returns Result.success(Unit)
-        coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
+        coEvery { sessionRepository.deleteSession() } returns AppResult.Success(Unit)
 
         assertEquals(AppResult.Success(Unit), repository.delete())
     }
@@ -134,16 +140,16 @@ class ProfileRepositoryImplTest {
     fun `delete returns Success and clears the session even when the server fails`() = runTest {
         // Политика «логаут в любом случае»: серверная ошибка не отменяет локальный выход.
         coEvery { userProfileService.delete() } returns Result.failure(serverError())
-        coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
+        coEvery { sessionRepository.deleteSession() } returns AppResult.Success(Unit)
 
         assertEquals(AppResult.Success(Unit), repository.delete())
-        coVerify { sessionDataSource.deleteSession() }
+        coVerify { sessionRepository.deleteSession() }
     }
 
     @Test
     fun `delete reports an UnknownError when only the local cleanup fails`() = runTest {
         coEvery { userProfileService.delete() } returns Result.success(Unit)
-        coEvery { sessionDataSource.deleteSession() } returns Result.failure(RuntimeException("cleanup"))
+        coEvery { sessionRepository.deleteSession() } returns AppResult.Error(SessionError.UnknownError("cleanup"))
 
         assertEquals(AppResult.Error(DeleteError.UnknownError("cleanup")), repository.delete())
     }
@@ -151,7 +157,7 @@ class ProfileRepositoryImplTest {
     @Test
     fun `logout returns Success when both calls succeed`() = runTest {
         coEvery { userProfileService.logout() } returns Result.success(Unit)
-        coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
+        coEvery { sessionRepository.deleteSession() } returns AppResult.Success(Unit)
 
         assertEquals(AppResult.Success(Unit), repository.logout())
     }
@@ -160,17 +166,36 @@ class ProfileRepositoryImplTest {
     fun `logout returns Success and clears the session even when the server fails`() = runTest {
         // Политика «логаут в любом случае»: серверная ошибка не отменяет локальный выход.
         coEvery { userProfileService.logout() } returns Result.failure(clientError(429))
-        coEvery { sessionDataSource.deleteSession() } returns Result.success(Unit)
+        coEvery { sessionRepository.deleteSession() } returns AppResult.Success(Unit)
 
         assertEquals(AppResult.Success(Unit), repository.logout())
-        coVerify { sessionDataSource.deleteSession() }
+        coVerify { sessionRepository.deleteSession() }
     }
 
     @Test
     fun `logout reports an UnknownError when local session deletion fails`() = runTest {
         coEvery { userProfileService.logout() } returns Result.success(Unit)
-        coEvery { sessionDataSource.deleteSession() } returns Result.failure(RuntimeException("local"))
+        coEvery { sessionRepository.deleteSession() } returns AppResult.Error(SessionError.UnknownError("local"))
 
         assertEquals(AppResult.Error(LogoutError.UnknownError("local")), repository.logout())
+    }
+
+    @Test
+    fun `late balance response from previous account is not cached for the new account`() = runTest {
+        coEvery { sessionRepository.getSession() } returnsMany listOf(
+            AppResult.Success(Session(phone = "account-a", accessToken = "a", refreshToken = "ra")),
+            AppResult.Success(Session(phone = "account-b", accessToken = "b", refreshToken = "rb")),
+        )
+        coEvery { loyaltyService.getBalance() } returns Result.success(BalanceResponse(balance = 750))
+
+        assertEquals(AppResult.Success(Balance(750)), repository.getBalance())
+
+        coVerify(exactly = 0) { balanceCacheDataSource.saveBalance(any(), any()) }
+    }
+
+    private fun stubSession(phone: String = "1234567890") {
+        coEvery { sessionRepository.getSession() } returns AppResult.Success(
+            Session(phone = phone, accessToken = "access", refreshToken = "refresh"),
+        )
     }
 }

@@ -4,7 +4,9 @@ import com.zavgar.system.datastore.model.CachedBalance
 
 interface BalanceCacheDataSource {
 
-    suspend fun getCachedBalance(): CachedBalance?
+    suspend fun getCachedBalance(owner: String): CachedBalance?
 
-    suspend fun saveBalance(balance: Int)
+    suspend fun saveBalance(owner: String, balance: Int)
+
+    suspend fun clearBalance()
 }

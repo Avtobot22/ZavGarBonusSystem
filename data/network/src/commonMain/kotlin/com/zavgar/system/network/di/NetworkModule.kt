@@ -4,10 +4,12 @@ import com.zavgar.system.config.AppConfig
 import com.zavgar.system.config.IS_DEBUG_BUILD
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.domain.session.LogoutHandler
+import com.zavgar.system.network.auth.AuthTokenCache
+import com.zavgar.system.network.auth.BearerTokenRefresher
+import com.zavgar.system.network.auth.KtorAuthTokenCache
 import com.zavgar.system.network.mapper.ApiException
 import com.zavgar.system.network.model.ApiErrorCode
 import com.zavgar.system.network.model.ErrorResponse
-import com.zavgar.system.network.model.LoginResponse
 import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.network.remote.AuthServiceImpl
 import com.zavgar.system.network.remote.LoyaltyService
@@ -90,6 +92,12 @@ val networkModule = module {
         val isDebugBuild = get<Boolean>(named(IS_DEBUG_BUILD))
         val appConfig = get<AppConfig>()
         val koinScope = this
+        val tokenRefresher = BearerTokenRefresher(
+            sessionDataSource = sessionDataSource,
+            onRefreshRejected = { refreshToken ->
+                koinScope.get<LogoutHandler>().logoutIfCurrent(refreshToken)
+            },
+        )
 
         buildHttpClient(getOrNull(named(NETWORK_ENGINE))) {
             configureCommon(get(), appConfig::baseUrl, isDebugBuild)
@@ -97,53 +105,33 @@ val networkModule = module {
             install(Auth) {
                 bearer {
                     loadTokens {
-                        val access = sessionDataSource.getAccessToken().getOrNull()
-                        val refresh = sessionDataSource.getRefreshToken().getOrNull()
-
-                        if (access != null && refresh != null) {
-                            BearerTokens(accessToken = access, refreshToken = refresh)
-                        } else {
-                            null
+                        sessionDataSource.getSession().getOrNull()?.let { session ->
+                            BearerTokens(
+                                accessToken = session.accessToken,
+                                refreshToken = session.refreshToken,
+                            )
                         }
                     }
 
                     sendWithoutRequest { true }
 
                     refreshTokens {
-                        val oldRefreshToken = oldTokens?.refreshToken
-                            ?: sessionDataSource.getRefreshToken().getOrNull()
-                            ?: return@refreshTokens null
-
-                        try {
-                            val newTokens: LoginResponse = publicClient.post("auth/refresh/token") {
+                        tokenRefresher.refresh(oldTokens) { refreshToken ->
+                            publicClient.post("auth/refresh/token") {
                                 markAsRefreshTokenRequest()
                                 headers {
-                                    append(HttpHeaders.Authorization, "Bearer $oldRefreshToken")
+                                    append(HttpHeaders.Authorization, "Bearer $refreshToken")
                                 }
                             }.body()
-
-                            sessionDataSource.saveTokens(
-                                accessToken = newTokens.accessToken,
-                                refreshToken = newTokens.refreshToken,
-                            )
-
-                            BearerTokens(
-                                accessToken = newTokens.accessToken,
-                                refreshToken = newTokens.refreshToken,
-                            )
-                        } catch (cause: ApiException) {
-                            if (cause.statusCode.isRefreshAuthFailure()) {
-                                triggerLogout(koinScope.get())
-                            } else {
-                                null
-                            }
-                        } catch (_: Exception) {
-                            null
                         }
                     }
                 }
             }
         }
+    }
+
+    single<AuthTokenCache> {
+        KtorAuthTokenCache(get(named("authClient")))
     }
 
     single<AuthService> {
@@ -158,13 +146,6 @@ val networkModule = module {
         LoyaltyServiceImpl(get(named("authClient")))
     }
 }
-
-private suspend fun triggerLogout(logoutHandler: LogoutHandler): BearerTokens? {
-    logoutHandler.logout()
-    return null
-}
-
-private fun Int.isRefreshAuthFailure(): Boolean = this == HttpStatusCode.Unauthorized.value
 
 /**
  * Создаёт [HttpClient] на переданном [engine], либо на дефолтном платформенном движке,

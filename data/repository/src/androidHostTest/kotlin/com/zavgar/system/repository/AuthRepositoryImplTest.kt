@@ -1,17 +1,20 @@
 package com.zavgar.system.repository
 
+import com.zavgar.system.datastore.datasource.BalanceCacheDataSource
 import com.zavgar.system.datastore.datasource.SessionDataSource
 import com.zavgar.system.datastore.model.Session
 import com.zavgar.system.domain.auth.error.AuthError
 import com.zavgar.system.domain.auth.error.ConfirmationError
 import com.zavgar.system.domain.auth.error.RegisterError
 import com.zavgar.system.domain.auth.error.ResendConfirmationError
+import com.zavgar.system.network.auth.AuthTokenCache
 import com.zavgar.system.network.model.LoginResponse
 import com.zavgar.system.network.remote.AuthService
 import com.zavgar.system.utils.result.AppResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,7 +23,15 @@ class AuthRepositoryImplTest {
 
     private val authService = mockk<AuthService>()
     private val sessionDataSource = mockk<SessionDataSource>()
-    private val repository = AuthRepositoryImpl(authService, sessionDataSource, TestDispatcherProvider())
+    private val balanceCacheDataSource = mockk<BalanceCacheDataSource>(relaxed = true)
+    private val authTokenCache = mockk<AuthTokenCache>(relaxed = true)
+    private val repository = AuthRepositoryImpl(
+        authService,
+        sessionDataSource,
+        balanceCacheDataSource,
+        authTokenCache,
+        TestDispatcherProvider(),
+    )
 
     @Test
     fun `login returns Success when the service succeeds`() = runTest {
@@ -86,6 +97,8 @@ class AuthRepositoryImplTest {
                 Session(accessToken = "access", refreshToken = "refresh", phone = "1234567890"),
             )
         }
+        coVerify(exactly = 1) { balanceCacheDataSource.clearBalance() }
+        verify(exactly = 1) { authTokenCache.clear() }
     }
 
     @Test
@@ -98,6 +111,7 @@ class AuthRepositoryImplTest {
         val result = repository.confirmLogin(phone = "1234567890", code = "1111")
 
         assertEquals(AppResult.Error(ConfirmationError.UnknownError("disk full")), result)
+        verify(exactly = 0) { authTokenCache.clear() }
     }
 
     @Test
@@ -108,6 +122,8 @@ class AuthRepositoryImplTest {
 
         assertEquals(AppResult.Error(ConfirmationError.InvalidCodeError), result)
         coVerify(exactly = 0) { sessionDataSource.saveSession(any()) }
+        coVerify(exactly = 0) { balanceCacheDataSource.clearBalance() }
+        verify(exactly = 0) { authTokenCache.clear() }
     }
 
     @Test
@@ -125,6 +141,7 @@ class AuthRepositoryImplTest {
                 Session(accessToken = "access", refreshToken = "refresh", phone = "1234567890"),
             )
         }
+        verify(exactly = 1) { authTokenCache.clear() }
     }
 
     @Test
@@ -135,6 +152,21 @@ class AuthRepositoryImplTest {
 
         assertEquals(AppResult.Error(ConfirmationError.TooManyRequestError()), result)
         coVerify(exactly = 0) { sessionDataSource.saveSession(any()) }
+    }
+
+    @Test
+    fun `confirmLogin still saves an isolated session when old balance cleanup fails`() = runTest {
+        coEvery { authService.confirmLogin(any()) } returns Result.success(
+            LoginResponse(accessToken = "a", accessExpiresIn = 1, refreshToken = "r", refreshExpiresIn = 2),
+        )
+        coEvery { balanceCacheDataSource.clearBalance() } throws RuntimeException("cache")
+        coEvery { sessionDataSource.saveSession(any()) } returns Result.success(Unit)
+
+        val result = repository.confirmLogin(phone = "1234567890", code = "1111")
+
+        assertEquals(AppResult.Success(Unit), result)
+        coVerify(exactly = 1) { sessionDataSource.saveSession(any()) }
+        verify(exactly = 1) { authTokenCache.clear() }
     }
 
     @Test
