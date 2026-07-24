@@ -109,16 +109,13 @@ import com.zavgar.system.resources.register_name_label
 import com.zavgar.system.resources.register_name_placeholder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 
-private const val DELETE_SUCCESS_VISIBLE_MILLIS = 1500L
 private const val IME_HEADER_COLLAPSE_DURATION_MILLIS = 250
 private const val PROFILE_FADE_MULTIPLIER = 1.6f
 private const val PROFILE_COLLAPSED_SCALE_DELTA = 0.04f
@@ -155,21 +152,7 @@ internal fun AccountLoader(
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
             is AccountEvent.NavigateBack -> onNavigateBack()
-            is AccountEvent.DeleteAccountSuccess -> {
-                scope.launch {
-                    val shown = launch {
-                        snackbarHostState.showCustomSnackbar(
-                            type = event.message.type,
-                            message = event.message.message.suspendAsString(),
-                            withDismissAction = true,
-                        )
-                    }
-                    delay(DELETE_SUCCESS_VISIBLE_MILLIS.milliseconds)
-                    shown.cancel()
-                    onNavigateToLogin()
-                }
-            }
-
+            is AccountEvent.NavigateToLogin -> onNavigateToLogin()
             is AccountEvent.ShowSnackbar -> {
                 scope.launch { errorShakingState.shake() }
                 scope.launch {

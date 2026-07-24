@@ -96,7 +96,6 @@
     <string name="account_personal_data">Личные данные</string>
     <string name="account_profile_confirmed">Профиль подтверждён</string>
     <string name="profile_update_success">Данные успешно сохранены</string>
-    <string name="profile_delete_success">Профиль успешно удален</string>
     <string name="account_confirm">Сохранить изменения</string>
     <string name="account_delete_title">Удалить аккаунт</string>
     <string name="account_delete_description">Вы уверены, что хотите удалить аккаунт востановление будет не возможно?</string>

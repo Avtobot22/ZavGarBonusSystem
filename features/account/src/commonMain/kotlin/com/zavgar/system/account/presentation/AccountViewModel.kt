@@ -22,7 +22,6 @@ import com.zavgar.system.domain.userinfo.usecase.GetUserProfileUseCase
 import com.zavgar.system.domain.userinfo.usecase.UpdateUserProfileUseCase
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.error_unknown_error
-import com.zavgar.system.resources.profile_delete_success
 import com.zavgar.system.resources.profile_update_success
 import com.zavgar.system.utils.validation.ValidateBirthDateUseCase
 import com.zavgar.system.utils.validation.ValidateNameUseCase
@@ -151,14 +150,7 @@ class AccountViewModel(
                 is DeleteResult.Success -> {
                     analyticsTracker.log(AnalyticsEvent.DeleteAccount)
                     analyticsTracker.clearUser()
-                    setEvent {
-                        AccountEvent.DeleteAccountSuccess(
-                            SnackBarMessage(
-                                message = UiText.Resource(Res.string.profile_delete_success),
-                                type = SnackBarType.SUCCESS,
-                            ),
-                        )
-                    }
+                    setEvent { AccountEvent.NavigateToLogin }
                 }
 
                 is DeleteResult.Error -> {

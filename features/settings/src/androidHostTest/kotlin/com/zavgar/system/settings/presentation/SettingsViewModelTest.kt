@@ -159,7 +159,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `Logout navigates to login on success`() = runTest(dispatcher) {
+    fun `Logout emits only navigation to login on success`() = runTest(dispatcher) {
         coEvery { getUserProfileUseCase() } returns AppResult.Success(profile)
         coEvery { getUserBalanceUseCase() } returns AppResult.Success(Balance(0))
         every { observeDarkThemeUseCase() } returns flowOf(false)
@@ -170,6 +170,7 @@ class SettingsViewModelTest {
             vm.handleIntent(SettingsIntent.Logout)
             advanceUntilIdle()
             assertEquals(SettingsEvent.NavigateToLogin, awaitItem())
+            expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
     }

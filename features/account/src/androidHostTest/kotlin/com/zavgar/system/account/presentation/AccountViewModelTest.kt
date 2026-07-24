@@ -199,7 +199,7 @@ class AccountViewModelTest {
     }
 
     @Test
-    fun `ConfirmDeleteAccount emits DeleteAccountSuccess on success`() = runTest(dispatcher) {
+    fun `ConfirmDeleteAccount emits only navigation to login on success`() = runTest(dispatcher) {
         coEvery { getProfileUseCase() } returns AppResult.Success(profile)
         coEvery { deleteProfileUseCase() } returns AppResult.Success(Unit)
         val vm = viewModel()
@@ -209,7 +209,8 @@ class AccountViewModelTest {
         vm.event.test {
             vm.handleIntent(AccountIntent.ConfirmDeleteAccount)
             advanceUntilIdle()
-            assertTrue(awaitItem() is AccountEvent.DeleteAccountSuccess)
+            assertEquals(AccountEvent.NavigateToLogin, awaitItem())
+            expectNoEvents()
             cancelAndIgnoreRemainingEvents()
         }
     }
