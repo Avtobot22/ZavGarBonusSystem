@@ -83,7 +83,6 @@ private fun SplashScaffold(
     )
 }
 
-// `state` is threaded through for UDF symmetry; the splash UI is currently static.
 @Suppress("UnusedParameter")
 @Composable
 private fun SplashContent(state: SplashState, modifier: Modifier) {

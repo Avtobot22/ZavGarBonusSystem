@@ -2,7 +2,7 @@ package com.zavgar.system.designsystem.components.logo
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zavgar.system.designsystem.theme.onAccent
 import com.zavgar.system.resources.Res
+import com.zavgar.system.resources.logo_zavgar
 import com.zavgar.system.resources.zavgar_header_title
-import com.zavgar.system.resources.zavgar_logo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -29,12 +29,14 @@ fun AppLogo(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = painterResource(Res.drawable.zavgar_logo),
+            painter = painterResource(Res.drawable.logo_zavgar),
             contentDescription = "ZavGar",
             colorFilter = ColorFilter.tint(colors.onAccent),
-            modifier = Modifier.height(80.dp).padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .padding(horizontal = 32.dp),
         )
-        Spacer(Modifier.height(6.dp))
         Text(
             text = stringResource(Res.string.zavgar_header_title),
             color = colors.onAccent.copy(alpha = 0.75f),
