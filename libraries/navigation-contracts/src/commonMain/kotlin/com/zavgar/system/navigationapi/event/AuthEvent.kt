@@ -35,20 +35,13 @@ object AuthEvent {
             AuthDestination.Confirmation(phone = phone, isRegistration = true)
     }
 
-    /**
-     * Triggered when the user clicks "Already have an account? Login".
-     */
-    data object ToLogin : Event {
-        override fun nextDestination(): Destination = AuthDestination.Login
-    }
-
     // --- Confirmation Screen Events ---
 
     /**
-     * Triggered when the login OTP is successfully verified.
+     * Triggered when the login or registration OTP is successfully verified.
      * Clears the back stack and navigates to the main screen.
      */
-    data object ConfirmLoginSuccess : Event, ClearAndNavigateToTopLevel {
+    data object ConfirmSuccess : Event, ClearAndNavigateToTopLevel {
         override fun nextDestination(): Destination = HomeDestination.Wallet
     }
 }

@@ -47,7 +47,6 @@ import com.zavgar.system.designsystem.theme.ZavGarThemePreview
 import com.zavgar.system.designsystem.theme.accent
 import com.zavgar.system.designsystem.theme.foreground
 import com.zavgar.system.designsystem.theme.foregroundSecondary
-import com.zavgar.system.designsystem.theme.success
 import com.zavgar.system.resources.Res
 import com.zavgar.system.resources.confirmation_button_text
 import com.zavgar.system.resources.confirmation_default_time
@@ -63,14 +62,14 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ConfirmationScreen(
     phone: String,
     isRegistration: Boolean,
-    onNavigateToLogin: () -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ConfirmationLoader(
         phone = phone,
         isRegistration = isRegistration,
-        onNavigateToLogin = onNavigateToLogin,
+        onNavigateBack = onNavigateBack,
         onNavigateToWallet = onNavigateToWallet,
         modifier = modifier,
     )
@@ -80,7 +79,7 @@ fun ConfirmationScreen(
 internal fun ConfirmationLoader(
     phone: String,
     isRegistration: Boolean,
-    onNavigateToLogin: () -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateToWallet: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ConfirmationViewModel = koinViewModel(),
@@ -97,14 +96,11 @@ internal fun ConfirmationLoader(
 
     viewModel.event.ObserveAsEvents { event ->
         when (event) {
-            is ConfirmationEvent.NavigateToLogin -> {
-                haptics.success()
-                onNavigateToLogin()
-            }
             is ConfirmationEvent.NavigateToWallet -> {
                 haptics.success()
                 onNavigateToWallet()
             }
+
             is ConfirmationEvent.ShowSnackbar -> {
                 haptics.error()
                 scope.launch { errorShakingState.shake() }
@@ -124,7 +120,7 @@ internal fun ConfirmationLoader(
         snackbarHostState = snackbarHostState,
         onIntent = viewModel::handleIntent,
         errorShakingState = errorShakingState,
-        onBackClick = onNavigateToLogin,
+        onBackClick = onNavigateBack,
         modifier = modifier,
     )
 }

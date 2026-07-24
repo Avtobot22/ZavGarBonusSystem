@@ -89,7 +89,7 @@ class ConfirmationViewModelTest {
     }
 
     @Test
-    fun `Submit for a registration flow navigates to login on success`() = runTest(dispatcher) {
+    fun `Submit for a registration flow navigates to wallet on success`() = runTest(dispatcher) {
         coEvery { confirmationUseCase(any()) } returns AppResult.Success(Unit)
         val vm = viewModel()
         vm.handleIntent(ConfirmationIntent.Initialize(phone = "1234567890", isRegistration = true))
@@ -98,7 +98,7 @@ class ConfirmationViewModelTest {
         vm.event.test {
             vm.handleIntent(ConfirmationIntent.Submit)
             advanceUntilIdle()
-            assertEquals(ConfirmationEvent.NavigateToLogin, awaitItem())
+            assertEquals(ConfirmationEvent.NavigateToWallet, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

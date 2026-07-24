@@ -168,11 +168,7 @@ class ConfirmationViewModel(
                         analyticsTracker.log(AnalyticsEvent.LoginSuccess)
                     }
                     setEvent {
-                        if (confirmationRequest.isRegistration) {
-                            ConfirmationEvent.NavigateToLogin
-                        } else {
-                            ConfirmationEvent.NavigateToWallet
-                        }
+                        ConfirmationEvent.NavigateToWallet
                     }
                 }
 
