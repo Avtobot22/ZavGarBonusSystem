@@ -20,7 +20,7 @@ import com.zavgar.system.designsystem.theme.accent
 @Composable
 fun ZavGarOrangeHeader(
     modifier: Modifier = Modifier,
-    topPadding: Dp = 56.dp,
+    topPadding: Dp = 44.dp,
     bottomPadding: Dp = 44.dp,
 ) {
     val colors = MaterialTheme.colorScheme

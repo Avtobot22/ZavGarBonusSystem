@@ -25,7 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 fun AppLogo(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
