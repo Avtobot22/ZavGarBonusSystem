@@ -5,7 +5,7 @@ package com.zavgar.system.shared.di
  *
  * Kotlin/Native не экспортирует значения параметров по умолчанию в Swift, поэтому для
  * управления mock-сервером с iOS заводится отдельная функция без перегрузок. Вызывается
- * из `iosApp` (`KoinHelperKt.doInitKoinIos(useMockServer:)`).
+ * из `iosApp` (`KoinHelper_iosKt.doInitKoinIos(useMockServer:)`).
  *
  * @param useMockServer когда `true`, сетевой слой работает на in-memory Ktor mock без
  *   реального бэкенда (тот же offline-режим, что и на Android).

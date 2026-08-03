@@ -25,6 +25,7 @@ datastore = "1.2.1"
 security_crypto = "1.1.0"
 lifecycle_viewmodel = "2.10.0"
 lifecycle_runtime = "2.10.0"
+play_services_auth_api_phone = "18.3.1"
 
 # Compose
 compose_compiler = "1.10.3"
@@ -96,6 +97,7 @@ androidx_lifecycle_viewmodel = { module = "org.jetbrains.androidx.lifecycle:life
 androidx_lifecycle_viewmodel_navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle_viewmodel" }
 androidx_lifecycle_runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle_runtime" }
 androidx_lifecycle_compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_runtime" }
+google-play-services-auth-api-phone = { module = "com.google.android.gms:play-services-auth-api-phone", version.ref = "play_services_auth_api_phone" }
 
 #Compose
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose_runtime" }

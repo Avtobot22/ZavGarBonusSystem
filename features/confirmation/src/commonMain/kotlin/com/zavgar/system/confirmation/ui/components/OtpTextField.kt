@@ -10,23 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,63 +36,51 @@ fun OtpTextField(
     enabled: Boolean = true,
     autoFocus: Boolean = true,
 ) {
-    val focusRequester = remember { FocusRequester() }
-
-    if (autoFocus) {
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
-    }
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BasicTextField(
+        PlatformOtpInput(
             value = value,
             onValueChange = {
                 if (enabled && it.length <= length && it.all { char -> char.isDigit() }) {
                     onValueChange(it.take(length))
                 }
             },
+            length = length,
             enabled = enabled,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            decorationBox = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
+            autoFocus = autoFocus,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        repeat(length) { index ->
-                            val char = when {
-                                index < value.length -> value[index].toString()
-                                else -> ""
-                            }
-
-                            val isFocused = enabled && (
-                                index == value.length ||
-                                    (value.length == length && index == length - 1)
-                                )
-
-                            OtpCell(
-                                char = char,
-                                isFocused = isFocused,
-                                isError = isError,
-                                enabled = enabled,
-                            )
+                    repeat(length) { index ->
+                        val char = when {
+                            index < value.length -> value[index].toString()
+                            else -> ""
                         }
+
+                        val isFocused = enabled && (
+                            index == value.length ||
+                                (value.length == length && index == length - 1)
+                            )
+
+                        OtpCell(
+                            char = char,
+                            isFocused = isFocused,
+                            isError = isError,
+                            enabled = enabled,
+                        )
                     }
                 }
-            },
-            cursorBrush = SolidColor(Color.Transparent),
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester),
-        )
+            }
+        }
 
         if (isError && !errorMessage.isNullOrBlank()) {
             AppTextSecondary(

@@ -32,6 +32,7 @@ import com.zavgar.system.confirmation.presentation.ConfirmationIntent
 import com.zavgar.system.confirmation.presentation.ConfirmationState
 import com.zavgar.system.confirmation.presentation.ConfirmationViewModel
 import com.zavgar.system.confirmation.ui.components.OtpTextField
+import com.zavgar.system.confirmation.ui.components.rememberPlatformOtpAutofillController
 import com.zavgar.system.core.presentation.ObserveAsEvents
 import com.zavgar.system.core.presentation.compose.ScreenEntryEffect
 import com.zavgar.system.core.presentation.util.UiText
@@ -89,6 +90,10 @@ internal fun ConfirmationLoader(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val haptics = rememberZavGarHaptics()
+    val otpAutofillController = rememberPlatformOtpAutofillController(
+        codeLength = CODE_LENGTH,
+        onCodeReceived = { viewModel.handleIntent(ConfirmationIntent.EnterCode(it)) },
+    )
 
     ScreenEntryEffect(viewModel) {
         viewModel.handleIntent(ConfirmationIntent.Initialize(phone, isRegistration))
@@ -118,7 +123,12 @@ internal fun ConfirmationLoader(
     ConfirmationScaffold(
         state = state,
         snackbarHostState = snackbarHostState,
-        onIntent = viewModel::handleIntent,
+        onIntent = { intent ->
+            if (intent is ConfirmationIntent.ClickResend) {
+                otpAutofillController.start()
+            }
+            viewModel.handleIntent(intent)
+        },
         errorShakingState = errorShakingState,
         onBackClick = onNavigateBack,
         modifier = modifier,

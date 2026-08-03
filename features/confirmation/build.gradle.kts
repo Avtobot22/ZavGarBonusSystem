@@ -40,6 +40,11 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.logging)
         }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.google.play.services.auth.api.phone)
+        }
     }
 
     android {

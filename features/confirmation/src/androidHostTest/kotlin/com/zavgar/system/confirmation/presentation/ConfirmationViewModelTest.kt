@@ -74,6 +74,15 @@ class ConfirmationViewModelTest {
     }
 
     @Test
+    fun `EnterCode keeps only digits up to the configured length`() {
+        val vm = viewModel()
+
+        vm.handleIntent(ConfirmationIntent.EnterCode("12a345"))
+
+        assertEquals("1234", vm.state.value.code)
+    }
+
+    @Test
     fun `Submit for a login flow navigates to wallet on success`() = runTest(dispatcher) {
         coEvery { confirmationUseCase(any()) } returns AppResult.Success(Unit)
         val vm = viewModel()

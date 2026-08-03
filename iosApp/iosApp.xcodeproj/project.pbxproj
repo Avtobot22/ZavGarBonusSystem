@@ -19,7 +19,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A98AEB9C6250F8696A00D95A /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+		A98AEB9C6250F8696A00D95A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -33,7 +33,7 @@
 		13A84BA498C80991F741F94F /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				A98AEB9C6250F8696A00D95A /* Exceptions for "iosApp" folder in "iosApp" target */,
+				A98AEB9C6250F8696A00D95A /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -88,7 +88,6 @@
 			buildConfigurationList = 48AD11671149A8D79FE025EC /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
 				C1AEF51B6F08F585798F34E1 /* Compile Kotlin */,
-				70A693E0CC1913D91C828D4E /* Compile Kotlin Framework */,
 				31436FFCCC3BB399F0EB91F4 /* Sources */,
 				515E458D0769E34D44B9069D /* Frameworks */,
 				117396492FB83B0E008B21C9 /* ShellScript */,
@@ -165,6 +164,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		117396492FB83B0E008B21C9 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -182,6 +182,7 @@
 		};
 		1173965E2FB89788008B21C9 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -199,27 +200,9 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${BUILD_DIR%Build/*}SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
-		70A693E0CC1913D91C828D4E /* Compile Kotlin Framework */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Compile Kotlin Framework";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
-		};
 		C1AEF51B6F08F585798F34E1 /* Compile Kotlin */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -345,7 +328,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;

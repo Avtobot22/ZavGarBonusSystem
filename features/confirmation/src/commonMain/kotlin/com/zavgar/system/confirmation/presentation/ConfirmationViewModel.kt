@@ -23,6 +23,7 @@ import com.zavgar.system.resources.confirmation_resend_success
 import com.zavgar.system.resources.error_unknown_error
 import com.zavgar.system.utils.result.AppError
 import com.zavgar.system.utils.result.AppResult
+import com.zavgar.system.utils.validation.CODE_LENGTH
 import com.zavgar.system.utils.validation.ValidateCodeUseCase
 import com.zavgar.system.utils.validation.ValidationResult
 import com.zavgar.system.utils.validation.toPresentation
@@ -96,7 +97,7 @@ class ConfirmationViewModel(
 
     private fun handleEnterCode(code: String) = setState {
         copy(
-            code = code,
+            code = code.filter(Char::isDigit).take(CODE_LENGTH),
             codeError = null,
         )
     }
